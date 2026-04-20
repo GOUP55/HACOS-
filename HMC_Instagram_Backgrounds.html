@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HMC Instagram Feed Backgrounds</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #111;
+            padding: 40px 20px;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #ccc;
+        }
+        h1 {
+            text-align: center;
+            font-size: 1.4em;
+            font-weight: 400;
+            letter-spacing: 4px;
+            color: #888;
+            margin-bottom: 50px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .card svg {
+            width: 100%;
+            aspect-ratio: 1;
+            display: block;
+            border-radius: 4px;
+        }
+        .card p {
+            text-align: center;
+            font-size: 0.78em;
+            letter-spacing: 2px;
+            color: #666;
+        }
+        @media (max-width: 900px) {
+            .grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 600px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <h1>HMC · INSTAGRAM FEED · BACKGROUNDS</h1>
+
+    <div class="grid">
+
+        <!-- 01: Morning Gradient (Cream → Amber) -->
+        <div class="card">
+            <svg viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="g01" x1="0" y1="1" x2="0.4" y2="0">
+                        <stop offset="0%" stop-color="#1A1A1A"/>
+                        <stop offset="55%" stop-color="#2C2416"/>
+                        <stop offset="100%" stop-color="#C8A96E"/>
+                    </linearGradient>
+                </defs>
+                <rect width="1080" height="1080" fill="url(#g01)"/>
+                <!-- Horizon arc -->
+                <ellipse cx="540" cy="1140" rx="900" ry="500" fill="none" stroke="#C8A96E" stroke-width="1.5" opacity="0.4"/>
+                <ellipse cx="540" cy="1140" rx="700" ry="380" fill="none" stroke="#C8A96E" stroke-width="1" opacity="0.25"/>
+                <ellipse cx="540" cy="1140" rx="500" ry="260" fill="none" stroke="#C8A96E" stroke-width="0.8" opacity="0.15"/>
+                <!-- Sun -->
+                <circle cx="540" cy="640" r="48" fill="none" stroke="#C8A96E" stroke-width="1.5" opacity="0.7"/>
+                <circle cx="540" cy="640" r="30" fill="none" stroke="#C8A96E" stroke-width="1" opacity="0.4"/>
+                <!-- Sun rays -->
+                <g stroke="#C8A96E" stroke-width="1" opacity="0.5">
+                    <line x1="540" y1="572" x2="540" y2="548"/>
+                    <line x1="540" y1="708" x2="540" y2="732"/>
+                    <line x1="472" y1="640" x2="448" y2="640"/>
+                    <line x1="608" y1="640" x2="632" y2="640"/>
+                    <line x1="492" y1="592" x2="475" y2="575"/>
+                    <line x1="588" y1="592" x2="605" y2="575"/>
+                    <line x1="492" y1="688" x2="475" y2="705"/>
+                    <line x1="588" y1="688" x2="605" y2="705"/>
+                </g>
+            </svg>
+            <p>01 · MORNING RISE</p>
+        </div>
+
+        <!-- 02: Deep Sanctuary (Black + Green) -->
+        <div class="card">
+            <svg viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="g02" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#0D1A10"/>
+                        <stop offset="100%" stop-color="#1A1A1A"/>
+                    </linearGradient>
+                    <radialGradient id="g02r" cx="0.25" cy="0.3" r="0.6">
+                        <stop offset="0%" stop-color="#4A7C59" stop-opacity="0.35"/>
+                        <stop offset="100%" stop-color="#4A7C59" stop-opacity="0"/>
+                    </radialGradient>
+                </defs>
+                <rect width="1080" height="1080" fill="url(#g02)"/>
+                <rect width="1080" height="1080" fill="url(#g02r)"/>
+                <!-- Concentric botanical rings -->
+                <g fill="none" stroke="#4A7C59" opacity="0.2">
+                    <circle cx="540" cy="540" r="460" stroke-width="0.8"/>
+                    <circle cx="540" cy="540" r="380" stroke-width="0.8"/>
+                    <circle cx="540" cy="540" r="300" stroke-width="0.8"/>
+                    <circle cx="540" cy="540" r="220" stroke-width="0.8"/>
+                    <circle cx="540" cy="540" r="140" stroke-width="0.8"/>
+                </g>
+                <!-- Cross axis lines -->
+                <g stroke="#4A7C59" stroke-width="0.6" opacity="0.15">
+                    <line x1="540" y1="0" x2="540" y2="1080"/>
+                    <line x1="0" y1="540" x2="1080" y2="540"/>
+                    <line x1="0" y1="0" x2="1080" y2="1080"/>
+                    <line x1="1080" y1="0" x2="0" y2="1080"/>
+                </g>
+                <!-- Center dot -->
+                <circle cx="540" cy="540" r="4" fill="#4A7C59" opacity="0.6"/>
+            </svg>
+            <p>02 · SANCTUARY</p>
+        </div>
+
+        <!-- 03: Cream Minimal (Text-ready) -->
+        <div class="card">
+            <svg viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="g03" x1="0" y1="0" x2="0.3" y2="1">
+                        <stop offset="0%" stop-color="#FAF7F1"/>
+                        <stop offset="100%" stop-color="#EDE5D4"/>
+                    </linearGradient>
+                </defs>
+                <rect width="1080" height="1080" fill="url(#g03)"/>
+                <!-- Thin border frame -->
+                <rect x="54" y="54" width="972" height="972" fill="none" stroke="#C8A96E" stroke-width="1" opacity="0.5"/>
+                <rect x="72" y="72" width="936" height="936" fill="none" stroke="#C8A96E" stroke-width="0.5" opacity="0.3"/>
+                <!-- Corner ornaments -->
+                <g stroke="#C8A96E" stroke-width="1" fill="none" opacity="0.6">
+                    <!-- top-left -->
+                    <path d="M 54 130 L 54 54 L 130 54"/>
+                    <!-- top-right -->
+                    <path d="M 950 54 L 1026 54 L 1026 130"/>
+                    <!-- bottom-left -->
+                    <path d="M 54 950 L 54 1026 L 130 1026"/>
+                    <!-- bottom-right -->
+                    <path d="M 1026 950 L 1026 1026 L 950 1026"/>
+                </g>
+                <!-- Subtle horizontal divider -->
+                <line x1="240" y1="540" x2="840" y2="540" stroke="#1A1A1A" stroke-width="0.6" opacity="0.12"/>
+                <!-- Small center diamond -->
+                <polygon points="540,510 556,540 540,570 524,540" fill="none" stroke="#C8A96E" stroke-width="1" opacity="0.4"/>
+            </svg>
+            <p>03 · CREAM FRAME</p>
+        </div>
+
+        <!-- 04: Steam / Mist (Sauna concept) -->
+        <div class="card">
+            <svg viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="g04" x1="0" y1="1" x2="0" y2="0">
+                        <stop offset="0%" stop-color="#0A0A0A"/>
+                        <stop offset="40%" stop-color="#1A1A1A"/>
+                        <stop offset="100%" stop-color="#2A2A2A"/>
+                    </linearGradient>
+                    <filter id="blur04">
+                        <feGaussianBlur stdDeviation="18"/>
+                    </filter>
+                </defs>
+                <rect width="1080" height="1080" fill="url(#g04)"/>
+                <!-- Mist layers -->
+                <g filter="url(#blur04)" opacity="0.18">
+                    <ellipse cx="300" cy="700" rx="280" ry="100" fill="white"/>
+                    <ellipse cx="700" cy="600" rx="320" ry="120" fill="white"/>
+                    <ellipse cx="540" cy="800" rx="400" ry="80" fill="white"/>
+                    <ellipse cx="200" cy="500" rx="200" ry="80" fill="white"/>
+                    <ellipse cx="850" cy="750" rx="240" ry="90" fill="white"/>
+                </g>
+                <!-- Steam lines rising -->
+                <g stroke="white" stroke-width="1" fill="none" opacity="0.07">
+                    <path d="M 300 900 Q 290 800 310 700 Q 330 600 320 500"/>
+                    <path d="M 440 950 Q 425 840 445 730 Q 465 620 455 510"/>
+                    <path d="M 580 920 Q 565 810 585 700 Q 605 590 595 480"/>
+                    <path d="M 720 900 Q 705 790 725 680 Q 745 570 735 460"/>
+                    <path d="M 820 940 Q 805 830 825 720 Q 845 610 835 500"/>
+                </g>
+                <!-- Temperature indicator arc -->
+                <path d="M 240 840 A 400 400 0 0 1 840 840" fill="none" stroke="white" stroke-width="0.8" opacity="0.1"/>
+            </svg>
+            <p>04 · SAUNA STEAM</p>
+        </div>
+
+        <!-- 05: Grid / Structure (Premium modern) -->
+        <div class="card">
+            <svg viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="g05" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#F2EDE3"/>
+                        <stop offset="100%" stop-color="#E5DCC8"/>
+                    </linearGradient>
+                </defs>
+                <rect width="1080" height="1080" fill="url(#g05)"/>
+                <!-- Grid lines -->
+                <g stroke="#1A1A1A" stroke-width="0.5" opacity="0.07">
+                    <line x1="360" y1="0" x2="360" y2="1080"/>
+                    <line x1="720" y1="0" x2="720" y2="1080"/>
+                    <line x1="0" y1="360" x2="1080" y2="360"/>
+                    <line x1="0" y1="720" x2="1080" y2="720"/>
+                </g>
+                <!-- Thick accent bars -->
+                <rect x="0" y="0" width="8" height="1080" fill="#1A1A1A" opacity="0.9"/>
+                <rect x="0" y="0" width="1080" height="8" fill="#1A1A1A" opacity="0.9"/>
+                <rect x="1072" y="0" width="8" height="1080" fill="#1A1A1A" opacity="0.9"/>
+                <rect x="0" y="1072" width="1080" height="8" fill="#1A1A1A" opacity="0.9"/>
+                <!-- Accent block top-left -->
+                <rect x="8" y="8" width="200" height="8" fill="#C8A96E"/>
+                <rect x="8" y="8" width="8" height="200" fill="#C8A96E"/>
+                <!-- Accent block bottom-right -->
+                <rect x="872" y="1064" width="200" height="8" fill="#C8A96E"/>
+                <rect x="1064" y="872" width="8" height="200" fill="#C8A96E"/>
+                <!-- Center cross -->
+                <line x1="520" y1="540" x2="560" y2="540" stroke="#C8A96E" stroke-width="2" opacity="0.7"/>
+                <line x1="540" y1="520" x2="540" y2="560" stroke="#C8A96E" stroke-width="2" opacity="0.7"/>
+            </svg>
+            <p>05 · GRID PREMIUM</p>
+        </div>
+
+        <!-- 06: Deep Amber Horizon -->
+        <div class="card">
+            <svg viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="g06" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#0A0A0A"/>
+                        <stop offset="60%" stop-color="#1A1407"/>
+                        <stop offset="100%" stop-color="#3D2B07"/>
+                    </linearGradient>
+                    <radialGradient id="g06r" cx="0.5" cy="1.1" r="0.7">
+                        <stop offset="0%" stop-color="#C8A96E" stop-opacity="0.5"/>
+                        <stop offset="60%" stop-color="#C8A96E" stop-opacity="0.1"/>
+                        <stop offset="100%" stop-color="#C8A96E" stop-opacity="0"/>
+                    </radialGradient>
+                </defs>
+                <rect width="1080" height="1080" fill="url(#g06)"/>
+                <rect width="1080" height="1080" fill="url(#g06r)"/>
+                <!-- Horizon glow lines -->
+                <g stroke="#C8A96E" fill="none">
+                    <line x1="0" y1="780" x2="1080" y2="780" stroke-width="1.5" opacity="0.5"/>
+                    <line x1="0" y1="790" x2="1080" y2="790" stroke-width="0.8" opacity="0.25"/>
+                    <line x1="0" y1="800" x2="1080" y2="800" stroke-width="0.5" opacity="0.12"/>
+                </g>
+                <!-- Reflection lines above horizon -->
+                <g stroke="#C8A96E" stroke-width="0.6" opacity="0.12">
+                    <line x1="0" y1="700" x2="1080" y2="700"/>
+                    <line x1="0" y1="640" x2="1080" y2="640"/>
+                    <line x1="0" y1="580" x2="1080" y2="580"/>
+                </g>
+                <!-- Starburst / sun point at horizon -->
+                <g stroke="#C8A96E" stroke-width="1" opacity="0.35">
+                    <line x1="540" y1="780" x2="540" y2="200"/>
+                    <line x1="540" y1="780" x2="0" y2="480"/>
+                    <line x1="540" y1="780" x2="1080" y2="480"/>
+                    <line x1="540" y1="780" x2="160" y2="200"/>
+                    <line x1="540" y1="780" x2="920" y2="200"/>
+                </g>
+            </svg>
+            <p>06 · AMBER HORIZON</p>
+        </div>
+
+    </div>
+
+    <!-- Export note -->
+    <p style="text-align:center; margin-top: 50px; font-size: 0.75em; letter-spacing: 2px; color: #444;">
+        INSTAGRAM 1080×1080 · HMC BRAND SYSTEM
+    </p>
+</body>
+</html>
