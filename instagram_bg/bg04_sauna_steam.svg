@@ -1,0 +1,28 @@
+<svg viewBox="0 0 1080 1080" width="1080" height="1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g04" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#0A0A0A"/>
+      <stop offset="40%" stop-color="#1A1A1A"/>
+      <stop offset="100%" stop-color="#2A2A2A"/>
+    </linearGradient>
+    <filter id="blur04" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+  </defs>
+  <rect width="1080" height="1080" fill="url(#g04)"/>
+  <g filter="url(#blur04)" opacity="0.18">
+    <ellipse cx="300" cy="700" rx="280" ry="100" fill="white"/>
+    <ellipse cx="700" cy="600" rx="320" ry="120" fill="white"/>
+    <ellipse cx="540" cy="800" rx="400" ry="80" fill="white"/>
+    <ellipse cx="200" cy="500" rx="200" ry="80" fill="white"/>
+    <ellipse cx="850" cy="750" rx="240" ry="90" fill="white"/>
+  </g>
+  <g stroke="white" stroke-width="1" fill="none" opacity="0.07">
+    <path d="M 300 900 Q 290 800 310 700 Q 330 600 320 500"/>
+    <path d="M 440 950 Q 425 840 445 730 Q 465 620 455 510"/>
+    <path d="M 580 920 Q 565 810 585 700 Q 605 590 595 480"/>
+    <path d="M 720 900 Q 705 790 725 680 Q 745 570 735 460"/>
+    <path d="M 820 940 Q 805 830 825 720 Q 845 610 835 500"/>
+  </g>
+  <path d="M 240 840 A 400 400 0 0 1 840 840" fill="none" stroke="white" stroke-width="0.8" opacity="0.1"/>
+</svg>
