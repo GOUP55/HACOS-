@@ -1,0 +1,49 @@
+<svg viewBox="0 0 1400 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Pattern for internal design: Rising sun and meditation circles -->
+    <pattern id="sunrisePattern" patternUnits="userSpaceOnUse" width="40" height="40">
+      <circle cx="20" cy="25" r="6" fill="white" opacity="0.8"/>
+      <circle cx="20" cy="25" r="3" fill="white" opacity="0.5"/>
+    </pattern>
+  </defs>
+
+  <!-- White background -->
+  <rect width="1400" height="600" fill="white"/>
+
+  <!-- PATTERN 1: BOLD GEOMETRIC STYLE (inspired by Billionaire Boy Club) -->
+  <!-- This uses thick, geometric typography with internal pattern detail -->
+
+  <g id="pattern1">
+    <!-- H -->
+    <rect x="80" y="120" width="80" height="260" fill="black"/>
+    <rect x="80" y="240" width="180" height="60" fill="black"/>
+    <rect x="180" y="120" width="80" height="260" fill="black"/>
+    <!-- H pattern fill -->
+    <rect x="80" y="120" width="80" height="260" fill="url(#sunrisePattern)" opacity="0.3"/>
+    <rect x="180" y="120" width="80" height="260" fill="url(#sunrisePattern)" opacity="0.3"/>
+
+    <!-- M -->
+    <rect x="300" y="120" width="80" height="260" fill="black"/>
+    <polygon points="380,120 480,280 520,280 520,120 440,120 380,200" fill="black"/>
+    <rect x="520" y="120" width="80" height="260" fill="black"/>
+    <!-- M pattern fill -->
+    <rect x="300" y="120" width="80" height="260" fill="url(#sunrisePattern)" opacity="0.3"/>
+    <rect x="520" y="120" width="80" height="260" fill="url(#sunrisePattern)" opacity="0.3"/>
+
+    <!-- C -->
+    <rect x="640" y="120" width="80" height="260" fill="black"/>
+    <rect x="640" y="120" width="160" height="80" fill="white"/>
+    <rect x="640" y="300" width="160" height="80" fill="white"/>
+    <!-- C pattern fill -->
+    <rect x="640" y="120" width="80" height="260" fill="url(#sunrisePattern)" opacity="0.3"/>
+  </g>
+
+  <!-- Subtext for Pattern 1 -->
+  <text x="500" y="420" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="bold" text-anchor="middle" fill="black" letter-spacing="2">
+    HEALTHY MORNING CLUB
+  </text>
+
+  <text x="500" y="470" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" text-anchor="middle" fill="#666" letter-spacing="2">
+    WELLNESS · RECOVERY · RITUAL
+  </text>
+</svg>

@@ -1,0 +1,43 @@
+<svg viewBox="0 0 1200 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400&display=swap');
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="600" fill="white"/>
+
+  <!-- Main Logo Group -->
+  <g id="logo">
+    <!-- Primary Text: HMC in elegant serif script -->
+    <text x="300" y="280" font-family="Cormorant Garamond, serif" font-size="140" font-weight="700" font-style="italic" fill="black">
+      HMC
+    </text>
+
+    <!-- Decorative line -->
+    <line x1="150" y1="310" x2="450" y2="310" stroke="black" stroke-width="3"/>
+
+    <!-- Secondary text: Healthy Morning Club -->
+    <text x="300" y="360" font-family="Cormorant Garamond, serif" font-size="28" font-weight="400" letter-spacing="4" fill="#333">
+      HEALTHY MORNING CLUB
+    </text>
+
+    <!-- Tagline -->
+    <text x="300" y="400" font-family="Cormorant Garamond, serif" font-size="16" font-weight="400" letter-spacing="3" fill="#666">
+      SINCE MAY 2026 / WELLNESS SANCTUARY
+    </text>
+
+    <!-- Accent elements: Small geometric shapes representing morning/energy -->
+    <!-- Rising sun circle -->
+    <circle cx="480" cy="240" r="25" fill="none" stroke="black" stroke-width="2.5"/>
+    <circle cx="480" cy="240" r="18" fill="none" stroke="black" stroke-width="1.5" opacity="0.5"/>
+
+    <!-- Small diamonds for energy/sparkle -->
+    <g opacity="0.6">
+      <polygon points="520,220 530,230 520,240 510,230" fill="black"/>
+      <polygon points="540,260 548,268 540,276 532,268" fill="black"/>
+      <polygon points="500,280 506,286 500,292 494,286" fill="black"/>
+    </g>
+  </g>
+</svg>

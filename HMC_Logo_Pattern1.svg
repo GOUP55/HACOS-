@@ -1,0 +1,112 @@
+<svg viewBox="0 0 1000 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="sunPattern" patternUnits="userSpaceOnUse" width="20" height="20">
+      <circle cx="10" cy="10" r="2" fill="white"/>
+    </pattern>
+    <pattern id="morningPattern" patternUnits="userSpaceOnUse" width="30" height="30">
+      <path d="M 15 5 L 20 20 L 10 20 Z" fill="white" opacity="0.7"/>
+    </pattern>
+  </defs>
+
+  <!-- Background for visualization -->
+  <rect width="1000" height="400" fill="white"/>
+
+  <!-- Main Text: HEALTHY MORNING CLUB -->
+  <!-- Styling: Bold geometric sans-serif with internal pattern -->
+
+  <!-- H -->
+  <g>
+    <path d="M 60 120 L 60 280 L 110 280 L 110 200 L 160 200 L 160 280 L 210 280 L 210 120 L 160 120 L 160 170 L 110 170 L 110 120 Z"
+          fill="black"/>
+    <rect x="60" y="120" width="150" height="160" fill="url(#sunPattern)" opacity="0.4"/>
+  </g>
+
+  <!-- E -->
+  <g>
+    <path d="M 240 120 L 240 280 L 360 280 L 360 240 L 290 240 L 290 210 L 350 210 L 350 170 L 290 170 L 290 160 L 360 160 L 360 120 Z"
+          fill="black"/>
+    <rect x="240" y="120" width="120" height="160" fill="url(#sunPattern)" opacity="0.4"/>
+  </g>
+
+  <!-- A -->
+  <g>
+    <path d="M 390 280 L 440 120 L 490 280 L 540 280 L 465 120 L 415 120 L 340 280 Z M 410 200 L 515 200 L 465 150 Z"
+          fill="black"/>
+    <rect x="390" y="120" width="150" height="160" fill="url(#sunPattern)" opacity="0.4"/>
+  </g>
+
+  <!-- L -->
+  <g>
+    <path d="M 570 120 L 570 280 L 700 280 L 700 240 L 620 240 L 620 120 Z"
+          fill="black"/>
+    <rect x="570" y="120" width="130" height="160" fill="url(#sunPattern)" opacity="0.4"/>
+  </g>
+
+  <!-- T -->
+  <g>
+    <path d="M 730 120 L 730 160 L 785 160 L 785 280 L 835 280 L 835 160 L 890 160 L 890 120 Z"
+          fill="black"/>
+    <rect x="730" y="120" width="160" height="160" fill="url(#sunPattern)" opacity="0.4"/>
+  </g>
+
+  <!-- H -->
+  <g>
+    <path d="M 920 120 L 920 280 L 970 280 L 970 200 L 1020 200 L 1020 280 L 1070 280 L 1070 120 L 1020 120 L 1020 170 L 970 170 L 970 120 Z"
+          fill="black"/>
+    <rect x="920" y="120" width="150" height="160" fill="url(#sunPattern)" opacity="0.4"/>
+  </g>
+
+  <!-- Second row: MORNING CLUB -->
+  <!-- M -->
+  <g transform="translate(0, 180)">
+    <path d="M 60 50 L 60 210 L 110 210 L 135 120 L 160 210 L 210 210 L 210 50 L 160 50 L 160 140 L 135 70 L 110 140 L 110 50 Z"
+          fill="black"/>
+    <rect x="60" y="50" width="150" height="160" fill="url(#sunPattern)" opacity="0.4"/>
+  </g>
+
+  <!-- O -->
+  <g transform="translate(0, 180)">
+    <circle cx="300" cy="130" r="80" fill="none" stroke="black" stroke-width="50"/>
+    <circle cx="300" cy="130" r="80" fill="url(#sunPattern)" opacity="0.4"/>
+  </g>
+
+  <!-- R -->
+  <g transform="translate(0, 180)">
+    <path d="M 420 50 L 420 210 L 530 210 C 570 210 590 190 590 160 C 590 140 575 125 560 120 L 590 50 L 540 50 L 515 115 L 470 115 L 470 50 Z M 470 155 L 530 155 C 545 155 555 145 555 130 C 555 115 545 105 530 105 L 470 105 Z"
+          fill="black"/>
+    <rect x="420" y="50" width="170" height="160" fill="url(#sunPattern)" opacity="0.4"/>
+  </g>
+
+  <!-- N -->
+  <g transform="translate(0, 180)">
+    <path d="M 620 50 L 620 210 L 670 210 L 720 100 L 720 210 L 770 210 L 770 50 L 720 50 L 670 160 L 670 50 Z"
+          fill="black"/>
+    <rect x="620" y="50" width="150" height="160" fill="url(#sunPattern)" opacity="0.4"/>
+  </g>
+
+  <!-- I -->
+  <g transform="translate(0, 180)">
+    <path d="M 800 50 L 800 210 L 850 210 L 850 50 Z"
+          fill="black"/>
+    <rect x="800" y="50" width="50" height="160" fill="url(#sunPattern)" opacity="0.4"/>
+  </g>
+
+  <!-- N -->
+  <g transform="translate(0, 180)">
+    <path d="M 880 50 L 880 210 L 930 210 L 980 100 L 980 210 L 1030 210 L 1030 50 L 980 50 L 930 160 L 930 50 Z"
+          fill="black"/>
+    <rect x="880" y="50" width="150" height="160" fill="url(#sunPattern)" opacity="0.4"/>
+  </g>
+
+  <!-- G -->
+  <g transform="translate(0, 180)">
+    <path d="M 1070 50 L 1070 210 L 1200 210 L 1200 160 L 1120 160 L 1120 130 L 1190 130 L 1190 90 L 1120 90 L 1120 50 Z"
+          fill="black"/>
+    <rect x="1070" y="50" width="130" height="160" fill="url(#sunPattern)" opacity="0.4"/>
+  </g>
+
+  <!-- Subtext -->
+  <text x="500" y="360" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#666">
+    WELLNESS SANCTUARY
+  </text>
+</svg>
