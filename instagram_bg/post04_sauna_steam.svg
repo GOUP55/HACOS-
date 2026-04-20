@@ -1,0 +1,45 @@
+<svg viewBox="0 0 1080 1080" width="1080" height="1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g04" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#0A0A0A"/>
+      <stop offset="40%" stop-color="#1A1A1A"/>
+      <stop offset="100%" stop-color="#2A2A2A"/>
+    </linearGradient>
+    <filter id="blur04" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1080" height="1080" fill="url(#g04)"/>
+  <g filter="url(#blur04)" opacity="0.16">
+    <ellipse cx="300" cy="700" rx="280" ry="100" fill="white"/>
+    <ellipse cx="700" cy="600" rx="320" ry="120" fill="white"/>
+    <ellipse cx="540" cy="800" rx="400" ry="80" fill="white"/>
+    <ellipse cx="200" cy="500" rx="200" ry="80" fill="white"/>
+    <ellipse cx="850" cy="750" rx="240" ry="90" fill="white"/>
+  </g>
+
+  <!-- Top label -->
+  <text x="540" y="120" font-family="DejaVu Sans, sans-serif" font-size="20" font-weight="bold" fill="white" text-anchor="middle" letter-spacing="12" opacity="0.5">H M C</text>
+  <line x1="400" y1="134" x2="680" y2="134" stroke="white" stroke-width="0.6" opacity="0.2"/>
+
+  <!-- Temperature indicator: 90°C -->
+  <text x="540" y="300" font-family="DejaVu Sans, sans-serif" font-size="120" font-weight="bold" fill="white" text-anchor="middle" opacity="0.08">90°C</text>
+
+  <!-- Main copy -->
+  <text x="540" y="420" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="56" font-weight="bold" fill="white" text-anchor="middle" opacity="0.95">極限の熱が、</text>
+  <text x="540" y="506" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="56" font-weight="bold" fill="white" text-anchor="middle" opacity="0.95">頭の中を空白にする。</text>
+
+  <!-- Divider -->
+  <line x1="420" y1="560" x2="660" y2="560" stroke="white" stroke-width="0.8" opacity="0.25"/>
+
+  <!-- Sub copy -->
+  <text x="540" y="626" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="28" fill="white" text-anchor="middle" opacity="0.6">サウナ → アイスバス。</text>
+  <text x="540" y="670" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="28" fill="white" text-anchor="middle" opacity="0.6">身体のスイッチを、強制的に切り替える。</text>
+
+  <!-- Bottom -->
+  <line x1="380" y1="930" x2="700" y2="930" stroke="white" stroke-width="0.6" opacity="0.2"/>
+  <text x="540" y="970" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="24" fill="white" text-anchor="middle" opacity="0.5">毎週月曜日 07:00〜 ¥5,000</text>
+  <text x="540" y="1020" font-family="DejaVu Sans, sans-serif" font-size="18" fill="white" text-anchor="middle" letter-spacing="5" opacity="0.3">HEALTHY MORNING CLUB</text>
+</svg>

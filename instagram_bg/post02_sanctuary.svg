@@ -1,0 +1,49 @@
+<svg viewBox="0 0 1080 1080" width="1080" height="1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g02" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0D1A10"/>
+      <stop offset="100%" stop-color="#1A1A1A"/>
+    </linearGradient>
+    <radialGradient id="g02r" cx="0.25" cy="0.3" r="0.6">
+      <stop offset="0%" stop-color="#4A7C59" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#4A7C59" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1080" height="1080" fill="url(#g02)"/>
+  <rect width="1080" height="1080" fill="url(#g02r)"/>
+  <g fill="none" stroke="#4A7C59" opacity="0.18">
+    <circle cx="540" cy="540" r="460" stroke-width="0.8"/>
+    <circle cx="540" cy="540" r="380" stroke-width="0.8"/>
+    <circle cx="540" cy="540" r="300" stroke-width="0.8"/>
+    <circle cx="540" cy="540" r="220" stroke-width="0.8"/>
+    <circle cx="540" cy="540" r="140" stroke-width="0.8"/>
+  </g>
+  <g stroke="#4A7C59" stroke-width="0.6" opacity="0.12">
+    <line x1="540" y1="0" x2="540" y2="1080"/>
+    <line x1="0" y1="540" x2="1080" y2="540"/>
+    <line x1="0" y1="0" x2="1080" y2="1080"/>
+    <line x1="1080" y1="0" x2="0" y2="1080"/>
+  </g>
+  <circle cx="540" cy="540" r="4" fill="#4A7C59" opacity="0.5"/>
+
+  <!-- HMC top label -->
+  <text x="540" y="116" font-family="DejaVu Sans, sans-serif" font-size="20" font-weight="bold" fill="#4A7C59" text-anchor="middle" letter-spacing="12" opacity="0.9">H M C</text>
+  <line x1="400" y1="130" x2="680" y2="130" stroke="#4A7C59" stroke-width="0.7" opacity="0.4"/>
+
+  <!-- Main copy -->
+  <text x="540" y="380" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="48" fill="white" text-anchor="middle" opacity="0.9">情報が多すぎる時代に、</text>
+  <text x="540" y="460" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="48" fill="white" text-anchor="middle" opacity="0.9">感覚を取り戻す朝がある。</text>
+
+  <!-- Accent line -->
+  <line x1="440" y1="530" x2="640" y2="530" stroke="#4A7C59" stroke-width="1" opacity="0.6"/>
+
+  <!-- Sub copy -->
+  <text x="540" y="600" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="28" fill="#4A7C59" text-anchor="middle" opacity="0.85">画面の外側で、五感が目覚める。</text>
+
+  <!-- Bottom -->
+  <line x1="380" y1="930" x2="700" y2="930" stroke="#4A7C59" stroke-width="0.7" opacity="0.35"/>
+  <text x="540" y="968" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="24" fill="white" text-anchor="middle" opacity="0.6">毎週月曜日 7:00〜 川寺・みよしエリア</text>
+  <text x="540" y="1020" font-family="DejaVu Sans, sans-serif" font-size="18" fill="#4A7C59" text-anchor="middle" letter-spacing="5" opacity="0.6">HEALTHY MORNING CLUB</text>
+</svg>

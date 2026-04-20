@@ -1,0 +1,41 @@
+<svg viewBox="0 0 1080 1080" width="1080" height="1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g01" x1="0" y1="1" x2="0.4" y2="0">
+      <stop offset="0%" stop-color="#1A1A1A"/>
+      <stop offset="55%" stop-color="#2C2416"/>
+      <stop offset="100%" stop-color="#C8A96E"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1080" height="1080" fill="url(#g01)"/>
+  <ellipse cx="540" cy="1140" rx="900" ry="500" fill="none" stroke="#C8A96E" stroke-width="1.5" opacity="0.4"/>
+  <ellipse cx="540" cy="1140" rx="700" ry="380" fill="none" stroke="#C8A96E" stroke-width="1" opacity="0.25"/>
+  <ellipse cx="540" cy="1140" rx="500" ry="260" fill="none" stroke="#C8A96E" stroke-width="0.8" opacity="0.15"/>
+  <circle cx="540" cy="580" r="48" fill="none" stroke="#C8A96E" stroke-width="1.5" opacity="0.6"/>
+  <circle cx="540" cy="580" r="30" fill="none" stroke="#C8A96E" stroke-width="1" opacity="0.35"/>
+  <g stroke="#C8A96E" stroke-width="1" opacity="0.45">
+    <line x1="540" y1="512" x2="540" y2="490"/>
+    <line x1="540" y1="648" x2="540" y2="670"/>
+    <line x1="472" y1="580" x2="450" y2="580"/>
+    <line x1="608" y1="580" x2="630" y2="580"/>
+    <line x1="492" y1="532" x2="476" y2="516"/>
+    <line x1="588" y1="532" x2="604" y2="516"/>
+    <line x1="492" y1="628" x2="476" y2="644"/>
+    <line x1="588" y1="628" x2="604" y2="644"/>
+  </g>
+
+  <!-- Top: HMC label -->
+  <text x="540" y="120" font-family="DejaVu Sans, sans-serif" font-size="22" font-weight="bold" fill="#C8A96E" text-anchor="middle" letter-spacing="10" opacity="0.9">H M C</text>
+  <line x1="380" y1="134" x2="700" y2="134" stroke="#C8A96E" stroke-width="0.8" opacity="0.4"/>
+
+  <!-- Main copy (Japanese — IPAGothic) -->
+  <text x="540" y="300" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="62" font-weight="bold" fill="white" text-anchor="middle" opacity="0.95">月曜の朝7時。</text>
+  <text x="540" y="390" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="42" fill="white" text-anchor="middle" opacity="0.85">スマホを置いて、</text>
+  <text x="540" y="460" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="42" fill="white" text-anchor="middle" opacity="0.85">魂を目覚めさせに来てください。</text>
+
+  <!-- Bottom info -->
+  <line x1="380" y1="930" x2="700" y2="930" stroke="#C8A96E" stroke-width="0.8" opacity="0.4"/>
+  <text x="540" y="968" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="26" fill="#C8A96E" text-anchor="middle" opacity="0.9">毎週月曜日 7:00〜 / 予約制 ¥5,000</text>
+  <text x="540" y="1020" font-family="DejaVu Sans, sans-serif" font-size="20" fill="white" text-anchor="middle" letter-spacing="4" opacity="0.5">HEALTHY MORNING CLUB</text>
+</svg>

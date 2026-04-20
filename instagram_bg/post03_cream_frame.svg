@@ -1,0 +1,50 @@
+<svg viewBox="0 0 1080 1080" width="1080" height="1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g03" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0%" stop-color="#FAF7F1"/>
+      <stop offset="100%" stop-color="#EDE5D4"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1080" height="1080" fill="url(#g03)"/>
+  <rect x="54" y="54" width="972" height="972" fill="none" stroke="#C8A96E" stroke-width="1" opacity="0.5"/>
+  <rect x="72" y="72" width="936" height="936" fill="none" stroke="#C8A96E" stroke-width="0.5" opacity="0.3"/>
+  <g stroke="#C8A96E" stroke-width="1" fill="none" opacity="0.6">
+    <path d="M 54 130 L 54 54 L 130 54"/>
+    <path d="M 950 54 L 1026 54 L 1026 130"/>
+    <path d="M 54 950 L 54 1026 L 130 1026"/>
+    <path d="M 1026 950 L 1026 1026 L 950 1026"/>
+  </g>
+
+  <!-- HMC logo mark -->
+  <text x="540" y="210" font-family="DejaVu Sans, sans-serif" font-size="80" font-weight="bold" fill="#1A1A1A" text-anchor="middle" letter-spacing="-2" opacity="0.9">HMC</text>
+  <line x1="340" y1="228" x2="740" y2="228" stroke="#C8A96E" stroke-width="1.5" opacity="0.7"/>
+  <text x="540" y="268" font-family="DejaVu Sans, sans-serif" font-size="18" fill="#888" text-anchor="middle" letter-spacing="5">HEALTHY MORNING CLUB</text>
+
+  <!-- Divider diamond -->
+  <polygon points="540,330 550,342 540,354 530,342" fill="none" stroke="#C8A96E" stroke-width="1" opacity="0.5"/>
+
+  <!-- Event details -->
+  <text x="540" y="430" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="34" font-weight="bold" fill="#1A1A1A" text-anchor="middle">5月18日（月）スタート</text>
+  <text x="540" y="490" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="28" fill="#444" text-anchor="middle">毎週月曜日 07:00〜08:30</text>
+
+  <line x1="300" y1="530" x2="780" y2="530" stroke="#C8A96E" stroke-width="0.8" opacity="0.4"/>
+
+  <text x="540" y="596" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="26" fill="#1A1A1A" text-anchor="middle">ドロップイン ¥5,000（食事込み）</text>
+  <text x="540" y="648" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="24" fill="#666" text-anchor="middle">定員 20〜30名 / 完全予約制</text>
+  <text x="540" y="700" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="24" fill="#666" text-anchor="middle">徳島県 川寺・みよしエリア</text>
+
+  <line x1="300" y1="738" x2="780" y2="738" stroke="#C8A96E" stroke-width="0.8" opacity="0.4"/>
+
+  <!-- Pillars -->
+  <text x="270" y="800" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="20" fill="#888" text-anchor="middle">ヘルシーフード</text>
+  <text x="270" y="828" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="20" fill="#888" text-anchor="middle">サウナ &amp; アイスバス</text>
+  <text x="540" y="800" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="20" fill="#888" text-anchor="middle">マインドフルネス</text>
+  <text x="540" y="828" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="20" fill="#888" text-anchor="middle">シンギングボウル</text>
+  <text x="810" y="800" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="20" fill="#888" text-anchor="middle">CBD / シーシャ</text>
+  <text x="810" y="828" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="20" fill="#888" text-anchor="middle">スマホ禁止</text>
+
+  <!-- Bottom tagline -->
+  <text x="540" y="960" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="22" fill="#C8A96E" text-anchor="middle" opacity="0.9">一週間で一番、自分を感じる90分。</text>
+</svg>
