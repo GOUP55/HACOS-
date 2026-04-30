@@ -1,0 +1,72 @@
+<svg viewBox="0 0 1080 1080" width="1080" height="1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="0.2" y2="1">
+      <stop offset="0%" stop-color="#0D0F1E"/>
+      <stop offset="100%" stop-color="#1A1530"/>
+    </linearGradient>
+    <radialGradient id="horizonGlow" cx="0.5" cy="0.92" r="0.55">
+      <stop offset="0%" stop-color="#C8A96E" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#C8A96E" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1080" height="1080" fill="url(#bg3)"/>
+  <rect width="1080" height="1080" fill="url(#horizonGlow)"/>
+
+  <!-- Horizon light rays -->
+  <g stroke="#C8A96E" stroke-width="0.8" opacity="0.18">
+    <line x1="540" y1="920" x2="540" y2="100"/>
+    <line x1="540" y1="920" x2="0"   y2="520"/>
+    <line x1="540" y1="920" x2="1080" y2="520"/>
+    <line x1="540" y1="920" x2="80"  y2="80"/>
+    <line x1="540" y1="920" x2="1000" y2="80"/>
+    <line x1="540" y1="920" x2="260" y2="80"/>
+    <line x1="540" y1="920" x2="820" y2="80"/>
+  </g>
+  <!-- Horizon line -->
+  <line x1="0" y1="920" x2="1080" y2="920" stroke="#C8A96E" stroke-width="1.5" opacity="0.45"/>
+  <line x1="0" y1="930" x2="1080" y2="930" stroke="#C8A96E" stroke-width="0.5" opacity="0.2"/>
+
+  <!-- Stars -->
+  <g fill="white">
+    <circle cx="100" cy="100" r="1.4" opacity="0.8"/><circle cx="240" cy="60" r="1" opacity="0.6"/>
+    <circle cx="500" cy="80" r="1.6" opacity="0.9"/><circle cx="780" cy="110" r="1.2" opacity="0.7"/>
+    <circle cx="960" cy="70" r="1" opacity="0.6"/><circle cx="60"  cy="250" r="0.8" opacity="0.5"/>
+    <circle cx="1020" cy="200" r="1.1" opacity="0.6"/><circle cx="350" cy="140" r="0.9" opacity="0.6"/>
+    <circle cx="660" cy="150" r="1.3" opacity="0.7"/>
+  </g>
+
+  <!-- Moon top right -->
+  <circle cx="880" cy="180" r="56" fill="#141828"/>
+  <circle cx="908" cy="162" r="48" fill="#0D0F1E"/>
+  <g fill="white" opacity="0.6">
+    <circle cx="858" cy="200" r="2.2"/><circle cx="872" cy="175" r="1.4"/>
+    <circle cx="845" cy="180" r="1.8"/><circle cx="868" cy="215" r="1.2"/>
+  </g>
+  <!-- moon glow -->
+  <circle cx="880" cy="180" r="56" fill="none" stroke="#C8A96E" stroke-width="0.8" opacity="0.35"/>
+
+  <!-- Top label -->
+  <text x="540" y="108" font-family="DejaVu Sans, sans-serif" font-size="16" fill="#C8A96E" text-anchor="middle" letter-spacing="12" opacity="0.7">H A C O S</text>
+  <line x1="400" y1="120" x2="680" y2="120" stroke="#C8A96E" stroke-width="0.6" opacity="0.25"/>
+
+  <!-- Main copy: large + impactful -->
+  <text x="100" y="340" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="76" font-weight="bold" fill="white" opacity="0.95">ライフスタイルを</text>
+  <text x="100" y="440" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="76" font-weight="bold" fill="white" opacity="0.95">体験して、</text>
+  <text x="100" y="540" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="76" font-weight="bold" fill="#C8A96E">発信する夜。</text>
+
+  <!-- Divider -->
+  <line x1="100" y1="598" x2="500" y2="598" stroke="#C8A96E" stroke-width="1" opacity="0.4"/>
+
+  <!-- Sub copy -->
+  <text x="100" y="660" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="30" fill="white" opacity="0.55">wellness × Music × Community</text>
+
+  <!-- Event block bottom -->
+  <rect x="100" y="720" width="880" height="160" rx="8" fill="#C8A96E" fill-opacity="0.06" stroke="#C8A96E" stroke-width="0.7" stroke-opacity="0.25"/>
+  <text x="540" y="782" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="34" font-weight="bold" fill="#C8A96E" text-anchor="middle">5月18日（月）17:00〜22:00</text>
+  <text x="540" y="832" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="24" fill="white" text-anchor="middle" opacity="0.6">¥5,000（食事付きビュッフェ）／ 予約制</text>
+  <text x="540" y="868" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="20" fill="white" text-anchor="middle" opacity="0.38">予約 → プロフィールのリンク</text>
+
+  <!-- Bottom brand -->
+  <text x="540" y="988" font-family="DejaVu Sans, sans-serif" font-size="16" fill="#C8A96E" text-anchor="middle" letter-spacing="6" opacity="0.5">HACOS NIGHT CLUB</text>
+</svg>

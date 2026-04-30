@@ -1,0 +1,84 @@
+<svg viewBox="0 0 1080 1080" width="1080" height="1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0%" stop-color="#0A0C1A"/>
+      <stop offset="60%" stop-color="#0F1428"/>
+      <stop offset="100%" stop-color="#1A1F3A"/>
+    </linearGradient>
+    <radialGradient id="moonGlow" cx="0.72" cy="0.22" r="0.35">
+      <stop offset="0%" stop-color="#C8A96E" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#C8A96E" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- BG -->
+  <rect width="1080" height="1080" fill="url(#bg)"/>
+  <rect width="1080" height="1080" fill="url(#moonGlow)"/>
+
+  <!-- Stars -->
+  <g fill="white">
+    <circle cx="120" cy="80" r="1.2" opacity="0.7"/>
+    <circle cx="200" cy="140" r="0.8" opacity="0.5"/>
+    <circle cx="340" cy="60" r="1.5" opacity="0.8"/>
+    <circle cx="480" cy="100" r="0.9" opacity="0.6"/>
+    <circle cx="600" cy="50" r="1.3" opacity="0.7"/>
+    <circle cx="750" cy="120" r="0.8" opacity="0.5"/>
+    <circle cx="900" cy="70" r="1.4" opacity="0.8"/>
+    <circle cx="980" cy="160" r="0.9" opacity="0.6"/>
+    <circle cx="60" cy="220" r="1" opacity="0.5"/>
+    <circle cx="160" cy="310" r="0.7" opacity="0.4"/>
+    <circle cx="820" cy="200" r="1.1" opacity="0.6"/>
+    <circle cx="1020" cy="280" r="0.8" opacity="0.5"/>
+    <circle cx="440" cy="170" r="0.6" opacity="0.4"/>
+    <circle cx="680" cy="190" r="1.2" opacity="0.7"/>
+  </g>
+
+  <!-- Moon -->
+  <circle cx="780" cy="230" r="72" fill="#1A1F3A"/>
+  <circle cx="780" cy="230" r="72" fill="none" stroke="#C8A96E" stroke-width="1" opacity="0.4"/>
+  <!-- Crescent -->
+  <circle cx="810" cy="210" r="62" fill="#0F1428"/>
+  <!-- Moon surface texture -->
+  <circle cx="758" cy="248" r="6" fill="none" stroke="#C8A96E" stroke-width="0.5" opacity="0.2"/>
+  <circle cx="774" cy="220" r="3" fill="none" stroke="#C8A96E" stroke-width="0.5" opacity="0.15"/>
+
+  <!-- Horizon line -->
+  <line x1="0" y1="820" x2="1080" y2="820" stroke="#C8A96E" stroke-width="1" opacity="0.3"/>
+  <!-- Ground glow -->
+  <rect x="0" y="820" width="1080" height="260" fill="#0A0C14"/>
+  <rect x="0" y="818" width="1080" height="4" fill="#C8A96E" opacity="0.15"/>
+
+  <!-- Top label -->
+  <text x="540" y="112" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="bold" fill="#C8A96E" text-anchor="middle" letter-spacing="12" opacity="0.85">H A C O S</text>
+  <line x1="380" y1="126" x2="700" y2="126" stroke="#C8A96E" stroke-width="0.7" opacity="0.3"/>
+
+  <!-- Main copy -->
+  <text x="140" y="400" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="68" font-weight="bold" fill="white" opacity="0.95">月曜の夜を、</text>
+  <text x="140" y="490" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="68" font-weight="bold" fill="#C8A96E" opacity="1">自分のために使う。</text>
+
+  <!-- Sub copy -->
+  <text x="140" y="580" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="30" fill="white" opacity="0.55">仕事終わりに走って、食べて、汗をかいて、笑う。</text>
+
+  <!-- Program icons row -->
+  <g font-family="IPAGothic, IPAゴシック, sans-serif" font-size="22" fill="white" opacity="0.7">
+    <text x="140" y="668">🏃 Night Run</text>
+    <text x="330" y="668">🔥 BBQ</text>
+    <text x="460" y="668">🪨 Sauna</text>
+    <text x="600" y="668">🧘 Yoga</text>
+    <text x="720" y="668">🎵 Music</text>
+  </g>
+  <line x1="140" y1="688" x2="940" y2="688" stroke="white" stroke-width="0.5" opacity="0.15"/>
+
+  <!-- Event info block -->
+  <text x="140" y="756" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="28" fill="#C8A96E" opacity="0.9">5月18日（月）17:00〜22:00（L.O. 21:30）</text>
+  <text x="140" y="800" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="26" fill="white" opacity="0.6">会費 ¥5,000 ／ 食事付きビュッフェ ／ 完全予約制</text>
+
+  <!-- Bottom -->
+  <line x1="140" y1="870" x2="940" y2="870" stroke="#C8A96E" stroke-width="0.7" opacity="0.25"/>
+  <text x="140" y="910" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="22" fill="white" opacity="0.4">予約 → プロフィールのリンクから</text>
+  <text x="940" y="910" font-family="DejaVu Sans, sans-serif" font-size="18" fill="#C8A96E" text-anchor="end" letter-spacing="3" opacity="0.5">HACOS NIGHT CLUB</text>
+</svg>
