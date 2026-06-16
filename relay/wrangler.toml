@@ -1,0 +1,13 @@
+name = "hacos-relay"
+main = "src/index.ts"
+compatibility_date = "2025-04-01"
+compatibility_flags = ["nodejs_compat"]
+
+# LINE Harness の D1 データベースを共有バインディング
+[[d1_databases]]
+binding = "DB"
+database_name = "line-harness"
+database_id = "fd389273-1236-4683-aa43-913e845c640c"
+
+[vars]
+LINE_HARNESS_WEBHOOK_URL = "https://line-harness.hacos.workers.dev/webhook"
