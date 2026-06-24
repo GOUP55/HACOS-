@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HACOS × HMC — Healthy Morning Club</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Noto+Serif+JP:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #F5F0E8;
+  --warm-white: #FAF8F4;
+  --forest: #3D5A3E;
+  --forest-light: #5A7A5C;
+  --amber: #C8833A;
+  --amber-light: #E8A85A;
+  --rust: #B85C38;
+  --sand: #D4C4A0;
+  --sand-light: #EAE0CC;
+  --dark: #1C1C1A;
+  --mid: #4A4840;
+  --light-text: #8A8478;
+  --pink-soft: #C4857A;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { font-family:'Noto Serif JP',serif; background:var(--warm-white); color:var(--dark); overflow-x:hidden; }
+
+/* ── STICKY CTA ── */
+.sticky-cta {
+  position:fixed; bottom:0; left:0; right:0; z-index:999;
+  background:var(--forest); padding:12px 20px;
+  display:flex; align-items:center; justify-content:space-between;
+  transform:translateY(100%); transition:transform .4s ease;
+  box-shadow:0 -2px 20px rgba(0,0,0,.25);
+}
+.sticky-cta.visible { transform:translateY(0); }
+.sticky-cta .sticky-text { color:var(--cream); font-size:13px; line-height:1.4; }
+.sticky-cta .sticky-text strong { display:block; font-size:15px; }
+.sticky-cta a {
+  background:var(--amber); color:#fff; text-decoration:none;
+  padding:10px 18px; border-radius:4px; font-size:13px;
+  font-family:'DM Sans',sans-serif; white-space:nowrap; flex-shrink:0;
+}
+
+/* ── HERO ── */
+.hero {
+  min-height:100svh; background:var(--dark); position:relative;
+  display:flex; flex-direction:column; justify-content:flex-end; overflow:hidden;
+}
+.hero-bg {
+  position:absolute; inset:0;
+  background-image:
+    linear-gradient(to top,rgba(20,18,10,.93) 0%,rgba(28,24,12,.5) 42%,rgba(40,34,14,.28) 72%,rgba(40,34,14,.35) 100%),
+    url('images/hero-mimosa-new.jpg');
+  background-size:cover; background-position:center 60%;
+}
+.hero-inner {
+  position:relative; z-index:2; padding:0 24px 56px;
+  display:flex; flex-direction:column; gap:20px;
+}
+.hero-logo { width:80px; opacity:.9; border-radius:12px; }
+.hero-eyebrow {
+  font-family:'DM Sans',sans-serif; font-size:11px; letter-spacing:.18em;
+  color:var(--amber-light); text-transform:uppercase;
+}
+.hero-title {
+  font-family:'Cormorant Garamond',serif; font-size:clamp(40px,11vw,72px);
+  font-weight:300; color:var(--cream); line-height:1.1;
+}
+.hero-subtitle {
+  font-size:13px; color:rgba(245,240,232,.72); line-height:1.8;
+  border-left:2px solid var(--amber); padding-left:12px;
+}
+/* ── 改善①：HEROにCTAバッジ + ボタン追加 ── */
+.hero-meta {
+  display:flex; flex-wrap:wrap; gap:8px; margin-top:4px;
+}
+.hero-badge {
+  background:rgba(200,131,58,.18); border:1px solid rgba(200,131,58,.4);
+  color:var(--amber-light); font-size:11px; padding:4px 10px; border-radius:20px;
+  font-family:'DM Sans',sans-serif;
+}
+.hero-cta {
+  display:block; background:var(--amber); color:#fff; text-decoration:none;
+  text-align:center; padding:16px; border-radius:4px; font-size:15px;
+  font-family:'DM Sans',sans-serif; letter-spacing:.04em; margin-top:8px;
+  transition:background .2s;
+}
+.hero-cta:active { background:var(--amber-light); }
+.hero-cta-sub {
+  text-align:center; font-size:11px; color:rgba(245,240,232,.5);
+  font-family:'DM Sans',sans-serif; margin-top:6px;
+}
+
+/* ── TICKER ── */
+.ticker { background:var(--forest); overflow:hidden; padding:12px 0; }
+.ticker-inner {
+  display:flex; white-space:nowrap;
+  animation:ticker 28s linear infinite;
+}
+.ticker-inner span {
+  font-family:'DM Sans',sans-serif; font-size:12px; letter-spacing:.14em;
+  color:var(--cream); text-transform:uppercase; padding:0 32px; opacity:.85;
+}
+@keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+/* ── SECTION COMMONS ── */
+section { padding:72px 24px; }
+.section-label {
+  font-family:'DM Sans',sans-serif; font-size:10px; letter-spacing:.2em;
+  color:var(--amber); text-transform:uppercase; margin-bottom:12px;
+}
+.section-title {
+  font-family:'Cormorant Garamond',serif; font-size:clamp(28px,7vw,44px);
+  font-weight:300; color:var(--dark); line-height:1.2; margin-bottom:8px;
+}
+.section-title em { font-style:italic; color:var(--forest); }
+.section-body { font-size:14px; color:var(--mid); line-height:1.9; }
+.divider { width:40px; height:1px; background:var(--amber); margin:20px 0; }
+
+/* ── WHAT IS HMC ── */
+.what-is { background:var(--cream); }
+.pillar-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:28px; }
+.pillar-grid .full { grid-column:1/-1; }
+.pillar-card {
+  background:var(--warm-white); border:1px solid var(--sand);
+  border-radius:8px; overflow:hidden;
+}
+.pillar-img { width:100%; aspect-ratio:4/3; object-fit:cover; }
+.pillar-img.tall { aspect-ratio:3/4; }
+.pillar-text { padding:14px 16px; }
+.pillar-en {
+  font-family:'DM Sans',sans-serif; font-size:10px; letter-spacing:.16em;
+  color:var(--amber); text-transform:uppercase; margin-bottom:4px;
+}
+.pillar-ja { font-size:15px; color:var(--dark); margin-bottom:6px; }
+.pillar-desc { font-size:12px; color:var(--light-text); line-height:1.7; }
+
+/* ── SCHEDULE ── */
+.schedule { background:var(--warm-white); }
+.time-flow { display:flex; align-items:flex-start; gap:0; margin:32px 0; overflow-x:auto; padding-bottom:8px; }
+.time-step { flex:1; min-width:80px; text-align:center; position:relative; }
+.time-step:not(:last-child)::after {
+  content:''; position:absolute; top:14px; right:0; left:50%;
+  height:1px; background:var(--sand);
+}
+.time-dot {
+  width:28px; height:28px; border-radius:50%; background:var(--cream);
+  border:2px solid var(--amber); margin:0 auto 8px; position:relative; z-index:1;
+  display:flex; align-items:center; justify-content:center;
+}
+.time-dot.active { background:var(--amber); }
+.time-dot.active span { color:#fff; font-size:10px; font-family:'DM Sans',sans-serif; }
+.time-label { font-size:12px; color:var(--amber); font-family:'DM Sans',sans-serif; margin-bottom:2px; }
+.time-desc { font-size:10px; color:var(--light-text); line-height:1.4; }
+
+/* ── 改善②：7月スケジュール ── */
+.program-header {
+  display:flex; align-items:baseline; gap:10px; margin:32px 0 16px;
+}
+.program-month {
+  font-family:'Cormorant Garamond',serif; font-size:32px; font-weight:300; color:var(--forest);
+}
+.program-label {
+  font-family:'DM Sans',sans-serif; font-size:10px; letter-spacing:.16em;
+  color:var(--amber); text-transform:uppercase;
+}
+.program-list { display:flex; flex-direction:column; gap:12px; }
+.program-card {
+  background:var(--cream); border-radius:8px;
+  border-left:3px solid var(--forest); padding:16px 18px;
+  display:grid; grid-template-columns:auto 1fr; gap:12px 16px; align-items:start;
+}
+.program-date-box { text-align:center; }
+.program-day-num {
+  font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:300;
+  color:var(--forest); line-height:1;
+}
+.program-day-week {
+  font-family:'DM Sans',sans-serif; font-size:10px; color:var(--light-text);
+  text-transform:uppercase;
+}
+.program-info {}
+.program-fitness {
+  font-size:15px; color:var(--dark); margin-bottom:4px;
+}
+.program-food {
+  font-size:12px; color:var(--amber); margin-bottom:6px;
+}
+.program-trainers {
+  display:flex; flex-wrap:wrap; gap:4px;
+}
+.trainer-chip {
+  background:var(--forest); color:var(--cream); font-size:10px;
+  padding:2px 8px; border-radius:20px; font-family:'DM Sans',sans-serif;
+}
+.program-note { font-size:11px; color:var(--light-text); margin-top:4px; }
+
+/* ── WEEKLY CLASS ── */
+.weekly { background:var(--forest); }
+.weekly .section-title { color:var(--cream); }
+.weekly .section-label { color:var(--amber-light); }
+.weekly .divider { background:rgba(245,240,232,.3); }
+.class-cards { display:flex; flex-direction:column; gap:16px; margin-top:28px; }
+.class-card {
+  background:rgba(245,240,232,.08); border:1px solid rgba(245,240,232,.15);
+  border-radius:8px; padding:20px;
+}
+.class-card-badge {
+  display:inline-block; background:var(--amber); color:#fff;
+  font-size:10px; padding:3px 10px; border-radius:20px;
+  font-family:'DM Sans',sans-serif; letter-spacing:.08em; margin-bottom:12px;
+}
+.class-card-badge.soon { background:rgba(200,131,58,.35); color:var(--amber-light); }
+.class-card-title { font-size:17px; color:var(--cream); margin-bottom:8px; }
+.class-card-meta { font-size:12px; color:rgba(245,240,232,.6); line-height:1.8; }
+.class-card-price { margin-top:12px; font-size:13px; color:var(--amber-light); }
+.class-card-price strong { font-size:20px; }
+
+/* ── HNC ── */
+.hnc { background:var(--dark); }
+.hnc .section-title { color:var(--cream); }
+.hnc .section-label { color:var(--amber-light); }
+.hnc-logo { width:72px; border-radius:12px; margin-bottom:20px; }
+.hnc-info-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:24px; }
+.hnc-info-card {
+  background:rgba(245,240,232,.06); border:1px solid rgba(245,240,232,.12);
+  border-radius:8px; padding:16px;
+}
+.hnc-info-label { font-size:10px; color:var(--amber-light); letter-spacing:.12em; text-transform:uppercase; margin-bottom:6px; font-family:'DM Sans',sans-serif; }
+.hnc-info-value { font-size:14px; color:var(--cream); line-height:1.6; }
+.hnc-event-card {
+  background:rgba(200,131,58,.1); border:1px solid rgba(200,131,58,.25);
+  border-radius:8px; padding:20px; margin-top:20px;
+}
+.hnc-event-title { font-size:16px; color:var(--amber-light); margin-bottom:8px; }
+.hnc-event-detail { font-size:13px; color:rgba(245,240,232,.7); line-height:1.9; }
+.hnc-event-price { margin-top:12px; font-size:12px; color:rgba(245,240,232,.6); line-height:1.8; }
+
+/* ── TRAINERS ── */
+.trainers { background:var(--cream); }
+.trainer-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:28px; }
+.trainer-card { background:var(--warm-white); border-radius:8px; overflow:hidden; }
+.trainer-photo {
+  width:100%; aspect-ratio:3/4; object-fit:cover;
+}
+.trainer-body { padding:14px; }
+.trainer-name { font-size:16px; color:var(--dark); margin-bottom:2px; }
+.trainer-role { font-size:11px; color:var(--amber); font-family:'DM Sans',sans-serif; letter-spacing:.08em; margin-bottom:6px; }
+.trainer-bio { font-size:11px; color:var(--light-text); line-height:1.7; }
+.trainer-kitchen { grid-column:1/-1; }
+.trainer-kitchen .trainer-photo { aspect-ratio:16/9; object-fit:cover; }
+
+/* ── FOOD ── */
+.food { background:var(--warm-white); }
+.food-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:24px; }
+.food-img { width:100%; aspect-ratio:1; object-fit:cover; border-radius:6px; }
+.food-note { font-size:12px; color:var(--light-text); margin-top:12px; line-height:1.7; }
+
+/* ── PRICING ── */
+/* 改善③：「まず体験」の動線をステップ型に */
+.pricing { background:var(--forest); }
+.pricing .section-title { color:var(--cream); }
+.pricing .section-label { color:var(--amber-light); }
+.pricing .divider { background:rgba(245,240,232,.3); }
+.pricing-steps { display:flex; flex-direction:column; gap:12px; margin-top:28px; }
+.pricing-step {
+  background:rgba(245,240,232,.08); border:1px solid rgba(245,240,232,.15);
+  border-radius:8px; padding:20px; position:relative;
+}
+.pricing-step.featured {
+  background:rgba(200,131,58,.12); border-color:rgba(200,131,58,.35);
+}
+.step-label {
+  font-family:'DM Sans',sans-serif; font-size:10px; letter-spacing:.14em;
+  color:var(--amber-light); text-transform:uppercase; margin-bottom:8px;
+}
+.step-title { font-size:16px; color:var(--cream); margin-bottom:6px; }
+.step-price { font-size:28px; color:var(--amber-light); font-family:'Cormorant Garamond',serif; }
+.step-price-unit { font-size:14px; color:rgba(245,240,232,.5); }
+.step-desc { font-size:12px; color:rgba(245,240,232,.6); line-height:1.8; margin-top:10px; }
+.step-cta {
+  display:block; background:var(--amber); color:#fff; text-decoration:none;
+  text-align:center; padding:12px; border-radius:4px; font-size:13px;
+  font-family:'DM Sans',sans-serif; margin-top:14px;
+}
+.step-badge {
+  position:absolute; top:-10px; right:16px;
+  background:var(--amber); color:#fff; font-size:10px;
+  padding:3px 10px; border-radius:20px; font-family:'DM Sans',sans-serif;
+}
+.pricing-coming { margin-top:12px; text-align:center; font-size:12px; color:rgba(245,240,232,.45); }
+
+/* ── 3ヶ月プレミアム（NEW SECTION） ── */
+.method { background:var(--dark); }
+.method .section-title { color:var(--cream); }
+.method .section-label { color:var(--amber-light); }
+.method .divider { background:rgba(245,240,232,.25); }
+.method-lead { font-size:14px; color:rgba(245,240,232,.75); line-height:1.9; margin-top:16px; }
+.method-card {
+  background:linear-gradient(135deg,rgba(61,90,62,.3),rgba(200,131,58,.1));
+  border:1px solid rgba(200,131,58,.3); border-radius:12px; padding:24px; margin-top:28px;
+}
+.method-tag {
+  display:inline-block; background:var(--amber); color:#fff; font-size:10px;
+  padding:4px 12px; border-radius:20px; font-family:'DM Sans',sans-serif;
+  letter-spacing:.08em; margin-bottom:16px;
+}
+.method-title { font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:300; color:var(--cream); margin-bottom:4px; }
+.method-sub { font-size:12px; color:rgba(245,240,232,.55); margin-bottom:20px; }
+.method-includes { list-style:none; display:flex; flex-direction:column; gap:8px; margin-bottom:20px; }
+.method-includes li {
+  font-size:13px; color:rgba(245,240,232,.8); padding-left:20px; position:relative; line-height:1.6;
+}
+.method-includes li::before { content:'✓'; position:absolute; left:0; color:var(--amber-light); }
+.method-price-box {
+  background:rgba(0,0,0,.25); border-radius:8px; padding:16px; text-align:center; margin-bottom:16px;
+}
+.method-price-old { font-size:13px; color:rgba(245,240,232,.4); text-decoration:line-through; margin-bottom:4px; }
+.method-price-new { font-family:'Cormorant Garamond',serif; font-size:40px; font-weight:300; color:var(--amber-light); }
+.method-price-period { font-size:13px; color:rgba(245,240,232,.5); }
+.method-capacity { font-size:11px; color:rgba(245,240,232,.5); text-align:center; margin-bottom:16px; }
+.method-cta {
+  display:block; background:var(--amber); color:#fff; text-decoration:none;
+  text-align:center; padding:16px; border-radius:6px; font-size:15px;
+  font-family:'DM Sans',sans-serif; letter-spacing:.04em;
+}
+.method-note { font-size:11px; color:rgba(245,240,232,.4); text-align:center; margin-top:10px; line-height:1.6; }
+
+/* ── HOW TO JOIN ── */
+.how { background:var(--cream); }
+.steps-list { display:flex; flex-direction:column; gap:0; margin-top:28px; }
+.how-step { display:flex; gap:16px; position:relative; padding-bottom:24px; }
+.how-step:not(:last-child)::after {
+  content:''; position:absolute; left:19px; top:40px; bottom:0;
+  width:1px; background:var(--sand);
+}
+.step-num {
+  width:40px; height:40px; border-radius:50%; background:var(--forest);
+  color:var(--cream); display:flex; align-items:center; justify-content:center;
+  font-family:'DM Sans',sans-serif; font-size:16px; flex-shrink:0; z-index:1;
+}
+.step-content {}
+.step-title-how { font-size:15px; color:var(--dark); margin-bottom:4px; padding-top:8px; }
+.step-desc-how { font-size:12px; color:var(--light-text); line-height:1.7; }
+.step-link {
+  display:inline-block; color:var(--amber); font-size:12px; text-decoration:none;
+  border-bottom:1px solid var(--sand); padding-bottom:1px; margin-top:6px;
+}
+
+/* ── FAQ ── */
+.faq { background:var(--warm-white); }
+.faq-list { margin-top:28px; display:flex; flex-direction:column; gap:8px; }
+.faq-item { background:var(--cream); border-radius:8px; overflow:hidden; }
+.faq-q {
+  width:100%; background:none; border:none; padding:18px 20px;
+  text-align:left; font-size:14px; color:var(--dark); cursor:pointer;
+  display:flex; justify-content:space-between; align-items:center; gap:12px;
+  font-family:'Noto Serif JP',serif;
+}
+.faq-q::after {
+  content:'+'; font-size:20px; color:var(--amber); flex-shrink:0;
+  font-family:'DM Sans',sans-serif; transition:transform .2s;
+}
+.faq-item.open .faq-q::after { transform:rotate(45deg); }
+.faq-a {
+  max-height:0; overflow:hidden; transition:max-height .3s ease;
+  font-size:13px; color:var(--mid); line-height:1.8;
+}
+.faq-a-inner { padding:0 20px 18px; }
+
+/* ── CTA ── */
+.cta-section { background:var(--forest); text-align:center; padding:72px 24px; }
+.cta-section .section-title { color:var(--cream); }
+.cta-section .section-label { color:var(--amber-light); }
+.cta-section .divider { margin:20px auto; }
+.cta-section .section-body { color:rgba(245,240,232,.7); margin-bottom:28px; }
+.cta-btn {
+  display:block; background:var(--amber); color:#fff; text-decoration:none;
+  padding:18px 24px; border-radius:4px; font-size:15px; max-width:360px;
+  margin:0 auto 12px; font-family:'DM Sans',sans-serif; letter-spacing:.04em;
+}
+.cta-sub {
+  font-size:12px; color:rgba(245,240,232,.5);
+  font-family:'DM Sans',sans-serif;
+}
+.cta-line {
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  margin-top:20px; text-decoration:none; color:var(--cream); font-size:13px;
+}
+.cta-line-icon { width:32px; height:32px; background:#06c755; border-radius:8px; display:flex; align-items:center; justify-content:center; }
+
+/* ── FOOTER ── */
+footer {
+  background:var(--dark); padding:40px 24px; text-align:center;
+}
+.footer-logo { width:60px; border-radius:10px; margin:0 auto 16px; }
+.footer-name { font-family:'Cormorant Garamond',serif; font-size:18px; color:var(--cream); margin-bottom:4px; }
+.footer-sub { font-size:11px; color:var(--light-text); letter-spacing:.1em; font-family:'DM Sans',sans-serif; margin-bottom:20px; }
+.footer-links { display:flex; justify-content:center; gap:20px; flex-wrap:wrap; margin-bottom:20px; }
+.footer-links a { font-size:12px; color:var(--light-text); text-decoration:none; }
+.footer-copy { font-size:11px; color:rgba(138,132,120,.5); font-family:'DM Sans',sans-serif; }
+</style>
+</head>
+<body>
+
+<!-- ═══ STICKY CTA ═══ -->
+<div class="sticky-cta" id="stickyCta">
+  <div class="sticky-text">
+    <strong>7月の体験を予約する</strong>
+    初回 ¥3,500 ・ 毎週日曜 AM7:30
+  </div>
+  <a href="https://forms.gle/dpJWZtafUfZWXnvC7" target="_blank">予約する →</a>
+</div>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero" id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-inner">
+    <img src="images/hmc-logo-new.jpg" alt="HMC" class="hero-logo">
+    <p class="hero-eyebrow">Healthy Morning Club</p>
+    <h1 class="hero-title">朝の1時間が<br>変える。</h1>
+    <p class="hero-subtitle">
+      動く × 食べる × つながる。<br>
+      観音寺から始まる、もうひとつの朝活。
+    </p>
+    <!-- ★改善①：具体的なバッジ追加 -->
+    <div class="hero-meta">
+      <span class="hero-badge">毎週日曜 AM 7:30</span>
+      <span class="hero-badge">観音寺 / HACOS</span>
+      <span class="hero-badge">定員10名</span>
+    </div>
+    <!-- ★改善①：HEROにCTAボタン追加 -->
+    <a href="https://forms.gle/dpJWZtafUfZWXnvC7" class="hero-cta" target="_blank">
+      7月の体験を予約する →
+    </a>
+    <p class="hero-cta-sub">初回体験 ¥3,500 ｜ 無料相談あり</p>
+  </div>
+</section>
+
+<!-- ═══ TICKER ═══ -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <span>HACOS = Healthy Authentic Community Organic Space</span>
+    <span>動く × 食べる × つながる</span>
+    <span>毎週日曜 AM7:30 観音寺</span>
+    <span>HACOS = Healthy Authentic Community Organic Space</span>
+    <span>動く × 食べる × つながる</span>
+    <span>毎週日曜 AM7:30 観音寺</span>
+  </div>
+</div>
+
+<!-- ═══ WHAT IS HMC ═══ -->
+<section class="what-is">
+  <p class="section-label">What is HMC</p>
+  <h2 class="section-title">動く。食べる。<br><em>つながる。</em></h2>
+  <div class="divider"></div>
+  <p class="section-body">
+    HMCは毎週日曜の朝、観音寺のHACOSで開かれる朝活コミュニティです。
+    フィットネスだけじゃない。食も、人との繋がりも。
+    体が変わる朝を、一緒に作りましょう。
+  </p>
+  <div class="pillar-grid">
+    <div class="pillar-card">
+      <img src="images/studio-class.jpg" alt="フィットネス" class="pillar-img">
+      <div class="pillar-text">
+        <p class="pillar-en">Move</p>
+        <p class="pillar-ja">動く</p>
+        <p class="pillar-desc">毎週テーマが変わるフィットネス。ストレッチ・筋トレ・ピラティスなど多彩なクラス。</p>
+      </div>
+    </div>
+    <div class="pillar-card">
+      <img src="images/food-plate.jpg" alt="食事" class="pillar-img">
+      <div class="pillar-text">
+        <p class="pillar-en">Eat</p>
+        <p class="pillar-ja">食べる</p>
+        <p class="pillar-desc">HACOS KITCHENの発酵ごはんと旬の食材。体に優しい朝ごはんを味わう。</p>
+      </div>
+    </div>
+    <div class="pillar-card full">
+      <img src="images/go-sunday.jpg" alt="つながる" class="pillar-img" style="aspect-ratio:16/9;object-position:center 60%;">
+      <div class="pillar-text">
+        <p class="pillar-en">Connect</p>
+        <p class="pillar-ja">つながる</p>
+        <p class="pillar-desc">日曜の朝、同じ志を持つ仲間と集まる。それだけで、また来週も頑張れる。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SCHEDULE ═══ -->
+<section class="schedule" id="schedule">
+  <p class="section-label">Schedule</p>
+  <h2 class="section-title">当日の<br><em>流れ</em></h2>
+  <div class="divider"></div>
+
+  <div class="time-flow">
+    <div class="time-step">
+      <div class="time-dot"><span></span></div>
+      <p class="time-label">7:00</p>
+      <p class="time-desc">自由参加<br>（朝活・会話）</p>
+    </div>
+    <div class="time-step">
+      <div class="time-dot active"><span>▶</span></div>
+      <p class="time-label">7:30</p>
+      <p class="time-desc">フィットネス<br>スタート</p>
+    </div>
+    <div class="time-step">
+      <div class="time-dot"><span></span></div>
+      <p class="time-label">8:15</p>
+      <p class="time-desc">朝食・<br>フリータイム</p>
+    </div>
+    <div class="time-step">
+      <div class="time-dot"><span></span></div>
+      <p class="time-label">10:00</p>
+      <p class="time-desc">終了</p>
+    </div>
+  </div>
+
+  <!-- ★改善②：7月プログラムに更新 -->
+  <div class="program-header">
+    <p class="program-month">July</p>
+    <p class="program-label">7月プログラム</p>
+  </div>
+
+  <div class="program-list">
+
+    <div class="program-card">
+      <div class="program-date-box">
+        <p class="program-day-num">5</p>
+        <p class="program-day-week">Sun</p>
+      </div>
+      <div class="program-info">
+        <p class="program-fitness">セルフマッサージ＆ストレッチ</p>
+        <p class="program-food">🍱 フードメニュー近日公開</p>
+        <div class="program-trainers">
+          <span class="trainer-chip">GO</span>
+          <span class="trainer-chip">片山</span>
+          <span class="trainer-chip">ちひろ</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="program-card">
+      <div class="program-date-box">
+        <p class="program-day-num">12</p>
+        <p class="program-day-week">Sun</p>
+      </div>
+      <div class="program-info">
+        <p class="program-fitness">GOトレクラス（筋トレ）</p>
+        <p class="program-food">🍱 フードメニュー近日公開</p>
+        <div class="program-trainers">
+          <span class="trainer-chip">GO</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="program-card">
+      <div class="program-date-box">
+        <p class="program-day-num">19</p>
+        <p class="program-day-week">Sun</p>
+      </div>
+      <div class="program-info">
+        <p class="program-fitness">ピラティス</p>
+        <p class="program-food">🍱 フードメニュー近日公開</p>
+        <div class="program-trainers">
+          <span class="trainer-chip">ちひろ</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="program-card">
+      <div class="program-date-box">
+        <p class="program-day-num">26</p>
+        <p class="program-day-week">Sun</p>
+      </div>
+      <div class="program-info">
+        <p class="program-fitness">ウェストシェイプ</p>
+        <p class="program-food">🍱 フードメニュー近日公開</p>
+        <div class="program-trainers">
+          <span class="trainer-chip">片山</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <p style="font-size:12px;color:var(--light-text);margin-top:16px;line-height:1.7;">
+    ドリンク：コーヒー ¥200 ／ ハーブウォーター・コーン茶 無料<br>
+    弁当のご注文は前日までに。¥1,200〜1,300
+  </p>
+</section>
+
+<!-- ═══ WEEKLY CLASS ═══ -->
+<section class="weekly" id="class">
+  <p class="section-label">Weekly Class</p>
+  <h2 class="section-title">クラス<br><em>案内</em></h2>
+  <div class="divider"></div>
+  <div class="class-cards">
+    <div class="class-card">
+      <span class="class-card-badge">受付中</span>
+      <p class="class-card-title">HMC — Healthy Morning Club</p>
+      <p class="class-card-meta">
+        📅 毎週日曜<br>
+        ⏱ AM 7:30〜10:00<br>
+        👥 定員10名
+      </p>
+      <div class="class-card-price">
+        会員 <strong>¥2,000</strong> ／ ビジター <strong>¥3,000</strong>
+      </div>
+    </div>
+    <div class="class-card">
+      <span class="class-card-badge soon">準備中</span>
+      <p class="class-card-title">セミパーソナル</p>
+      <p class="class-card-meta">
+        📅 月〜金<br>
+        ⏱ 11:00 ／ 19:00<br>
+        👥 定員5名（少人数制）
+      </p>
+      <div class="class-card-price">
+        会員 <strong>¥3,000</strong> ／ ビジター <strong>¥4,000</strong>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ NIGHT CLUB (HNC) ═══ -->
+<section class="hnc" id="hnc">
+  <img src="images/hnc-logo-new.jpg" alt="HNC" class="hnc-logo">
+  <p class="section-label">Night Club</p>
+  <h2 class="section-title" style="color:var(--cream);">夜の<em style="color:var(--amber-light);">HACOS</em>へ。</h2>
+  <div class="divider" style="background:rgba(245,240,232,.25);"></div>
+  <p style="font-size:14px;color:rgba(245,240,232,.7);line-height:1.9;">
+    金曜夜、仕事の後に。フィットネスで汗をかいて、みんなで食卓を囲む。
+    HNCは、そんな特別な夜のコミュニティです。
+  </p>
+  <div class="hnc-info-grid">
+    <div class="hnc-info-card">
+      <p class="hnc-info-label">Open</p>
+      <p class="hnc-info-value">18:30〜</p>
+    </div>
+    <div class="hnc-info-card">
+      <p class="hnc-info-label">Fitness</p>
+      <p class="hnc-info-value">19:00〜19:45</p>
+    </div>
+    <div class="hnc-info-card">
+      <p class="hnc-info-label">食事</p>
+      <p class="hnc-info-value">20:00〜</p>
+    </div>
+    <div class="hnc-info-card">
+      <p class="hnc-info-label">ドリンク</p>
+      <p class="hnc-info-value">持込自由<br>（ビール・ハイボール等）</p>
+    </div>
+  </div>
+  <div class="hnc-event-card">
+    <p style="font-size:11px;color:var(--amber-light);font-family:'DM Sans',sans-serif;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;">Next Event</p>
+    <p class="hnc-event-title">次回のHNCは近日公開！</p>
+    <p class="hnc-event-detail">
+      公式LINEで先行案内をお届けします。<br>
+      フォローして待っていてください🌙
+    </p>
+    <p class="hnc-event-price">
+      フィットネス会員 ¥2,000 ／ ビジター ¥3,000<br>
+      食事参加 ¥4,000（ドリンク持込自由）
+    </p>
+  </div>
+</section>
+
+<!-- ═══ TRAINERS ═══ -->
+<section class="trainers" id="trainers">
+  <p class="section-label">Trainers</p>
+  <h2 class="section-title">あなたの<br><em>朝を変える人たち</em></h2>
+  <div class="divider"></div>
+  <div class="trainer-grid">
+
+    <div class="trainer-card">
+      <img src="images/go.jpg" alt="GO" class="trainer-photo" style="object-position:center 42%;">
+      <div class="trainer-body">
+        <p class="trainer-name">GO</p>
+        <p class="trainer-role">Owner / Trainer</p>
+        <p class="trainer-bio">HACOSオーナー。発酵食と運動で体と人生を変えるプログラムを設計。</p>
+      </div>
+    </div>
+
+    <div class="trainer-card">
+      <img src="images/katayama.jpg" alt="片山めぐみ" class="trainer-photo" style="object-position:center 12%;">
+      <div class="trainer-body">
+        <p class="trainer-name">片山めぐみ</p>
+        <p class="trainer-role">Trainer</p>
+        <p class="trainer-bio">JBBF日本選手権ファイナリスト。ボディメイクのプロ。</p>
+      </div>
+    </div>
+
+    <div class="trainer-card">
+      <img src="images/chihiro.jpg" alt="ちひろ" class="trainer-photo" style="object-position:center 25%;">
+      <div class="trainer-body">
+        <p class="trainer-name">ちひろ</p>
+        <p class="trainer-role">Trainer / Yoga</p>
+        <p class="trainer-bio">ピラティス・ヨガの専門家。愛されbodyを一緒に作ります。</p>
+      </div>
+    </div>
+
+    <div class="trainer-card">
+      <img src="images/kuroda.jpg" alt="黒田陽子KURO" class="trainer-photo" style="object-position:32% 28%;">
+      <div class="trainer-body">
+        <p class="trainer-name">黒田陽子 KURO</p>
+        <p class="trainer-role">Trainer</p>
+        <p class="trainer-bio">1年で-30kgを達成。当事者だからこそわかる、本当のダイエット。</p>
+      </div>
+    </div>
+
+    <div class="trainer-card">
+      <img src="images/fumiya.jpg" alt="加藤ふみや" class="trainer-photo" style="object-position:38% 16%;">
+      <div class="trainer-body">
+        <p class="trainer-name">加藤ふみや</p>
+        <p class="trainer-role">Trainer</p>
+        <p class="trainer-bio">とらや14年→2026年5月退職。新たなフィールドで体づくりを支える。</p>
+      </div>
+    </div>
+
+    <div class="trainer-card trainer-kitchen">
+      <img src="images/hacos-zebra.jpg" alt="HACOS KITCHEN" class="trainer-photo">
+      <div class="trainer-body">
+        <p class="trainer-name">HACOS KITCHEN</p>
+        <p class="trainer-role">Food</p>
+        <p class="trainer-bio">発酵ごはんと旬の食材で、あなたの朝を彩るHACOSの食部門。体に優しく、おいしい。</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ FOOD ═══ -->
+<section class="food" id="food">
+  <p class="section-label">Food</p>
+  <h2 class="section-title">ご褒美<br><em>Morning</em></h2>
+  <div class="divider"></div>
+  <p class="section-body">
+    汗をかいた後の朝ごはんは格別。HACOS KITCHENが毎週、旬の食材と発酵調味料で作る体に優しい一品。弁当のご予約は前日まで受付中。
+  </p>
+  <div class="food-grid">
+    <img src="images/food-new1.jpg" alt="food" class="food-img">
+    <img src="images/food-new2.jpg" alt="food" class="food-img">
+    <img src="images/food-new3.jpg" alt="food" class="food-img">
+    <img src="images/food-new4.jpg" alt="food" class="food-img">
+  </div>
+  <p class="food-note">
+    🍱 弁当 ¥1,200〜1,300（前日までご注文ください）<br>
+    ☕ コーヒー ¥200 ／ ハーブウォーター・コーン茶 無料<br>
+    <a href="https://hacos.base.shop/items/146190213" target="_blank" style="color:var(--amber);font-size:12px;">物販 → hacos.base.shop</a>
+  </p>
+</section>
+
+<!-- ═══ PRICING ═══ -->
+<!-- ★改善③：まず体験→会員→通い放題のステップ型に -->
+<section class="pricing" id="pricing">
+  <p class="section-label">Pricing</p>
+  <h2 class="section-title">まず、<br><em>体験から。</em></h2>
+  <div class="divider"></div>
+  <p style="font-size:13px;color:rgba(245,240,232,.6);line-height:1.8;margin-top:4px;">
+    はじめての方は体験パーソナルから。<br>続けたくなったら会員に。本気になったら通い放題へ。
+  </p>
+
+  <div class="pricing-steps">
+
+    <div class="pricing-step featured">
+      <span class="step-badge">おすすめのはじめ方</span>
+      <p class="step-label">Step 1</p>
+      <p class="step-title">体験パーソナルトレーニング</p>
+      <p class="step-price">¥3,500<span class="step-price-unit"> / 1回</span></p>
+      <p class="step-desc">
+        まずは一度体験してみてください。<br>
+        GOと1対1で、今の体とこれからの目標を話し合います。<br>
+        無理な勧誘は一切なし。
+      </p>
+      <a href="https://forms.gle/dpJWZtafUfZWXnvC7" class="step-cta" target="_blank">今すぐ予約する →</a>
+    </div>
+
+    <div class="pricing-step">
+      <p class="step-label">Step 2</p>
+      <p class="step-title">HMC 会員 / ビジター</p>
+      <p class="step-price">¥2,000<span class="step-price-unit">〜 / 回</span></p>
+      <p class="step-desc">
+        会員：¥2,000 ／ ビジター：¥3,000<br>
+        毎週日曜 AM7:30〜。定員10名の少人数制。
+      </p>
+    </div>
+
+    <div class="pricing-step">
+      <p class="step-label">Step 3（準備中）</p>
+      <p class="step-title">通い放題プラン</p>
+      <p class="step-price">¥20,000<span class="step-price-unit">〜 / 月</span></p>
+      <p class="step-desc">
+        HMC + セミパーソナルが受け放題。<br>
+        月8回セミパーソナルを使うと¥24,000 → 通い放題¥20,000でお得！<br>
+        <span style="color:var(--amber-light);">先行案内はLINEから登録を。</span>
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ 3ヶ月プレミアムコース（NEW） ═══ -->
+<section class="method" id="method">
+  <p class="section-label">Premium Method</p>
+  <h2 class="section-title">本気で<br><em>変わりたい人へ。</em></h2>
+  <div class="divider"></div>
+  <p class="method-lead">
+    今パーソナルに通われている方、<br>
+    もっと加速したい方へ。<br>
+    食事・フィットネス・コミュニティが全部揃った<br>
+    3ヶ月の集中プログラムです。
+  </p>
+
+  <div class="method-card">
+    <span class="method-tag">先着3名限定</span>
+    <h3 class="method-title">HACOS 3ヶ月<br>プレミアムメソッド</h3>
+    <p class="method-sub">既存パーソナル会員さまも参加可能</p>
+
+    <ul class="method-includes">
+      <li>パーソナルトレーニング（月8回・週2ペース）</li>
+      <li>HMC 毎週参加（日曜 AM7:30〜）</li>
+      <li>HACOS KITCHEN 食サポート（毎週弁当＋栄養指導）</li>
+      <li>体組成測定＋月次フィードバックレポート</li>
+      <li>GOのLINE個別サポート（毎週）</li>
+      <li>発酵食ワークショップ（月1回）</li>
+    </ul>
+
+    <div class="method-price-box">
+      <p class="method-price-old">通常 ¥350,000（3ヶ月）</p>
+      <p class="method-price-new">¥300,000</p>
+      <p class="method-price-period">3ヶ月一括 ／ 分割相談可</p>
+    </div>
+
+    <p class="method-capacity">📍 定員3名 ｜ 次期スタート：随時相談</p>
+
+    <a href="https://lin.ee/T59MH4H" class="method-cta" target="_blank">
+      LINEで無料相談する →
+    </a>
+    <p class="method-note">
+      既存パーソナル会員の方は現在の料金と差額でご参加いただけます。<br>
+      まずはLINEでご相談ください。
+    </p>
+  </div>
+</section>
+
+<!-- ═══ HOW TO JOIN ═══ -->
+<section class="how" id="how">
+  <p class="section-label">How to Join</p>
+  <h2 class="section-title">予約の<br><em>流れ</em></h2>
+  <div class="divider"></div>
+  <div class="steps-list">
+    <div class="how-step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <p class="step-title-how">フォームから予約する</p>
+        <p class="step-desc-how">参加したい日程とクラスを選んでご送信ください。</p>
+        <a href="https://forms.gle/dpJWZtafUfZWXnvC7" class="step-link" target="_blank">予約フォームはこちら →</a>
+      </div>
+    </div>
+    <div class="how-step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <p class="step-title-how">GOから確認連絡</p>
+        <p class="step-desc-how">LINEまたはメールで確認をお送りします。当日の詳細もお伝えします。</p>
+      </div>
+    </div>
+    <div class="how-step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <p class="step-title-how">当日HACOSへ</p>
+        <p class="step-desc-how">7:00から自由参加OK。7:30にクラスがスタートします。動きやすい服装でお越しください。</p>
+      </div>
+    </div>
+    <div class="how-step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <p class="step-title-how">体験後、続けたくなったら</p>
+        <p class="step-desc-how">会員登録は当日その場でもOK。気に入ったら来週からも一緒に。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FAQ ═══ -->
+<section class="faq">
+  <p class="section-label">FAQ</p>
+  <h2 class="section-title">よくある<br><em>質問</em></h2>
+  <div class="divider"></div>
+  <div class="faq-list">
+
+    <div class="faq-item">
+      <button class="faq-q">初めてでも参加できますか？</button>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          もちろんです。HMCは運動初心者の方も大歓迎。体験パーソナル（¥3,500）からスタートすれば、GOがあなたの体に合ったプランを一緒に考えます。
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q">何を持っていけばいいですか？</button>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          動きやすい服装とシューズ、タオル、水分をお持ちください。着替えスペースもご用意しています。
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q">子連れでも参加できますか？</button>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          はい。お子様連れの参加者の方も多くいらっしゃいます。スペースに余裕があるため、安心してご参加ください。
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q">単発で参加することはできますか？</button>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          できます。ビジター参加（¥3,000/回）で毎回単発でのご参加もOKです。ただし定員10名のため、事前予約をおすすめします。
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q">食事だけの参加はできますか？</button>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          基本的にはフィットネス参加が前提ですが、HNCのイベントでは食事のみの参加プランもご用意することがあります。詳細はLINEでご確認ください。
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ CTA ═══ -->
+<section class="cta-section">
+  <p class="section-label">Join Us</p>
+  <h2 class="section-title">さあ、<br><em>日曜の朝へ。</em></h2>
+  <div class="divider"></div>
+  <p class="section-body">
+    まずは体験から。<br>
+    GOが一緒に考えます。あなたのペースで、あなたの朝を変えましょう。
+  </p>
+  <a href="https://forms.gle/dpJWZtafUfZWXnvC7" class="cta-btn" target="_blank">
+    体験を予約する（¥3,500）→
+  </a>
+  <p class="cta-sub">定員10名 ／ 毎週日曜 AM7:30〜</p>
+  <a href="https://lin.ee/T59MH4H" class="cta-line" target="_blank">
+    <div class="cta-line-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M19.365 9.863c.349 0 .63.285.63.63 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.281.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+    </div>
+    LINEで相談する（無料）
+  </a>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <img src="images/hmc-logo-new.jpg" alt="HMC" class="footer-logo" style="display:block;">
+  <p class="footer-name">HACOS × HMC</p>
+  <p class="footer-sub">Healthy Morning Club / 観音寺</p>
+  <div class="footer-links">
+    <a href="https://forms.gle/dpJWZtafUfZWXnvC7" target="_blank">予約フォーム</a>
+    <a href="https://lin.ee/T59MH4H" target="_blank">公式LINE</a>
+    <a href="https://hacos.base.shop/items/146190213" target="_blank">物販</a>
+    <a href="https://www.instagram.com/hmc.day/" target="_blank">Instagram</a>
+  </div>
+  <p class="footer-copy">© 2025 HACOS LIFESTYLES. All rights reserved.</p>
+</footer>
+
+<script>
+// ── Sticky CTA ──
+(function(){
+  const cta = document.getElementById('stickyCta');
+  const hero = document.getElementById('hero');
+  const footerCta = document.querySelector('.cta-section');
+  function onScroll(){
+    const heroBottom = hero.getBoundingClientRect().bottom;
+    const ctaTop = footerCta ? footerCta.getBoundingClientRect().top : 9999;
+    const wh = window.innerHeight;
+    if(heroBottom < 0 && ctaTop > wh){
+      cta.classList.add('visible');
+    } else {
+      cta.classList.remove('visible');
+    }
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+})();
+
+// ── FAQ Accordion ──
+document.querySelectorAll('.faq-q').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    const item = this.closest('.faq-item');
+    const ans  = item.querySelector('.faq-a');
+    const open = item.classList.contains('open');
+    // close all
+    document.querySelectorAll('.faq-item').forEach(function(el){
+      el.classList.remove('open');
+      el.querySelector('.faq-a').style.maxHeight = '0';
+    });
+    if(!open){
+      item.classList.add('open');
+      ans.style.maxHeight = ans.scrollHeight + 'px';
+    }
+  });
+});
+</script>
+
+</body>
+</html>
