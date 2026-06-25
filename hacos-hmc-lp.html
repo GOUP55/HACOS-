@@ -141,6 +141,27 @@ section { padding:72px 24px; }
 /* ── SCHEDULE ── */
 .schedule { background:var(--warm-white); }
 .time-flow { display:flex; align-items:flex-start; gap:0; margin:32px 0; overflow-x:auto; padding-bottom:8px; }
+/* プログラムカード：お休み */
+.program-card.closed {
+  border-left-color:var(--sand); opacity:.6; background:var(--sand-light);
+}
+.closed-label { font-size:15px; color:var(--mid); }
+/* TACOS Partyバナー */
+.tacos-banner {
+  background:linear-gradient(135deg,#8B2500,#C8400A);
+  border-radius:8px; padding:16px 18px; margin-top:8px;
+  border-left:3px solid #FF6B35;
+}
+.tacos-badge {
+  display:inline-block; background:rgba(255,255,255,.2); color:#FFD4B2;
+  font-size:10px; padding:2px 8px; border-radius:20px;
+  font-family:'DM Sans',sans-serif; margin-bottom:8px; letter-spacing:.08em;
+}
+.tacos-title { font-size:16px; color:#fff; margin-bottom:4px; }
+.tacos-detail { font-size:12px; color:rgba(255,255,255,.75); line-height:1.8; }
+.tacos-tag { display:inline-block; background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.3); color:#FFD4B2; font-size:10px; padding:2px 8px; border-radius:20px; font-family:'DM Sans',sans-serif; margin:4px 2px 0 0; }
+/* 朝RUN */
+.run-badge { display:inline-block; background:var(--forest); color:var(--cream); font-size:9px; padding:1px 7px; border-radius:20px; font-family:'DM Sans',sans-serif; margin-left:4px; vertical-align:middle; }
 .time-step { flex:1; min-width:80px; text-align:center; position:relative; }
 .time-step:not(:last-child)::after {
   content:''; position:absolute; top:14px; right:0; left:50%;
@@ -498,6 +519,11 @@ footer {
 
   <div class="time-flow">
     <div class="time-step">
+      <div class="time-dot" style="border-color:var(--forest-light);"><span></span></div>
+      <p class="time-label" style="color:var(--forest);">6:30</p>
+      <p class="time-desc">朝RUN🏃<br>（一部日程）</p>
+    </div>
+    <div class="time-step">
       <div class="time-dot"><span></span></div>
       <p class="time-label">7:00</p>
       <p class="time-desc">自由参加<br>（朝活・会話）</p>
@@ -527,6 +553,7 @@ footer {
 
   <div class="program-list">
 
+    <!-- 7/5 -->
     <div class="program-card">
       <div class="program-date-box">
         <p class="program-day-num">5</p>
@@ -534,29 +561,34 @@ footer {
       </div>
       <div class="program-info">
         <p class="program-fitness">セルフマッサージ＆ストレッチ</p>
-        <p class="program-food">🍱 フードメニュー近日公開</p>
+        <p class="program-food">🍱 ビビン麺と本格キンパ</p>
         <div class="program-trainers">
           <span class="trainer-chip">GO</span>
           <span class="trainer-chip">片山</span>
           <span class="trainer-chip">ちひろ</span>
+          <span class="trainer-chip">みどり（KITCHEN）</span>
         </div>
+        <p class="program-note">🏃 朝RUN 6:30〜あり</p>
       </div>
     </div>
 
+    <!-- 7/12 -->
     <div class="program-card">
       <div class="program-date-box">
         <p class="program-day-num">12</p>
         <p class="program-day-week">Sun</p>
       </div>
       <div class="program-info">
-        <p class="program-fitness">GOトレクラス（筋トレ）</p>
+        <p class="program-fitness">片山めぐみトレーナーの全身ワークアウト</p>
         <p class="program-food">🍱 フードメニュー近日公開</p>
         <div class="program-trainers">
-          <span class="trainer-chip">GO</span>
+          <span class="trainer-chip">片山めぐみ</span>
         </div>
+        <p class="program-note" style="color:var(--light-text);">※ 朝RUN 6:30〜は開催なし</p>
       </div>
     </div>
 
+    <!-- 7/19 -->
     <div class="program-card">
       <div class="program-date-box">
         <p class="program-day-num">19</p>
@@ -564,24 +596,42 @@ footer {
       </div>
       <div class="program-info">
         <p class="program-fitness">ピラティス</p>
-        <p class="program-food">🍱 フードメニュー近日公開</p>
+        <p class="program-food">🍱 ビーフストロガノフ</p>
         <div class="program-trainers">
           <span class="trainer-chip">ちひろ</span>
+          <span class="trainer-chip">ふみや（KITCHEN）</span>
         </div>
+        <p class="program-note">🏃 朝RUN 6:30〜あり</p>
       </div>
     </div>
+    <!-- TACOS Party（7/19 午後〜）-->
+    <div class="tacos-banner">
+      <span class="tacos-badge">同日開催 Special Event</span>
+      <p class="tacos-title">🌮 TACOS Party</p>
+      <p class="tacos-detail">
+        7月19日（日）12:00〜21:00<br>
+        タコス × サウナ × コーヒー × アルコール🍺
+      </p>
+      <div style="margin-top:8px;">
+        <span class="tacos-tag">🥤 アルコールあり</span>
+        <span class="tacos-tag">🧖 サウナ</span>
+        <span class="tacos-tag">☕ コーヒー</span>
+      </div>
+      <p style="font-size:11px;color:rgba(255,255,255,.55);margin-top:10px;line-height:1.6;">
+        ※ 駐車場はHACOS最大10台まで。お早めにどうぞ。<br>
+        詳細・予約はLINEでご確認ください。
+      </p>
+    </div>
 
-    <div class="program-card">
+    <!-- 7/26 お休み -->
+    <div class="program-card closed">
       <div class="program-date-box">
         <p class="program-day-num">26</p>
         <p class="program-day-week">Sun</p>
       </div>
       <div class="program-info">
-        <p class="program-fitness">ウェストシェイプ</p>
-        <p class="program-food">🍱 フードメニュー近日公開</p>
-        <div class="program-trainers">
-          <span class="trainer-chip">片山</span>
-        </div>
+        <p class="closed-label">🙏 本日はお休みです</p>
+        <p class="program-note" style="margin-top:6px;">スタッフ不在のためクローズ。また来週！</p>
       </div>
     </div>
 
@@ -654,18 +704,21 @@ footer {
       <p class="hnc-info-value">持込自由<br>（ビール・ハイボール等）</p>
     </div>
   </div>
-  <div class="hnc-event-card">
-    <p style="font-size:11px;color:var(--amber-light);font-family:'DM Sans',sans-serif;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;">Next Event</p>
-    <p class="hnc-event-title">次回のHNCは近日公開！</p>
+  <div class="hnc-event-card" style="background:linear-gradient(135deg,rgba(139,37,0,.35),rgba(200,64,10,.2));border-color:rgba(255,107,53,.35);">
+    <p style="font-size:11px;color:#FFD4B2;font-family:'DM Sans',sans-serif;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;">🌮 July Special — HNCの代わりに開催</p>
+    <p class="hnc-event-title" style="color:#FFD4B2;">TACOS Party</p>
     <p class="hnc-event-detail">
-      公式LINEで先行案内をお届けします。<br>
-      フォローして待っていてください🌙
+      7月19日（日）12:00〜21:00<br>
+      タコス × サウナ × コーヒー × アルコール🍺<br>
+      駐車場はHACOS最大10台。お早めにどうぞ。
     </p>
-    <p class="hnc-event-price">
-      フィットネス会員 ¥2,000 ／ ビジター ¥3,000<br>
-      食事参加 ¥4,000（ドリンク持込自由）
+    <p class="hnc-event-price" style="color:rgba(255,212,178,.7);">
+      詳細・予約は公式LINEにて案内中📩
     </p>
   </div>
+  <p style="font-size:12px;color:rgba(245,240,232,.4);margin-top:16px;line-height:1.7;">
+    ※ 通常のHNCは月によって開催形式が変わります。最新情報はLINEをご確認ください。
+  </p>
 </section>
 
 <!-- ═══ TRAINERS ═══ -->
@@ -834,14 +887,14 @@ footer {
       <p class="method-price-period">3ヶ月一括 ／ 分割相談可</p>
     </div>
 
-    <p class="method-capacity">📍 定員3名 ｜ 次期スタート：随時相談</p>
+    <p class="method-capacity">📍 定員3名 ｜ スタート：7月中〜随時（残席わずか）</p>
 
     <a href="https://lin.ee/T59MH4H" class="method-cta" target="_blank">
       LINEで無料相談する →
     </a>
     <p class="method-note">
-      既存パーソナル会員の方は現在の料金と差額でご参加いただけます。<br>
-      まずはLINEでご相談ください。
+      既存パーソナル会員の方は現在の料金との差額調整可能です。<br>
+      7月スタート枠は残りわずか。まずはLINEでご相談を。
     </p>
   </div>
 </section>
