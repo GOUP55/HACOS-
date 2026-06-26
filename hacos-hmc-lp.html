@@ -400,7 +400,27 @@ section { padding:72px 24px; }
   text-align:center; padding:16px; border-radius:6px; font-size:15px;
   font-family:'DM Sans',sans-serif; letter-spacing:.04em;
 }
+.method-cta.secondary {
+  background:transparent; border:1px solid rgba(245,240,232,.4);
+  color:var(--cream); margin-top:10px;
+}
 .method-note { font-size:11px; color:rgba(245,240,232,.4); text-align:center; margin-top:10px; line-height:1.6; }
+
+/* ── VOICES（お客様の声 / 社会的証明） ── */
+.voices { background:var(--cream); }
+.voices-note { font-size:12px; color:var(--light-text); margin-top:6px; }
+.voice-grid { display:flex; flex-direction:column; gap:14px; margin-top:24px; }
+.voice-card {
+  background:var(--warm-white); border:1px solid var(--sand);
+  border-radius:10px; padding:18px;
+}
+.voice-head { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+.voice-avatar { width:46px; height:46px; border-radius:50%; object-fit:cover; background:var(--sand-light); flex-shrink:0; }
+.voice-name { font-size:13px; font-weight:500; color:var(--dark); }
+.voice-meta { font-size:11px; color:var(--light-text); font-family:'DM Sans',sans-serif; }
+.voice-text { font-size:13px; color:var(--mid); line-height:1.85; }
+.voice-result { display:inline-block; margin-top:8px; background:var(--forest); color:var(--cream); font-size:11px; padding:3px 10px; border-radius:20px; font-family:'DM Sans',sans-serif; }
+.voices-cta { display:inline-block; margin-top:18px; color:var(--amber); font-size:13px; font-family:'DM Sans',sans-serif; text-decoration:none; }
 
 /* ── HOW TO JOIN ── */
 .how { background:var(--cream); }
@@ -970,6 +990,55 @@ footer {
   </div>
 </section>
 
+<!-- ═══ VOICES（お客様の声 / 社会的証明） ═══ -->
+<!-- ★要差し替え：実際の参加者の声に。①写真 ②名前/年代 ③コメント ④変化。掲載許可を取得のこと。下記はサンプル -->
+<section class="voices">
+  <p class="section-label">Voices</p>
+  <h2 class="section-title">参加者の<br><em>声</em></h2>
+  <div class="divider"></div>
+  <p class="voices-note">実際に朝が変わった人たちのリアルな声です。</p>
+  <div class="voice-grid">
+
+    <div class="voice-card">
+      <div class="voice-head">
+        <img class="voice-avatar" src="images/go.jpg" alt="" loading="lazy">
+        <div>
+          <p class="voice-name">A・Mさん（40代・会社員）</p>
+          <p class="voice-meta">HMC 参加3ヶ月</p>
+        </div>
+      </div>
+      <p class="voice-text">「日曜の朝が楽しみになりました。ひとりでは続かなかった運動も、仲間と一緒なら自然と続く。朝ごはんも本当においしいです。」</p>
+      <span class="voice-result">体重 -5kg（サンプル）</span>
+    </div>
+
+    <div class="voice-card">
+      <div class="voice-head">
+        <img class="voice-avatar" src="images/katayama.jpg" alt="" loading="lazy">
+        <div>
+          <p class="voice-name">K・Sさん（30代・自営業）</p>
+          <p class="voice-meta">HMC 参加半年</p>
+        </div>
+      </div>
+      <p class="voice-text">「運動・食事・人とのつながりが全部そろっているのがHACOSの魅力。一週間の始まりが整う感覚があります。」</p>
+      <span class="voice-result">体脂肪 -4%（サンプル）</span>
+    </div>
+
+    <div class="voice-card">
+      <div class="voice-head">
+        <img class="voice-avatar" src="images/midori.jpg" alt="" loading="lazy">
+        <div>
+          <p class="voice-name">Y・Tさん（50代・主婦）</p>
+          <p class="voice-meta">体験から継続中</p>
+        </div>
+      </div>
+      <p class="voice-text">「初心者でも全く問題ありませんでした。子連れでも温かく迎えてもらえて、毎週通うのが習慣になっています。」</p>
+      <span class="voice-result">継続6ヶ月（サンプル）</span>
+    </div>
+
+  </div>
+  <a href="https://www.instagram.com/hmc.day/" target="_blank" class="voices-cta">📷 もっと見る（Instagram） →</a>
+</section>
+
 <!-- ═══ FAQ ═══ -->
 <section class="faq">
   <p class="section-label">FAQ</p>
@@ -1074,7 +1143,10 @@ footer {
 
     <p class="method-capacity">📍 定員3名 ｜ スタート：7月中〜随時（残席わずか）</p>
 
-    <a href="https://lin.ee/TsRy6I9" class="method-cta" target="_blank">
+    <a href="premium.html" class="method-cta">
+      プレミアムの全貌を見る →
+    </a>
+    <a href="https://lin.ee/TsRy6I9" class="method-cta secondary" target="_blank">
       LINEで無料相談する →
     </a>
     <p class="method-note">

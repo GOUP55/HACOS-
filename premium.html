@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HACOS 3ヶ月プレミアムメソッド — 本気で変わりたいあなたへ</title>
+
+<!-- ═══ SEO / OGP META ═══ -->
+<meta name="description" content="運動×食事×コミュニティの三位一体。3ヶ月であなたを根本から変える、HACOSの集中プログラム。先着3名限定。まずはLINEで無料相談を。">
+<link rel="canonical" href="https://hmclife.netlify.app/premium.html">
+<meta property="og:title" content="HACOS 3ヶ月プレミアムメソッド">
+<meta property="og:description" content="運動×食事×コミュニティの三位一体。3ヶ月であなたを根本から変える集中プログラム。先着3名限定。">
+<meta property="og:image" content="https://hmclife.netlify.app/images/ogp.jpg">
+<meta property="og:url" content="https://hmclife.netlify.app/premium.html">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:site_name" content="HACOS × HMC">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Noto+Serif+JP:wght@300;400;500;600&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #F5F0E8;
+  --warm-white: #FAF8F4;
+  --forest: #3D5A3E;
+  --forest-light: #5A7A5C;
+  --amber: #C8833A;
+  --amber-light: #E8A85A;
+  --rust: #B85C38;
+  --sand: #D4C4A0;
+  --sand-light: #EAE0CC;
+  --dark: #1C1C1A;
+  --mid: #4A4840;
+  --light-text: #8A8478;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { font-family:'Noto Serif JP',serif; background:var(--warm-white); color:var(--dark); overflow-x:hidden; line-height:1.8; }
+img { max-width:100%; display:block; }
+
+/* ── BACK LINK ── */
+.back-link {
+  position:fixed; top:0; left:0; right:0; z-index:50;
+  background:rgba(28,28,26,.82); backdrop-filter:blur(6px);
+  padding:10px 20px; font-family:'DM Sans',sans-serif; font-size:12px;
+}
+.back-link a { color:var(--cream); text-decoration:none; opacity:.85; }
+
+/* ── STICKY CTA ── */
+.sticky-cta {
+  position:fixed; bottom:0; left:0; right:0; z-index:999;
+  background:var(--forest); padding:12px 20px;
+  display:flex; align-items:center; justify-content:space-between;
+  box-shadow:0 -2px 20px rgba(0,0,0,.25);
+}
+.sticky-cta .sticky-text { color:var(--cream); font-size:13px; line-height:1.4; }
+.sticky-cta .sticky-text strong { display:block; font-size:15px; }
+.sticky-cta a {
+  background:#06c755; color:#fff; text-decoration:none;
+  padding:10px 18px; border-radius:4px; font-size:13px;
+  font-family:'DM Sans',sans-serif; white-space:nowrap; flex-shrink:0; font-weight:600;
+}
+
+/* ── COMMONS ── */
+section { padding:64px 24px; }
+.label {
+  font-family:'DM Sans',sans-serif; font-size:10px; letter-spacing:.2em;
+  color:var(--amber); text-transform:uppercase; margin-bottom:12px;
+}
+.title {
+  font-family:'Cormorant Garamond',serif; font-size:clamp(28px,7.5vw,46px);
+  font-weight:300; line-height:1.2; margin-bottom:8px;
+}
+.title em { font-style:italic; color:var(--forest); }
+.divider { width:40px; height:1px; background:var(--amber); margin:18px 0; }
+.lead { font-size:14px; color:var(--mid); line-height:1.95; }
+.placeholder {
+  border:1px dashed var(--amber); background:rgba(200,131,58,.06);
+  border-radius:8px; padding:14px 16px; margin:10px 0;
+  font-family:'DM Sans',sans-serif; font-size:12px; color:var(--rust); line-height:1.7;
+}
+
+/* ── HERO ── */
+.p-hero {
+  min-height:92svh; background:var(--dark); position:relative;
+  display:flex; flex-direction:column; justify-content:flex-end; overflow:hidden;
+}
+.p-hero-bg {
+  position:absolute; inset:0;
+  background-image:
+    linear-gradient(to top,rgba(20,18,10,.94) 0%,rgba(28,24,12,.55) 45%,rgba(40,34,14,.35) 100%),
+    url('images/studio-class-new.jpg');
+  background-size:cover; background-position:center 30%;
+}
+.p-hero-inner { position:relative; z-index:2; padding:0 24px 64px; display:flex; flex-direction:column; gap:18px; }
+.p-eyebrow { font-family:'DM Sans',sans-serif; font-size:11px; letter-spacing:.18em; color:var(--amber-light); text-transform:uppercase; }
+.p-hero h1 { font-family:'Cormorant Garamond',serif; font-weight:300; color:var(--cream); font-size:clamp(34px,9vw,60px); line-height:1.15; }
+.p-hero h1 em { font-style:italic; color:var(--amber-light); }
+.p-hero-sub { font-size:14px; color:rgba(245,240,232,.78); line-height:1.9; border-left:2px solid var(--amber); padding-left:14px; }
+.p-badges { display:flex; flex-wrap:wrap; gap:8px; }
+.p-badge { background:rgba(200,131,58,.18); border:1px solid rgba(200,131,58,.45); color:var(--amber-light); font-size:11px; padding:5px 12px; border-radius:20px; font-family:'DM Sans',sans-serif; }
+
+/* ── CTA BUTTONS ── */
+.cta-line {
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  background:#06c755; color:#fff; text-decoration:none; font-weight:600;
+  font-family:'DM Sans',sans-serif; font-size:15px; padding:16px 24px;
+  border-radius:6px; letter-spacing:.03em;
+}
+.cta-sub { text-align:center; font-size:11px; color:var(--light-text); font-family:'DM Sans',sans-serif; margin-top:8px; }
+
+/* ── EMPATHY ── */
+.empathy { background:var(--cream); }
+.empathy ul { list-style:none; margin-top:20px; display:flex; flex-direction:column; gap:12px; }
+.empathy li { background:var(--warm-white); border:1px solid var(--sand); border-radius:8px; padding:14px 16px; font-size:14px; color:var(--mid); }
+.empathy li::before { content:"✓ "; color:var(--amber); font-weight:600; }
+
+/* ── WHY (三位一体) ── */
+.why { background:var(--forest); color:var(--cream); }
+.why .title { color:var(--cream); }
+.why .title em { color:var(--amber-light); }
+.trinity { display:grid; gap:12px; margin-top:24px; }
+.trinity-card { background:rgba(255,255,255,.06); border:1px solid rgba(245,240,232,.15); border-radius:8px; padding:18px; }
+.trinity-card h3 { font-family:'DM Sans',sans-serif; font-size:13px; letter-spacing:.1em; color:var(--amber-light); text-transform:uppercase; margin-bottom:6px; }
+.trinity-card p { font-size:13px; color:rgba(245,240,232,.78); }
+
+/* ── INCLUDES ── */
+.includes { background:var(--warm-white); }
+.inc-list { margin-top:22px; display:flex; flex-direction:column; gap:10px; }
+.inc-item { display:flex; gap:12px; align-items:flex-start; background:var(--cream); border-radius:8px; padding:14px 16px; }
+.inc-item .ico { font-size:20px; line-height:1; flex-shrink:0; }
+.inc-item .ic-body strong { display:block; font-size:14px; color:var(--dark); margin-bottom:2px; }
+.inc-item .ic-body span { font-size:12px; color:var(--light-text); line-height:1.7; }
+
+/* ── VOICES ── */
+.voices { background:var(--cream); }
+.voice-card { background:var(--warm-white); border:1px solid var(--sand); border-radius:10px; padding:18px; margin-top:14px; }
+.voice-head { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+.voice-avatar { width:48px; height:48px; border-radius:50%; object-fit:cover; background:var(--sand-light); flex-shrink:0; }
+.voice-name { font-size:13px; font-weight:500; }
+.voice-meta { font-size:11px; color:var(--light-text); font-family:'DM Sans',sans-serif; }
+.voice-text { font-size:13px; color:var(--mid); line-height:1.85; }
+.voice-result { display:inline-block; margin-top:8px; background:var(--forest); color:var(--cream); font-size:11px; padding:3px 10px; border-radius:20px; font-family:'DM Sans',sans-serif; }
+
+/* ── STORY ── */
+.story { background:var(--dark); color:var(--cream); }
+.story .title { color:var(--cream); }
+.story .lead { color:rgba(245,240,232,.78); }
+.story-photo { width:100%; border-radius:10px; margin:18px 0; aspect-ratio:4/3; object-fit:cover; object-position:center 20%; }
+
+/* ── PRICE ── */
+.price { background:var(--warm-white); }
+.price-box { background:var(--forest); color:var(--cream); border-radius:12px; padding:28px 22px; margin-top:20px; text-align:center; }
+.price-tag { display:inline-block; background:var(--rust); color:#fff; font-size:11px; font-family:'DM Sans',sans-serif; padding:4px 12px; border-radius:20px; margin-bottom:14px; letter-spacing:.05em; }
+.price-old { font-size:14px; color:rgba(245,240,232,.55); text-decoration:line-through; }
+.price-new { font-family:'Cormorant Garamond',serif; font-size:54px; font-weight:300; color:var(--amber-light); line-height:1.1; }
+.price-period { font-size:12px; color:rgba(245,240,232,.7); font-family:'DM Sans',sans-serif; margin-top:4px; }
+.value-table { margin-top:22px; border:1px solid var(--sand); border-radius:8px; overflow:hidden; }
+.value-row { display:flex; justify-content:space-between; padding:12px 16px; font-size:13px; border-bottom:1px solid var(--sand-light); }
+.value-row:last-child { border-bottom:none; background:var(--cream); font-weight:600; }
+.value-row span:last-child { color:var(--forest); font-family:'DM Sans',sans-serif; }
+
+/* ── GUARANTEE ── */
+.guarantee { background:var(--cream); }
+.guarantee-card { background:var(--warm-white); border:2px solid var(--forest); border-radius:12px; padding:24px; margin-top:18px; text-align:center; }
+.guarantee-card .seal { font-size:40px; }
+.guarantee-card h3 { font-family:'Cormorant Garamond',serif; font-weight:400; font-size:24px; margin:8px 0; color:var(--forest); }
+
+/* ── FAQ ── */
+.faq { background:var(--warm-white); }
+.faq-item { border-bottom:1px solid var(--sand); }
+.faq-q { width:100%; text-align:left; background:none; border:none; padding:16px 0; font-family:'Noto Serif JP',serif; font-size:14px; color:var(--dark); cursor:pointer; display:flex; justify-content:space-between; gap:12px; }
+.faq-q::after { content:"+"; color:var(--amber); }
+.faq-item.open .faq-q::after { content:"−"; }
+.faq-a { max-height:0; overflow:hidden; transition:max-height .3s ease; }
+.faq-a-inner { padding:0 0 16px; font-size:13px; color:var(--mid); line-height:1.85; }
+
+/* ── FINAL CTA ── */
+.final { background:var(--forest); color:var(--cream); text-align:center; }
+.final .title { color:var(--cream); }
+.final .title em { color:var(--amber-light); }
+.urgency { display:inline-block; background:var(--rust); color:#fff; font-size:12px; font-family:'DM Sans',sans-serif; padding:6px 16px; border-radius:20px; margin-bottom:18px; }
+.steps3 { display:flex; flex-direction:column; gap:10px; margin:20px 0; text-align:left; }
+.steps3 .s { background:rgba(255,255,255,.06); border:1px solid rgba(245,240,232,.15); border-radius:8px; padding:12px 16px; font-size:13px; }
+.steps3 .s b { color:var(--amber-light); font-family:'DM Sans',sans-serif; }
+
+footer { background:var(--dark); color:rgba(245,240,232,.6); text-align:center; padding:32px 24px; font-size:11px; font-family:'DM Sans',sans-serif; }
+footer a { color:var(--amber-light); text-decoration:none; }
+</style>
+</head>
+<body>
+
+<div class="back-link"><a href="index.html">← HMC トップに戻る</a></div>
+
+<!-- ═══ 1. HERO ═══ -->
+<section class="p-hero">
+  <div class="p-hero-bg"></div>
+  <div class="p-hero-inner">
+    <p class="p-eyebrow">HACOS Premium Method — 3 Months</p>
+    <h1>3ヶ月で、<br><em>根本から変わる。</em></h1>
+    <p class="p-hero-sub">
+      運動 × 食事 × コミュニティ。<br>
+      ひとりでは続かなかったあなたを、<br>
+      HACOSがまるごと伴走します。
+    </p>
+    <div class="p-badges">
+      <span class="p-badge">先着3名限定</span>
+      <span class="p-badge">月8回パーソナル</span>
+      <span class="p-badge">食サポート付き</span>
+    </div>
+    <a href="https://lin.ee/TsRy6I9" class="cta-line" target="_blank">LINEで無料相談する →</a>
+    <p class="cta-sub" style="color:rgba(245,240,232,.5);">まずは話を聞くだけでもOK・勧誘なし</p>
+  </div>
+</section>
+
+<!-- ═══ 2. 共感（こんな悩み） ═══ -->
+<section class="empathy">
+  <p class="label">Why you're here</p>
+  <h2 class="title">こんな悩み、<br><em>ありませんか。</em></h2>
+  <div class="divider"></div>
+  <ul>
+    <li>ジムに入会しても、結局ひとりだと続かない</li>
+    <li>運動はしているけど、食事が合っているのか分からない</li>
+    <li>自己流でやってきたが、思うように結果が出ない</li>
+    <li>今度こそ、3ヶ月で「変わった」と言える自分になりたい</li>
+  </ul>
+  <p class="lead" style="margin-top:18px;">
+    ひとつでも当てはまったなら、このプログラムはあなたのためのものです。
+  </p>
+</section>
+
+<!-- ═══ 3. なぜ変われるか（三位一体） ═══ -->
+<section class="why">
+  <p class="label" style="color:var(--amber-light);">The HACOS Way</p>
+  <h2 class="title">なぜ、<br><em>変われるのか。</em></h2>
+  <div class="divider"></div>
+  <p class="lead" style="color:rgba(245,240,232,.8);">
+    続かない原因は「意志の弱さ」ではありません。運動・食事・環境のどれかが欠けているからです。HACOSは3つを同時に設計します。
+  </p>
+  <div class="trinity">
+    <div class="trinity-card">
+      <h3>Move — 動く</h3>
+      <p>週2回のマンツーマンパーソナル。あなたの体に合わせて、プロが設計・伴走します。</p>
+    </div>
+    <div class="trinity-card">
+      <h3>Eat — 食べる</h3>
+      <p>HACOS KITCHENの食サポート。毎週の弁当＋栄養指導で「何を食べるか」に迷わない。</p>
+    </div>
+    <div class="trinity-card">
+      <h3>Connect — つながる</h3>
+      <p>毎週日曜のHMCで仲間と会う。ひとりじゃないから、3ヶ月続けられる。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 4. 含まれるもの ═══ -->
+<section class="includes">
+  <p class="label">What's included</p>
+  <h2 class="title">3ヶ月に、<br><em>すべてを。</em></h2>
+  <div class="divider"></div>
+  <div class="inc-list">
+    <div class="inc-item"><span class="ico">🏋️</span><div class="ic-body"><strong>パーソナルトレーニング 月8回（週2ペース）</strong><span>マンツーマンで、あなただけのプログラムを。</span></div></div>
+    <div class="inc-item"><span class="ico">🌅</span><div class="ic-body"><strong>HMC 毎週参加（日曜 AM7:30〜）</strong><span>仲間と続ける朝活コミュニティ。</span></div></div>
+    <div class="inc-item"><span class="ico">🍱</span><div class="ic-body"><strong>HACOS KITCHEN 食サポート</strong><span>毎週の弁当＋栄養指導で食事を最適化。</span></div></div>
+    <div class="inc-item"><span class="ico">📊</span><div class="ic-body"><strong>体組成測定＋月次フィードバックレポート</strong><span>数値で変化を可視化。迷わず進める。</span></div></div>
+    <div class="inc-item"><span class="ico">💬</span><div class="ic-body"><strong>GOのLINE個別サポート（毎週）</strong><span>いつでも相談できる安心感。</span></div></div>
+    <div class="inc-item"><span class="ico">🧪</span><div class="ic-body"><strong>発酵食ワークショップ（月1回）</strong><span>一生モノの食の知識が身につく。</span></div></div>
+  </div>
+</section>
+
+<!-- ═══ 5. お客様の声（要素材：差し替え） ═══ -->
+<section class="voices">
+  <p class="label">Voices</p>
+  <h2 class="title">変わった人たちの、<br><em>声。</em></h2>
+  <div class="divider"></div>
+  <div class="placeholder">
+    📷 要差し替え：実際の参加者の声を 2〜4件。①顔写真（or イニシャルアバター） ②お名前/年代/職業 ③コメント ④変化（数値があれば「-8kg / 3ヶ月」等）。掲載許可も忘れずに。下記はサンプル文です。
+  </div>
+  <div class="voice-card">
+    <div class="voice-head">
+      <img class="voice-avatar" src="images/go.jpg" alt="" loading="lazy">
+      <div><p class="voice-name">A・Mさん（40代・会社員）</p><p class="voice-meta">3ヶ月プレミアム受講</p></div>
+    </div>
+    <p class="voice-text">「ひとりでは何度も挫折しましたが、GOさんと仲間がいたから続けられました。食事まで見てもらえたのが大きかったです。」</p>
+    <span class="voice-result">-8kg / 3ヶ月（サンプル）</span>
+  </div>
+  <div class="voice-card">
+    <div class="voice-head">
+      <img class="voice-avatar" src="images/katayama.jpg" alt="" loading="lazy">
+      <div><p class="voice-name">K・Sさん（30代・自営業）</p><p class="voice-meta">3ヶ月プレミアム受講</p></div>
+    </div>
+    <p class="voice-text">「数値で変化が見えるので、モチベーションが切れませんでした。朝が変わると一日が変わる、を実感しています。」</p>
+    <span class="voice-result">体脂肪 -6%（サンプル）</span>
+  </div>
+</section>
+
+<!-- ═══ 6. GOのストーリー（要素材：差し替え） ═══ -->
+<section class="story">
+  <p class="label" style="color:var(--amber-light);">Founder's Story</p>
+  <h2 class="title">なぜ、この<br><em>プログラムを。</em></h2>
+  <div class="divider"></div>
+  <img class="story-photo" src="images/go.jpg" alt="GO / HACOS オーナー" loading="lazy">
+  <div class="placeholder">
+    ✍️ 要差し替え：GOさんの経歴・想いを 200〜400字で。「なぜHACOSを作ったか」「運動だけでなく食・つながりにこだわる理由」「このプログラムで何を約束したいか」。信頼の核になる最重要パートです。
+  </div>
+  <p class="lead">
+    （サンプル）私自身、運動も食事もバラバラに頑張って遠回りをしてきました。だからこそ、3つを同時に設計し、仲間と続けられる場所を作りたかった。3ヶ月後、あなたが「変われた」と笑えるように、全力で伴走します。— GO
+  </p>
+</section>
+
+<!-- ═══ 7. 料金と価値 ═══ -->
+<section class="price">
+  <p class="label">Investment</p>
+  <h2 class="title">価格以上の、<br><em>価値を。</em></h2>
+  <div class="divider"></div>
+  <div class="price-box">
+    <span class="price-tag">先着3名限定</span>
+    <p class="price-old">通常 ¥350,000（3ヶ月）</p>
+    <p class="price-new">¥300,000</p>
+    <p class="price-period">3ヶ月一括 ／ 分割相談可</p>
+  </div>
+  <div class="value-table">
+    <div class="value-row"><span>パーソナル 月8回 ×3ヶ月（計24回）</span><span>相当 ¥168,000〜</span></div>
+    <div class="value-row"><span>食サポート（弁当＋栄養指導）</span><span>相当 ¥60,000〜</span></div>
+    <div class="value-row"><span>体組成測定・月次レポート・LINEサポート</span><span>相当 ¥40,000〜</span></div>
+    <div class="value-row"><span>発酵食ワークショップ ×3</span><span>相当 ¥30,000〜</span></div>
+    <div class="value-row"><span>3ヶ月パッケージ価格</span><span>¥300,000</span></div>
+  </div>
+  <div class="placeholder">
+    💰 要確認：上記の「相当額」は仮置きです。実際の単価に合わせて調整します。分割の具体条件（回数・1回あたり金額・手数料有無）もご指定ください。
+  </div>
+</section>
+
+<!-- ═══ 8. 保証 / リスクリバーサル（要方針） ═══ -->
+<section class="guarantee">
+  <p class="label">Our Promise</p>
+  <h2 class="title">あなたの一歩を、<br><em>守ります。</em></h2>
+  <div class="divider"></div>
+  <div class="guarantee-card">
+    <div class="seal">🤝</div>
+    <h3>安心の個別調整</h3>
+    <p class="lead">既存パーソナル会員の方は、現在の料金との差額調整が可能です。まずはLINEで、あなたに合った形をご相談ください。</p>
+  </div>
+  <div class="placeholder">
+    🛡️ 要方針：返金保証や「合わなければ◯日以内全額返金」などのリスクリバーサルを設けると高額成約率が上がります。可否と条件をご相談ください（無理に設けなくてもOK）。
+  </div>
+</section>
+
+<!-- ═══ 9. FAQ ═══ -->
+<section class="faq">
+  <p class="label">FAQ</p>
+  <h2 class="title">よくある<br><em>質問。</em></h2>
+  <div class="divider"></div>
+  <div class="faq-item"><button class="faq-q">運動初心者でも大丈夫ですか？</button><div class="faq-a"><div class="faq-a-inner">はい。あなたの体力・目標に合わせてプロが設計するので、初心者の方こそ伴走の価値があります。</div></div></div>
+  <div class="faq-item"><button class="faq-q">分割払いはできますか？</button><div class="faq-a"><div class="faq-a-inner">ご相談いただけます。具体的な条件はLINEの無料相談でご案内します。</div></div></div>
+  <div class="faq-item"><button class="faq-q">今パーソナルに通っています。参加できますか？</button><div class="faq-a"><div class="faq-a-inner">もちろん可能です。既存会員さまは現在の料金との差額調整ができます。</div></div></div>
+  <div class="faq-item"><button class="faq-q">3ヶ月でどのくらい変わりますか？</button><div class="faq-a"><div class="faq-a-inner">目標により異なります。無料相談で現状をうかがい、現実的なゴールを一緒に設定します。</div></div></div>
+  <div class="faq-item"><button class="faq-q">まず話だけ聞くことはできますか？</button><div class="faq-a"><div class="faq-a-inner">はい。LINEの無料相談は、話を聞くだけでもOK。無理な勧誘は一切ありません。</div></div></div>
+</section>
+
+<!-- ═══ 10-11. 最終CTA + 限定性 ═══ -->
+<section class="final">
+  <span class="urgency">📍 定員3名 ｜ 7月スタート枠 残りわずか</span>
+  <h2 class="title">次に変わるのは、<br><em>あなたです。</em></h2>
+  <div class="divider" style="margin-left:auto;margin-right:auto;"></div>
+  <div class="steps3">
+    <div class="s"><b>STEP 1</b>　LINEで無料相談（話を聞くだけでもOK）</div>
+    <div class="s"><b>STEP 2</b>　ヒアリングで現状と目標を整理</div>
+    <div class="s"><b>STEP 3</b>　納得したらスタート（分割相談可）</div>
+  </div>
+  <a href="https://lin.ee/TsRy6I9" class="cta-line" target="_blank">LINEで無料相談する →</a>
+  <p class="cta-sub" style="color:rgba(245,240,232,.55);">勧誘なし・あなたのペースで</p>
+</section>
+
+<footer>
+  <p>HACOS × HMC — Healthy Morning Club / 観音寺</p>
+  <p style="margin-top:8px;"><a href="index.html">← HMC トップへ</a> ｜ <a href="https://www.instagram.com/hmc.day/" target="_blank">Instagram</a></p>
+  <p style="margin-top:12px;">© 2025 HACOS LIFESTYLES. All rights reserved.</p>
+</footer>
+
+<!-- ═══ STICKY CTA ═══ -->
+<div class="sticky-cta">
+  <div class="sticky-text">
+    <strong>3ヶ月プレミアムメソッド</strong>
+    先着3名 ・ まずは無料相談
+  </div>
+  <a href="https://lin.ee/TsRy6I9" target="_blank">無料相談 →</a>
+</div>
+
+<script>
+document.querySelectorAll('.faq-q').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var item=this.closest('.faq-item'), ans=item.querySelector('.faq-a'), open=item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(function(el){ el.classList.remove('open'); el.querySelector('.faq-a').style.maxHeight='0'; });
+    if(!open){ item.classList.add('open'); ans.style.maxHeight=ans.scrollHeight+'px'; }
+  });
+});
+</script>
+
+</body>
+</html>
