@@ -413,6 +413,17 @@ section { padding:72px 24px; }
 }
 .cta-line-icon { width:32px; height:32px; background:#06c755; border-radius:8px; display:flex; align-items:center; justify-content:center; }
 
+/* ── RESERVATION FORM EMBED ── */
+.reservation-form { background:var(--cream); }
+.form-embed-wrap {
+  margin-top:24px; border-radius:8px; overflow:hidden;
+  background:#fff; box-shadow:0 2px 16px rgba(0,0,0,.08);
+}
+.form-embed-wrap iframe {
+  display:block; width:100%; min-height:720px;
+  border:none; border-radius:8px;
+}
+
 /* ── FOOTER ── */
 footer {
   background:var(--dark); padding:40px 24px; text-align:center;
@@ -648,6 +659,24 @@ footer {
     ドリンク：コーヒー ¥200 ／ ハーブウォーター・コーン茶 無料<br>
     弁当のご注文は前日までに。¥1,200〜1,300
   </p>
+</section>
+
+<!-- ═══ RESERVATION FORM ═══ -->
+<section class="reservation-form" id="reservation">
+  <p class="section-label">Reservation</p>
+  <h2 class="section-title">今すぐ<br><em>予約する</em></h2>
+  <div class="divider"></div>
+  <p class="section-body">
+    7月のプログラムに参加申込できます。<br>
+    初回体験 ¥3,500 ｜ 無料相談あり
+  </p>
+  <div class="form-embed-wrap">
+    <iframe
+      src="https://docs.google.com/forms/d/1f4iV9T_oQFJ1uh8tSXPMb3aQZWgXtaBsYPBGiKB1LVU/viewform?embedded=true"
+      title="HMC 予約フォーム"
+      loading="lazy"
+    >読み込んでいます…</iframe>
+  </div>
 </section>
 
 <!-- ═══ WEEKLY CLASS ═══ -->
