@@ -1,22 +1,36 @@
-import base64, re, os
+"""hacos-hmc-lp.html → index.html を生成する。
 
-html = open('hacos-hmc-lp.html', encoding='utf-8').read()
-refs = set(re.findall(r"(?:url\(['\"]?|src=['\"])images/([^'\")]+)", html))
-mime = {'webp':'image/webp','jpg':'image/jpeg','jpeg':'image/jpeg','png':'image/png'}
-skip_ext = {'mp4','mov','webm','avi'}
+【方針変更（構造改善③：base64脱却）】
+以前は画像を base64 で index.html に埋め込んでいたため、HTMLが約12MBに肥大し、
+モバイル初速が遅く、ブラウザキャッシュも効かなかった。
 
+現在は画像を base64 化せず、`images/xxx.jpg` のパス参照のまま残す。
+→ index.html は約55KBに激減。画像は images/ ごと Netlify にデプロイされ、
+   個別にキャッシュ＆並列ロードされる（loading="lazy" で遅延読み込みも有効）。
+
+Netlify の公開ファイルは従来どおり index.html。images/ フォルダも一緒に
+push すればパス参照で表示される。
+"""
+import re
+import os
+
+SRC = 'hacos-hmc-lp.html'
+DST = 'index.html'
+
+html = open(SRC, encoding='utf-8').read()
+
+# 参照されている素材の存在チェック（欠損を早期に警告）
+refs = sorted(set(re.findall(r"(?:url\(['\"]?|src=['\"])images/([^'\")]+)", html)))
+missing = [fn for fn in refs if not os.path.exists(f'images/{fn}')]
 for fn in refs:
-    path = f'images/{fn}'
-    if not os.path.exists(path):
-        print(f'[SKIP] {fn} not found')
-        continue
-    ext = fn.rsplit('.',1)[-1].lower()
-    if ext in skip_ext:
-        print(f'[SKIP] {fn} (video – kept as path)')
-        continue
-    b64 = base64.b64encode(open(path,'rb').read()).decode()
-    html = html.replace(f"images/{fn}", f"data:{mime[ext]};base64,{b64}")
-    print(f'[OK]   {fn}')
+    mark = '✗ NOT FOUND' if fn in missing else '✓'
+    print(f'  {mark}  images/{fn}')
 
-open('index.html','w', encoding='utf-8').write(html)
-print('\n✅ index.html を生成しました。Netlifyにアップしてください。')
+# 画像はパス参照のまま。index.html は実質コピー（パスは images/ を維持）。
+open(DST, 'w', encoding='utf-8').write(html)
+
+kb = os.path.getsize(DST) / 1024
+print(f'\n✅ {DST} を生成しました（{kb:.0f} KB）。')
+print('   images/ フォルダごと git push して Netlify にデプロイしてください。')
+if missing:
+    print(f'\n⚠️  {len(missing)} 件の画像が見つかりません: {missing}')
