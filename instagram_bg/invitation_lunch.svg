@@ -1,0 +1,87 @@
+<svg viewBox="0 0 1080 1080" width="1080" height="1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0%" stop-color="#FAF7F1"/>
+      <stop offset="100%" stop-color="#EDE5D4"/>
+    </linearGradient>
+    <linearGradient id="menuBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1A1A1A" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#1A1A1A" stop-opacity="0.07"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1080" height="1080" fill="url(#bg)"/>
+
+  <!-- Outer border -->
+  <rect x="40" y="40" width="1000" height="1000" fill="none" stroke="#C8A96E" stroke-width="1" opacity="0.5"/>
+  <rect x="54" y="54" width="972" height="972" fill="none" stroke="#C8A96E" stroke-width="0.4" opacity="0.25"/>
+
+  <!-- Corner ornaments -->
+  <g stroke="#C8A96E" stroke-width="1.2" fill="none" opacity="0.7">
+    <path d="M 40 100 L 40 40 L 100 40"/>
+    <path d="M 980 40 L 1040 40 L 1040 100"/>
+    <path d="M 40 980 L 40 1040 L 100 1040"/>
+    <path d="M 1040 980 L 1040 1040 L 980 1040"/>
+  </g>
+
+  <!-- Top label: HACOS -->
+  <text x="540" y="118" font-family="DejaVu Sans, sans-serif" font-size="15" fill="#C8A96E" text-anchor="middle" letter-spacing="10" opacity="0.8">H A C O S</text>
+
+  <!-- Invitation headline -->
+  <text x="540" y="188" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="20" fill="#888" text-anchor="middle" letter-spacing="6">— ご招待 —</text>
+
+  <!-- Event title -->
+  <text x="540" y="272" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="52" font-weight="bold" fill="#1A1A1A" text-anchor="middle">Special Lunch</text>
+
+  <!-- Date bar -->
+  <rect x="200" y="300" width="680" height="58" rx="4" fill="#1A1A1A" opacity="0.88"/>
+  <text x="540" y="338" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="26" fill="#C8A96E" text-anchor="middle" letter-spacing="2">5月18日（月）11:00 〜 15:00</text>
+
+  <!-- Divider -->
+  <line x1="200" y1="386" x2="460" y2="386" stroke="#C8A96E" stroke-width="0.8" opacity="0.4"/>
+  <polygon points="540,376 552,386 540,396 528,386" fill="#C8A96E" opacity="0.6"/>
+  <line x1="620" y1="386" x2="880" y2="386" stroke="#C8A96E" stroke-width="0.8" opacity="0.4"/>
+
+  <!-- Concept line -->
+  <text x="540" y="428" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="22" fill="#666" text-anchor="middle">健康より、美味しく。いい時間を一緒に。</text>
+
+  <!-- Menu block -->
+  <rect x="100" y="458" width="880" height="386" rx="6" fill="url(#menuBg)" stroke="#C8A96E" stroke-width="0.6" stroke-opacity="0.25"/>
+
+  <text x="540" y="497" font-family="DejaVu Sans, sans-serif" font-size="14" fill="#C8A96E" text-anchor="middle" letter-spacing="6" opacity="0.8">M E N U</text>
+  <line x1="280" y1="508" x2="800" y2="508" stroke="#C8A96E" stroke-width="0.5" opacity="0.25"/>
+
+  <!-- Menu items — 2 columns -->
+  <g font-family="IPAGothic, IPAゴシック, sans-serif" font-size="19" fill="#333">
+    <!-- Left column -->
+    <text x="148" y="548">・ほうれん草とじゃがいものフリッタータ</text>
+    <text x="148" y="580">・茄子とトマトの軽い煮込み</text>
+    <text x="148" y="612">・ズッキーニのスカペーチェ（マリネ）</text>
+    <text x="148" y="644">・南瓜のスカペーチェ（マリネ）</text>
+    <text x="148" y="676">・茄子のパルミジャーナ</text>
+    <!-- Right column -->
+    <text x="148" y="716">・フルーツトマトとハーブのクスクス</text>
+    <text x="148" y="748">・白インゲン豆とキャベツのズッパ</text>
+    <text x="148" y="780">・トマトと生ハムのブルスケッタ</text>
+    <text x="148" y="812">・生ハム・サラミ・チーズ盛り合わせ</text>
+  </g>
+
+  <!-- Highlight dish -->
+  <rect x="118" y="824" width="844" height="48" rx="3" fill="#C8A96E" fill-opacity="0.12" stroke="#C8A96E" stroke-width="0.6" stroke-opacity="0.3"/>
+  <text x="540" y="854" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="20" font-weight="bold" fill="#1A1A1A" text-anchor="middle">🔥  オリーブ豚の低温調理　炭火仕上げ  🔥</text>
+
+  <!-- Drinks -->
+  <text x="540" y="886" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="18" fill="#888" text-anchor="middle">🍺 ビール　🥃 ハイボール　🍋 レモンサワー</text>
+
+  <!-- Price & reservation -->
+  <line x1="200" y1="910" x2="880" y2="910" stroke="#C8A96E" stroke-width="0.7" opacity="0.3"/>
+
+  <text x="400" y="952" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="30" font-weight="bold" fill="#1A1A1A" text-anchor="middle">会費 ¥5,000</text>
+  <line x1="530" y1="930" x2="530" y2="970" stroke="#C8A96E" stroke-width="0.8" opacity="0.4"/>
+  <text x="720" y="943" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="19" fill="#666" text-anchor="middle">食事・お酒込み</text>
+  <text x="720" y="967" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="19" fill="#666" text-anchor="middle">完全予約制・人数限定</text>
+
+  <!-- Bottom CTA -->
+  <text x="540" y="1018" font-family="IPAGothic, IPAゴシック, sans-serif" font-size="20" fill="#C8A96E" text-anchor="middle" opacity="0.85">ご予約はプロフィールのリンクから</text>
+</svg>
