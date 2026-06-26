@@ -47,6 +47,26 @@
 }
 </script>
 
+<!-- ═══ 計測タグ（GA4 / Meta Pixel）═══
+     測定IDをいただければ下記コメントを外して有効化します。
+     GA4: G-XXXXXXXXXX ／ Meta Pixel: 0000000000000000
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXXXXX');
+</script>
+<script>
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+  document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init','0000000000000000');fbq('track','PageView');
+</script>
+     ═══ ここまで計測タグ ═══ -->
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Noto+Serif+JP:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
@@ -1134,7 +1154,7 @@ footer {
       プレミアムの全貌を見る →
     </a>
     <a href="https://lin.ee/TsRy6I9" class="method-cta secondary" target="_blank">
-      LINEで無料相談する →
+      無料カウンセリングを予約する →
     </a>
     <p class="method-note">
       既存パーソナル会員の方は現在の料金との差額調整可能です。<br>
