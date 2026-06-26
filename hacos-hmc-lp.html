@@ -272,7 +272,7 @@ section { padding:72px 24px; }
 .trainer-role { font-size:11px; color:var(--amber); font-family:'DM Sans',sans-serif; letter-spacing:.08em; margin-bottom:6px; }
 .trainer-bio { font-size:11px; color:var(--light-text); line-height:1.7; }
 .trainer-kitchen { grid-column:1/-1; }
-.trainer-kitchen .trainer-photo { aspect-ratio:16/9; object-fit:cover; }
+.trainer-kitchen .trainer-photo { aspect-ratio:16/9; object-fit:contain; background:var(--warm-white); }
 
 /* ── FOOD ── */
 .food { background:var(--warm-white); }
@@ -581,6 +581,7 @@ footer {
         <p class="program-food">🍱 カオマンガイ（担当：ふみや）</p>
         <div class="program-trainers">
           <span class="trainer-chip">片山めぐみ</span>
+          <span class="trainer-chip">ふみや（KITCHEN）</span>
         </div>
         <p class="program-note" style="color:var(--light-text);">※ 朝RUN 6:30〜は開催なし</p>
       </div>
@@ -742,7 +743,7 @@ footer {
     </div>
 
     <div class="trainer-card">
-      <img src="images/fumiya.jpg" alt="加藤ふみや" class="trainer-photo" style="object-position:38% 16%;">
+      <img src="images/fumiya.jpg" alt="加藤ふみや" class="trainer-photo" style="object-position:center 15%;">
       <div class="trainer-body">
         <p class="trainer-name">加藤ふみや</p>
         <p class="trainer-role">Trainer</p>
@@ -751,7 +752,7 @@ footer {
     </div>
 
     <div class="trainer-card trainer-kitchen">
-      <img src="images/hacos-zebra.jpg" alt="HACOS KITCHEN" class="trainer-photo">
+      <img src="images/hacos-kitchen-logo.png" alt="HACOS KITCHEN" class="trainer-photo">
       <div class="trainer-body">
         <p class="trainer-name">HACOS KITCHEN</p>
         <p class="trainer-role">Food</p>
