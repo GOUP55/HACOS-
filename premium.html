@@ -144,6 +144,18 @@ section { padding:64px 24px; }
 .voice-text { font-size:13px; color:var(--mid); line-height:1.85; }
 .voice-result { display:inline-block; margin-top:8px; background:var(--forest); color:var(--cream); font-size:11px; padding:3px 10px; border-radius:20px; font-family:'DM Sans',sans-serif; }
 
+/* ── RESULTS（実績 Before→After） ── */
+.results { background:var(--cream); }
+.results-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:22px; }
+.result-card { background:var(--warm-white); border:1px solid var(--sand); border-radius:10px; overflow:hidden; display:flex; flex-direction:column; }
+.result-card.wide { grid-column:1/-1; }
+.result-card img { width:100%; aspect-ratio:1; object-fit:cover; background:var(--sand-light); }
+.result-card.wide img { aspect-ratio:2/1; }
+.result-cap { padding:10px 12px; }
+.result-num { display:inline-block; background:var(--forest); color:var(--cream); font-size:11px; font-family:'DM Sans',sans-serif; padding:3px 9px; border-radius:20px; margin-bottom:4px; }
+.result-who { font-size:12px; color:var(--mid); line-height:1.6; }
+.results-disclaimer { font-size:11px; color:var(--light-text); margin-top:16px; line-height:1.7; }
+
 /* ── STORY ── */
 .story { background:var(--dark); color:var(--cream); }
 .story .title { color:var(--cream); }
@@ -270,30 +282,67 @@ footer a { color:var(--amber-light); text-decoration:none; }
   </div>
 </section>
 
-<!-- ═══ 5. お客様の声（要素材：差し替え） ═══ -->
-<section class="voices">
-  <p class="label">Voices</p>
-  <h2 class="title">変わった人たちの、<br><em>声。</em></h2>
+<!-- ═══ 5. 実績（Before → After） ═══ -->
+<section class="results">
+  <p class="label">Real Results</p>
+  <h2 class="title">数字が、<br><em>証明する。</em></h2>
   <div class="divider"></div>
-  <div class="placeholder">
-    📷 要差し替え：実際の参加者の声を 2〜4件。①顔写真（or イニシャルアバター） ②お名前/年代/職業 ③コメント ④変化（数値があれば「-8kg / 3ヶ月」等）。掲載許可も忘れずに。下記はサンプル文です。
-  </div>
-  <div class="voice-card">
-    <div class="voice-head">
-      <img class="voice-avatar" src="images/go.jpg" alt="" loading="lazy">
-      <div><p class="voice-name">A・Mさん（40代・会社員）</p><p class="voice-meta">3ヶ月プレミアム受講</p></div>
+  <p class="lead">HACOSのトレーナーが伴走した、リアルなビフォーアフター。本気で取り組めば、体は応えてくれます。</p>
+  <div class="results-grid">
+
+    <div class="result-card">
+      <img src="images/result-vispiral.jpg" alt="50代男性 ビフォーアフター" loading="lazy">
+      <div class="result-cap">
+        <span class="result-num">2ヶ月 79.1→72.8kg</span>
+        <p class="result-who">50代男性／ウエスト 94→83cm・胸囲 100→94cm</p>
+      </div>
     </div>
-    <p class="voice-text">「ひとりでは何度も挫折しましたが、GOさんと仲間がいたから続けられました。食事まで見てもらえたのが大きかったです。」</p>
-    <span class="voice-result">-8kg / 3ヶ月（サンプル）</span>
-  </div>
-  <div class="voice-card">
-    <div class="voice-head">
-      <img class="voice-avatar" src="images/katayama.jpg" alt="" loading="lazy">
-      <div><p class="voice-name">K・Sさん（30代・自営業）</p><p class="voice-meta">3ヶ月プレミアム受講</p></div>
+
+    <div class="result-card">
+      <img src="images/result-m-37kg.jpg" alt="男性 大幅減量" loading="lazy">
+      <div class="result-cap"><span class="result-num">118 → 81kg</span><p class="result-who">継続でここまで変わる</p></div>
     </div>
-    <p class="voice-text">「数値で変化が見えるので、モチベーションが切れませんでした。朝が変わると一日が変わる、を実感しています。」</p>
-    <span class="voice-result">体脂肪 -6%（サンプル）</span>
+    <div class="result-card">
+      <img src="images/result-m-contest.jpg" alt="男性 コンテスト出場ボディ" loading="lazy">
+      <div class="result-cap"><span class="result-num">大会出場ボディ</span><p class="result-who">趣味から舞台へ</p></div>
+    </div>
+
+    <div class="result-card">
+      <img src="images/result-w-merihari.jpg" alt="女性 メリハリボディ" loading="lazy">
+      <div class="result-cap"><span class="result-num">体脂肪 -2.2%</span><p class="result-who">女性／筋肉量UP・メリハリボディ</p></div>
+    </div>
+    <div class="result-card">
+      <img src="images/result-m-bulk.jpg" alt="男性 バルクアップ" loading="lazy">
+      <div class="result-cap"><span class="result-num">増量 59.2→67.2kg</span><p class="result-who">31歳・173cm／筋肉量UP</p></div>
+    </div>
+
+    <div class="result-card">
+      <img src="images/result-m-green.jpg" alt="男性 ビフォーアフター" loading="lazy">
+      <div class="result-cap"><span class="result-num">Before → After</span><p class="result-who">体型が引き締まった</p></div>
+    </div>
+    <div class="result-card">
+      <img src="images/result-m-cut.jpg" alt="男性 ビフォーアフター" loading="lazy">
+      <div class="result-cap"><span class="result-num">Before → After</span><p class="result-who">腹筋が見える体へ</p></div>
+    </div>
+
+    <div class="result-card">
+      <img src="images/result-w-front.jpg" alt="女性 ビフォーアフター" loading="lazy">
+      <div class="result-cap"><span class="result-num">Before → After</span><p class="result-who">女性／しなやかに引き締め</p></div>
+    </div>
+    <div class="result-card">
+      <img src="images/result-w-front2.jpg" alt="女性 ビフォーアフター" loading="lazy">
+      <div class="result-cap"><span class="result-num">Before → After</span><p class="result-who">女性／健康的なボディライン</p></div>
+    </div>
+
+    <div class="result-card">
+      <img src="images/result-wedding.jpg" alt="結婚式に向けたビフォーアフター" loading="lazy">
+      <div class="result-cap"><span class="result-num">Wedding 🤍</span><p class="result-who">人生の晴れ舞台に向けて、背中までしっかり</p></div>
+    </div>
+
   </div>
+  <p class="results-disclaimer">
+    ※ 効果には個人差があります。掲載はご本人の許可を得たものです。
+  </p>
 </section>
 
 <!-- ═══ 6. GOのストーリー（要素材：差し替え） ═══ -->
