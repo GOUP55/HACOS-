@@ -157,7 +157,15 @@ section { padding:72px 24px; }
   font-size:10px; padding:2px 8px; border-radius:20px;
   font-family:'DM Sans',sans-serif; margin-bottom:8px; letter-spacing:.08em;
 }
+.tacos-img { width:100%; border-radius:6px; margin-bottom:12px; display:block; }
 .tacos-title { font-size:16px; color:#fff; margin-bottom:4px; }
+/* 7/5 メニュー詳細 */
+.menu-detail { margin-top:8px; background:var(--cream); border-radius:8px; padding:14px 16px; border-left:3px solid var(--amber); }
+.menu-detail-photos { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
+.menu-detail-photos img { width:100%; aspect-ratio:1; object-fit:cover; border-radius:6px; }
+.menu-detail-name { font-size:14px; color:var(--dark); font-weight:500; margin-bottom:4px; }
+.menu-detail-desc { font-size:12px; color:var(--mid); line-height:1.7; }
+.menu-tag { display:inline-block; background:var(--sand-light); color:var(--forest); font-size:10px; padding:2px 8px; border-radius:20px; font-family:'DM Sans',sans-serif; margin:6px 4px 0 0; }
 .tacos-detail { font-size:12px; color:rgba(255,255,255,.75); line-height:1.8; }
 .tacos-tag { display:inline-block; background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.3); color:#FFD4B2; font-size:10px; padding:2px 8px; border-radius:20px; font-family:'DM Sans',sans-serif; margin:4px 2px 0 0; }
 /* 朝RUN */
@@ -572,12 +580,30 @@ footer {
       </div>
       <div class="program-info">
         <p class="program-fitness">セルフマッサージ＆ストレッチ</p>
-        <p class="program-food">🍱 ビビン麺と本格キンパ</p>
+        <p class="program-food">🍱 サラダビビンそば & 発酵彩りキンパ</p>
         <div class="program-trainers">
           <span class="trainer-chip">GO</span>
           <span class="trainer-chip">みどり（KITCHEN）</span>
         </div>
         <p class="program-note">🏃 朝RUN 6:30〜あり</p>
+
+        <!-- 7/5 メニュー詳細 -->
+        <div class="menu-detail">
+          <div class="menu-detail-photos">
+            <img src="images/food-0705-bibimsoba.jpg" alt="サラダビビンそば" loading="lazy">
+            <img src="images/food-0705-kimpa.jpg" alt="発酵彩りキンパ" loading="lazy">
+          </div>
+          <p class="menu-detail-name">🥗 サラダビビンそば</p>
+          <p class="menu-detail-desc">運動後のカラダにごちそうを。シャキッと彩り、からだ喜ぶ朝の一皿。良質な炭水化物とたんぱく質、発酵食で疲労回復＆腸内環境をサポート。約563kcal（P 27.2g／F 16.1g／C 68.4g）。</p>
+          <span class="menu-tag">グルテンフリー</span>
+          <span class="menu-tag">約563kcal</span>
+          <span class="menu-tag">テイクアウトOK</span>
+          <p class="menu-detail-name" style="margin-top:14px;">🍙 発酵彩りキンパ ¥900</p>
+          <p class="menu-detail-desc">忙しい朝や外出前にサッと食べられる。彩り豊かで満足感たっぷり。ご家族へのお土産にもおすすめです。</p>
+          <span class="menu-tag">¥900</span>
+          <span class="menu-tag">テイクアウトOK</span>
+          <a href="https://lin.ee/TsRy6I9" target="_blank" style="display:inline-block;margin-top:12px;color:var(--amber);font-size:12px;">お弁当の注文はLINEから →</a>
+        </div>
       </div>
     </div>
 
@@ -616,6 +642,7 @@ footer {
     </div>
     <!-- TACOS Party（7/19 午後〜）-->
     <div class="tacos-banner">
+      <img src="images/tacos-party.jpg" alt="TACOS Party" class="tacos-img">
       <span class="tacos-badge">同日開催 Special Event</span>
       <p class="tacos-title">🌮 TACOS Party</p>
       <p class="tacos-detail">
