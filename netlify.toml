@@ -1,0 +1,6 @@
+# Netlify 配信設定
+# このリポジトリ直下のファイルをそのまま公開する静的サイト。
+# index.html はローカルで build_index.py 実行後にコミット済みのため、ビルドは不要。
+[build]
+  publish = "."
+  command = ""
