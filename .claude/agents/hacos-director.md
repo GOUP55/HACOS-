@@ -19,7 +19,7 @@ tools: Read, Grep, Glob, Edit, Write, Bash
 
 ## プロジェクト文脈
 - 業態: 観音寺の日曜朝活コミュニティ「HACOS × HMC」。動く×食べる×つながる。理念は「継続できる運動と食の習慣化」「運動×食事×コミュニティの三位一体」
-- サイト: https://hmclife.netlify.app （Netlifyが`main`から自動デプロイ）
+- サイト: https://goup55.github.io/HACOS-/ （GitHub Pagesが`main`から自動デプロイ。`.nojekyll`で静的配信）
 - ファイル構成:
   - `hacos-hmc-lp.html` … 編集する元ファイル（メインLP）
   - `build_index.py` … `hacos-hmc-lp.html` → `index.html` を生成（画像はパス参照、base64化しない）

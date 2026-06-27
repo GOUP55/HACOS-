@@ -2,7 +2,7 @@
 
 > 対象: HACOS 3ヶ月プレミアムメソッド 第1期生
 > 募集締切: **2026-07-15** ／ 定員: **3名** ／ スタート: 2026年7月
-> プレミアムLP: https://hmclife.netlify.app/premium.html ／ メインLP: https://hmclife.netlify.app/
+> プレミアムLP: https://goup55.github.io/HACOS-/premium.html ／ メインLP: https://goup55.github.io/HACOS-/
 > 主CTA: 無料カウンセリング予約（LINE `https://lin.ee/TsRy6I9`）
 > 作成日: 2026-06-26 ／ 担当: hacos-growth
 >

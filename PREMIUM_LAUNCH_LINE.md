@@ -3,7 +3,7 @@
 
 > 対象: HACOS 3ヶ月プレミアムメソッド（第1期生・定員3名・募集締切7/15・7月スタート）
 > トーン: 温かく誠実／押し売りしない／限定性と結束感で背中を押す
-> リンク: LINE公式 https://lin.ee/TsRy6I9 ／ プレミアムLP https://hmclife.netlify.app/premium.html ／ Instagram https://www.instagram.com/hmc.day/
+> リンク: LINE公式 https://lin.ee/TsRy6I9 ／ プレミアムLP https://goup55.github.io/HACOS-/premium.html ／ Instagram https://www.instagram.com/hmc.day/
 > 数値は提供事実のみ使用（捏造禁止）
 
 ---
@@ -96,10 +96,10 @@
 送るだけでOKです。
 
 詳しくはこちら↓
-https://hmclife.netlify.app/premium.html
+https://goup55.github.io/HACOS-/premium.html
 ```
 
-- **CTA**: 「カウンセリング希望」とこのLINEに送信 → https://lin.ee/TsRy6I9 ／ 詳細は https://hmclife.netlify.app/premium.html
+- **CTA**: 「カウンセリング希望」とこのLINEに送信 → https://lin.ee/TsRy6I9 ／ 詳細は https://goup55.github.io/HACOS-/premium.html
 
 ---
 
@@ -148,10 +148,10 @@ https://hmclife.netlify.app/premium.html
 まずは無料カウンセリングから、お気軽に😊
 
 詳しくはこちら↓
-https://hmclife.netlify.app/premium.html
+https://goup55.github.io/HACOS-/premium.html
 ```
 
-- **CTA**: 「カウンセリング希望」とLINE送信 → https://lin.ee/TsRy6I9 ／ 詳細 https://hmclife.netlify.app/premium.html
+- **CTA**: 「カウンセリング希望」とLINE送信 → https://lin.ee/TsRy6I9 ／ 詳細 https://goup55.github.io/HACOS-/premium.html
 
 ---
 
@@ -367,7 +367,7 @@ HACOSは、3つを同時に設計します。
 ※効果には個人差があります
 あなたの3ヶ月、はじめませんか？
 ```
-- **演出指示**: ビフォーアフター写真を1枚（本人許諾済みのもの）。「詳しくはこちら」リンクスタンプで premium.html（https://hmclife.netlify.app/premium.html）へ誘導。アンケートスタンプ「興味ある／まずは話だけ聞きたい」で温度感を測る。
+- **演出指示**: ビフォーアフター写真を1枚（本人許諾済みのもの）。「詳しくはこちら」リンクスタンプで premium.html（https://goup55.github.io/HACOS-/premium.html）へ誘導。アンケートスタンプ「興味ある／まずは話だけ聞きたい」で温度感を測る。
 
 ---
 
