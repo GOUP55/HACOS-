@@ -1,0 +1,52 @@
+-- HACOS × HMC 予約システム D1 スキーマ
+-- Cloudflare D1 (SQLite) / wrangler d1 execute <DB_NAME> --file=schema.sql
+
+CREATE TABLE IF NOT EXISTS sessions (
+  id            TEXT PRIMARY KEY,
+  date          TEXT NOT NULL,
+  display_date  TEXT NOT NULL,
+  title         TEXT NOT NULL,
+  food          TEXT,
+  trainers      TEXT,
+  morning_run   INTEGER DEFAULT 0,
+  capacity      INTEGER NOT NULL DEFAULT 10,
+  is_open       INTEGER NOT NULL DEFAULT 1,
+  bento_json    TEXT,
+  has_tacos     INTEGER DEFAULT 0,
+  note          TEXT
+);
+
+CREATE TABLE IF NOT EXISTS reservations (
+  id            TEXT PRIMARY KEY,
+  session_id    TEXT NOT NULL REFERENCES sessions(id),
+  line_user_id  TEXT NOT NULL,
+  display_name  TEXT,
+  category      TEXT NOT NULL,
+  morning_run   TEXT,
+  bento         TEXT,
+  tacos         TEXT,
+  message       TEXT,
+  ref           TEXT,
+  status        TEXT NOT NULL DEFAULT 'confirmed',
+  created_at    TEXT NOT NULL,
+  UNIQUE(session_id, line_user_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_res_session ON reservations(session_id, status);
+
+-- 7月シードデータ
+INSERT OR IGNORE INTO sessions VALUES
+  ('2026-07-05','2026-07-05','7/5（日）','セルフマッサージ＆ストレッチ',
+   'サラダビビンそば & 発酵彩りキンパ','GO, みどり（KITCHEN）',1,10,1,
+   '[{"name":"サラダビビンそば","price":null},{"name":"発酵彩りキンパ","price":900}]',
+   0,'朝RUN 6:30〜あり'),
+  ('2026-07-12','2026-07-12','7/12（日）','LEAN BODY TRAINING〜燃やして締める60分〜',
+   'カオマンガイ','片山めぐみ, ふみや（KITCHEN）',0,10,1,
+   '[{"name":"カオマンガイ","price":1300}]',
+   0,'朝RUNなし'),
+  ('2026-07-19','2026-07-19','7/19（日）','ピラティス',
+   'ビーフストロガノフ','ちひろ, ふみや（KITCHEN）',1,10,1,
+   '[{"name":"ビーフストロガノフ","price":1300}]',
+   1,'朝RUN 6:30〜あり ／ 午後 TACOS Party 12:00〜21:00（参加費¥3,000）'),
+  ('2026-07-26','2026-07-26','7/26（日）','お休み',
+   NULL,NULL,0,0,0,NULL,0,'スタッフ不在のためクローズ');
