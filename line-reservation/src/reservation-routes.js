@@ -135,8 +135,10 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
   return c.json({ ok: true, reservations });
 });
 
-// ── GET /api/my-reservations ── 自分の予約一覧 ──
-reservationRoutes.get('/api/my-reservations', async (c) => {
+// ── GET /api/liff/my-reservations ── 自分の予約一覧 ──
+// 注意: LIFF（一般ユーザー）から呼ぶAPIは必ず /api/liff/ 配下に置くこと。
+// それ以外のパスは管理者認証ミドルウェアに弾かれて401になる。
+reservationRoutes.get('/api/liff/my-reservations', async (c) => {
   const idToken = (c.req.header('Authorization') || '').replace('Bearer ', '');
   if (!idToken) return c.json({ error: 'unauthorized' }, 401);
 
@@ -158,28 +160,36 @@ reservationRoutes.get('/api/my-reservations', async (c) => {
   return c.json({ reservations: results });
 });
 
-// ── POST /api/reservations/:id/cancel ── キャンセル ──
-reservationRoutes.post('/api/reservations/:id/cancel', async (c) => {
+// ── POST /api/liff/reservations/:id/cancel ── キャンセル ──
+reservationRoutes.post('/api/liff/reservations/:id/cancel', async (c) => {
   const idToken = (c.req.header('Authorization') || '').replace('Bearer ', '');
   if (!idToken) return c.json({ error: 'unauthorized' }, 401);
 
-  let userId;
+  let userId, displayName;
   try {
-    ({ userId } = await verifyIdToken(idToken, c.env));
+    ({ userId, displayName } = await verifyIdToken(idToken, c.env));
   } catch {
     return c.json({ error: 'invalid_token' }, 401);
   }
 
   const reservationId = c.req.param('id');
-  const reservation = await c.env.DB.prepare(
-    `SELECT * FROM reservations WHERE id = ? AND line_user_id = ? AND status = 'confirmed'`
-  ).bind(reservationId, userId).first();
+  const reservation = await c.env.DB.prepare(`
+    SELECT r.*, s.display_date, s.title
+    FROM reservations r
+    JOIN sessions s ON s.id = r.session_id
+    WHERE r.id = ? AND r.line_user_id = ? AND r.status = 'confirmed'
+  `).bind(reservationId, userId).first();
 
   if (!reservation) return c.json({ error: 'not_found' }, 404);
 
   await c.env.DB.prepare(
     `UPDATE reservations SET status = 'cancelled' WHERE id = ?`
   ).bind(reservationId).run();
+
+  // 本人への確認＋スタッフ通知（失敗してもキャンセル自体は成立させる）
+  c.executionCtx.waitUntil(
+    sendCancelNotifications(userId, displayName, reservation, c.env)
+  );
 
   return c.json({ ok: true });
 });
@@ -220,7 +230,7 @@ async function sendNotifications(userId, displayName, session, reservation, env)
     '',
     '動きやすい服装でお越しください。',
     '日曜の朝、お待ちしています🌅',
-    '変更・キャンセルはこのトークから「キャンセル」と送ってください。',
+    '変更・キャンセルは、予約フォームを開くと画面上部の「あなたの予約」からいつでも行えます。',
   ].join('\n');
 
   await pushToUser(userId, [{ type: 'text', text: userText }], env);
@@ -232,6 +242,30 @@ async function sendNotifications(userId, displayName, session, reservation, env)
     `${session.display_date} ／ ${reservation.category}`,
     `お名前(LINE)：${displayName}`,
     `残枠：${remaining}`,
+  ].join('\n');
+
+  const staffIds = (env.STAFF_USER_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
+  for (const staffId of staffIds) {
+    await pushToUser(staffId, [{ type: 'text', text: staffText }], env);
+  }
+}
+
+async function sendCancelNotifications(userId, displayName, reservation, env) {
+  const userText = [
+    '✅ キャンセルを受け付けました。',
+    '',
+    '▼ キャンセルした予約',
+    `${reservation.display_date} ${reservation.title}`,
+    '',
+    'またのご参加をお待ちしています🌅',
+  ].join('\n');
+
+  await pushToUser(userId, [{ type: 'text', text: userText }], env);
+
+  const staffText = [
+    '❌ 予約キャンセル',
+    `${reservation.display_date} ／ ${reservation.category}`,
+    `お名前(LINE)：${displayName}`,
   ].join('\n');
 
   const staffIds = (env.STAFF_USER_IDS || '').split(',').map(s => s.trim()).filter(Boolean);

@@ -83,6 +83,15 @@ textarea:focus { border-color: var(--green); }
 /* ── Conditional sections ── */
 .conditional { display: none; }
 
+/* ── My reservations ── */
+#my-reservations { display: none; margin: 12px 12px 0; }
+.myres-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 12px; border: 1.5px solid var(--border); border-radius: 9px; margin-bottom: 8px; background: white; }
+.myres-item:last-child { margin-bottom: 0; }
+.myres-info { font-size: 13px; line-height: 1.5; }
+.myres-date { font-weight: 700; color: var(--green); }
+.btn-cancel { flex-shrink: 0; background: white; color: var(--red); border: 1.5px solid var(--red); border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 700; cursor: pointer; }
+.btn-cancel:disabled { opacity: .5; cursor: not-allowed; }
+
 /* ── Complete screen ── */
 #complete { display: none; min-height: 100vh; background: white; padding: 48px 24px; text-align: center; }
 .complete-icon { font-size: 60px; }
@@ -108,6 +117,13 @@ textarea:focus { border-color: var(--green); }
     <div class="header-sub">毎週日曜 AM7:30〜 / 観音寺 HACOS</div>
     <div class="user-chip">✅ <span id="user-name-chip">ログイン済み</span></div>
     <div style="font-size:11px;color:var(--gray);margin-top:4px;">お名前の入力は不要です😊</div>
+  </div>
+
+  <!-- あなたの予約（予約がある人にだけ表示） -->
+  <div id="my-reservations" class="section">
+    <div class="section-title">あなたの予約</div>
+    <p class="section-note">キャンセルはこちらからどうぞ（前日までにお願いします）</p>
+    <div id="my-reservations-list"></div>
   </div>
 
   <form id="reserve-form" class="form-body" onsubmit="handleSubmit(event)" novalidate>
@@ -207,6 +223,7 @@ async function init() {
     profile = await liff.getProfile();
     document.getElementById('user-name-chip').textContent = profile.displayName;
     await loadSessions();
+    await loadMyReservations();
     document.getElementById('loading').style.display = 'none';
     document.getElementById('app').style.display = 'block';
   } catch (e) {
@@ -253,6 +270,72 @@ async function loadSessions() {
     if (!isFull) card.addEventListener('click', () => toggleSession(s.id, card));
     list.appendChild(card);
   });
+}
+
+async function loadMyReservations() {
+  const box = document.getElementById('my-reservations');
+  try {
+    const idToken = await liff.getIDToken();
+    const res = await fetch('/api/liff/my-reservations', {
+      headers: { 'Authorization': `Bearer ${idToken}` },
+    });
+    if (!res.ok) { box.style.display = 'none'; return; }
+    const data = await res.json();
+    const items = data.reservations || [];
+
+    if (!items.length) { box.style.display = 'none'; return; }
+
+    const list = document.getElementById('my-reservations-list');
+    list.innerHTML = '';
+    items.forEach(r => {
+      const row = document.createElement('div');
+      row.className = 'myres-item';
+      const info = document.createElement('div');
+      info.className = 'myres-info';
+      info.innerHTML = `<span class="myres-date"></span><br><span class="myres-title"></span>`;
+      info.querySelector('.myres-date').textContent = r.display_date || r.session_id;
+      info.querySelector('.myres-title').textContent = `${r.title || ''}（${r.category}）`;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn-cancel';
+      btn.textContent = 'キャンセル';
+      btn.addEventListener('click', () => cancelReservation(r, btn));
+      row.appendChild(info);
+      row.appendChild(btn);
+      list.appendChild(row);
+    });
+    box.style.display = 'block';
+  } catch (e) {
+    // 予約一覧が読めなくても、新規予約はできるようにフォームは出す
+    box.style.display = 'none';
+    console.error(e);
+  }
+}
+
+async function cancelReservation(r, btn) {
+  const ok = confirm(`${r.display_date || ''} のご予約をキャンセルしますか？`);
+  if (!ok) return;
+
+  btn.disabled = true;
+  btn.textContent = '処理中...';
+  try {
+    const idToken = await liff.getIDToken();
+    const res = await fetch(`/api/liff/reservations/${encodeURIComponent(r.id)}/cancel`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${idToken}` },
+    });
+    if (!res.ok) throw new Error('cancel_failed');
+    // 残席が変わるので日程一覧も取り直す
+    selectedIds.clear();
+    await loadSessions();
+    await loadMyReservations();
+    alert('キャンセルしました。確認メッセージをLINEでお送りします。');
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = 'キャンセル';
+    alert('キャンセルに失敗しました。時間をおいてもう一度お試しください。');
+    console.error(e);
+  }
 }
 
 function toggleSession(id, card) {
