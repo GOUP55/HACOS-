@@ -202,16 +202,16 @@ let selectedIds = new Set();
 
 async function init() {
   try {
-    window.__s='1:liff.init'; await liff.init({ liffId: LIFF_ID });
+    await liff.init({ liffId: LIFF_ID });
     if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
-    window.__s='3:getProfile'; profile = await liff.getProfile();
+    profile = await liff.getProfile();
     document.getElementById('user-name-chip').textContent = profile.displayName;
-    window.__s='5:loadSessions'; await loadSessions();
+    await loadSessions();
     document.getElementById('loading').style.display = 'none';
     document.getElementById('app').style.display = 'block';
   } catch (e) {
     document.getElementById('loading').innerHTML =
-      '<p style="color:red;padding:20px;font-size:12px;word-break:break-all;">STEP '+(window.__s||'?')+'<br>'+(e.message||e)+'</p>';
+      '<p style="color:var(--red);padding:24px;font-size:14px;">読み込みに失敗しました。<br>LINEアプリから再度お試しください。</p>';
     console.error(e);
   }
 }
@@ -220,11 +220,8 @@ async function loadSessions() {
   const ref = new URLSearchParams(location.search).get('ref') || '';
   if (ref) sessionStorage.setItem('ref', ref);
 
-  const res = await fetch('/api/sessions');
-  const text = await res.text();
-  let data = {};
-  try { data = JSON.parse(text); } catch(_) {}
-  if (!data.sessions) throw new Error('API status='+res.status+' body='+text.slice(0,300));
+  const res = await fetch('/api/liff/sessions');
+  const data = await res.json();
   sessions = data.sessions;
 
   const list = document.getElementById('sessions-list');
@@ -320,7 +317,7 @@ async function handleSubmit(e) {
     const formData = new FormData(form);
     const bento = formData.getAll('bento').filter(v => v !== 'none');
 
-    const res = await fetch('/api/reservations', {
+    const res = await fetch('/api/liff/reservations', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
