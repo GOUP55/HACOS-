@@ -211,7 +211,7 @@ async function init() {
     document.getElementById('app').style.display = 'block';
   } catch (e) {
     document.getElementById('loading').innerHTML =
-      '<p style="color:red;padding:20px;font-size:13px;word-break:break-all;">STEP '+(window.__s||'?')+'<br>'+(e.message||e)+'</p>';
+      '<p style="color:red;padding:20px;font-size:12px;word-break:break-all;">STEP '+(window.__s||'?')+'<br>'+(e.message||e)+'</p>';
     console.error(e);
   }
 }
@@ -221,7 +221,10 @@ async function loadSessions() {
   if (ref) sessionStorage.setItem('ref', ref);
 
   const res = await fetch('/api/sessions');
-  const data = await res.json();
+  const text = await res.text();
+  let data = {};
+  try { data = JSON.parse(text); } catch(_) {}
+  if (!data.sessions) throw new Error('API status='+res.status+' body='+text.slice(0,300));
   sessions = data.sessions;
 
   const list = document.getElementById('sessions-list');
