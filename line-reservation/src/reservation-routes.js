@@ -94,23 +94,31 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
     if (session.remaining <= 0) return c.json({ error: 'full', session_id: sessionId }, 409);
 
     // 3. 予約 INSERT（UNIQUE 制約で二重予約を自動防止）
+    // 残枠チェックとINSERTを1本のSQLにまとめ、同時申込みでの定員オーバーを防ぐ。
+    // 手順2のチェックだけだと「数える→書き込む」の間に他の人が書き込めてしまう。
     const reservationId = crypto.randomUUID();
     const createdAt = new Date().toISOString();
 
+    let inserted;
     try {
-      await c.env.DB.prepare(`
+      inserted = await c.env.DB.prepare(`
         INSERT INTO reservations
           (id, session_id, line_user_id, display_name, category,
            morning_run, bento, tacos, message, ref, status, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'confirmed', ?)
+        SELECT ?, s.id, ?, ?, ?, ?, ?, ?, ?, ?, 'confirmed', ?
+        FROM sessions s
+        WHERE s.id = ? AND s.is_open = 1
+          AND (SELECT COUNT(*) FROM reservations r
+               WHERE r.session_id = s.id AND r.status = 'confirmed') < s.capacity
       `).bind(
-        reservationId, sessionId, userId, displayName, category,
+        reservationId, userId, displayName, category,
         morning_run || null,
         Array.isArray(bento) && bento.length ? bento.join(',') : null,
         tacos || null,
         message || null,
         ref || null,
-        createdAt
+        createdAt,
+        sessionId
       ).run();
     } catch (e) {
       if (e.message?.includes('UNIQUE')) {
@@ -123,12 +131,24 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
       throw e;
     }
 
+    // 書き込めなかった＝この瞬間に満席になった（セッションの存在は手順2で確認済み）
+    if (!inserted.meta || inserted.meta.changes === 0) {
+      return c.json({ error: 'full', session_id: sessionId }, 409);
+    }
+
     const newRes = { id: reservationId, session_id: sessionId, category, display_name: displayName };
     reservations.push(newRes);
 
     // 4. Push通知（非同期・失敗しても予約は通す）
+    // 残枠はINSERT後に数え直した正確な値を使う
+    const counted = await c.env.DB.prepare(`
+      SELECT (capacity - (SELECT COUNT(*) FROM reservations
+              WHERE session_id = ? AND status = 'confirmed')) AS remaining
+      FROM sessions WHERE id = ?
+    `).bind(sessionId, sessionId).first();
+
     c.executionCtx.waitUntil(
-      sendNotifications(userId, displayName, session, newRes, c.env)
+      sendNotifications(userId, displayName, session, newRes, counted?.remaining ?? 0, c.env)
     );
   }
 
@@ -218,7 +238,7 @@ export async function sendReminders(env) {
   }
 }
 
-async function sendNotifications(userId, displayName, session, reservation, env) {
+async function sendNotifications(userId, displayName, session, reservation, remaining, env) {
   // 本人への確認メッセージ
   const userText = [
     '✅ ご予約ありがとうございます！',
@@ -236,7 +256,6 @@ async function sendNotifications(userId, displayName, session, reservation, env)
   await pushToUser(userId, [{ type: 'text', text: userText }], env);
 
   // スタッフ通知
-  const remaining = Math.max(0, session.remaining - 1);
   const staffText = [
     '🆕 新規予約',
     `${session.display_date} ／ ${reservation.category}`,
