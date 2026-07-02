@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>HACOS × HMC ご予約</title>
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<style>
+:root {
+  --green: #06C755;
+  --green-light: #f0fff4;
+  --dark: #1a1a1a;
+  --gray: #666;
+  --border: #e0e0e0;
+  --bg: #f5f5f5;
+  --red: #e53935;
+  --orange: #f57c00;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, 'Hiragino Sans', 'Yu Gothic', sans-serif; background: var(--bg); color: var(--dark); -webkit-font-smoothing: antialiased; }
+
+/* ── Loading ── */
+#loading { display: flex; align-items: center; justify-content: center; min-height: 100vh; flex-direction: column; gap: 16px; background: white; }
+.spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--green); border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Header ── */
+.header { background: white; padding: 20px 16px 14px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+.header-title { font-size: 17px; font-weight: 700; letter-spacing: .02em; }
+.header-sub { font-size: 12px; color: var(--gray); margin-top: 3px; }
+.user-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--green-light); color: #2e7d32; border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 600; margin-top: 8px; }
+
+/* ── Form body ── */
+.form-body { padding: 12px 12px 0; display: flex; flex-direction: column; gap: 12px; }
+
+/* ── Section card ── */
+.section { background: white; border-radius: 12px; padding: 16px; }
+.section-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+.required { color: var(--red); font-size: 11px; font-weight: 600; margin-left: 4px; background: #fff0f0; border-radius: 3px; padding: 1px 5px; }
+.section-note { font-size: 11px; color: var(--gray); margin-bottom: 10px; line-height: 1.5; }
+
+/* ── Session cards ── */
+.session-card { border: 2px solid var(--border); border-radius: 10px; padding: 13px; margin-bottom: 10px; cursor: pointer; transition: border-color .15s, background .15s; position: relative; }
+.session-card:last-child { margin-bottom: 0; }
+.session-card.selected { border-color: var(--green); background: var(--green-light); }
+.session-card.full { opacity: .5; cursor: default; }
+.session-date { font-size: 20px; font-weight: 800; color: var(--green); }
+.session-card.full .session-date { color: #999; }
+.session-title { font-size: 13px; font-weight: 600; margin-top: 3px; }
+.session-food { font-size: 11px; color: var(--gray); margin-top: 4px; }
+.session-tags { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+.tag { font-size: 10px; border-radius: 4px; padding: 2px 7px; font-weight: 600; }
+.tag-run { background: #fff3e0; color: #e65100; }
+.tag-tacos { background: #fce4ec; color: #c62828; }
+.remaining { position: absolute; top: 10px; right: 12px; font-size: 11px; font-weight: 700; }
+.remaining.ok { color: var(--green); }
+.remaining.low { color: var(--red); }
+.full-label { position: absolute; top: 10px; right: 12px; background: #ccc; color: white; font-size: 11px; font-weight: 700; border-radius: 4px; padding: 2px 8px; }
+.check-icon { position: absolute; bottom: 10px; right: 12px; font-size: 20px; color: var(--green); opacity: 0; transition: opacity .15s; }
+.session-card.selected .check-icon { opacity: 1; }
+
+/* ── Options (radio / checkbox) ── */
+.options { display: flex; flex-direction: column; gap: 8px; }
+.opt { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border: 1.5px solid var(--border); border-radius: 9px; cursor: pointer; transition: border-color .15s, background .15s; }
+.opt:has(input:checked) { border-color: var(--green); background: var(--green-light); }
+.opt input { accent-color: var(--green); width: 18px; height: 18px; flex-shrink: 0; cursor: pointer; }
+.opt-label { font-size: 13px; flex: 1; line-height: 1.4; }
+.opt-price { font-size: 11px; color: var(--gray); display: block; margin-top: 1px; }
+
+/* ── Textarea ── */
+textarea { width: 100%; border: 1.5px solid var(--border); border-radius: 9px; padding: 11px 12px; font-size: 13px; font-family: inherit; resize: vertical; min-height: 90px; outline: none; transition: border-color .15s; }
+textarea:focus { border-color: var(--green); }
+
+/* ── Error ── */
+.error-msg { background: #fff0f0; color: var(--red); border-radius: 9px; padding: 12px 14px; font-size: 13px; text-align: center; display: none; }
+
+/* ── Submit ── */
+.submit-area { padding: 14px 12px 28px; }
+.btn-submit { width: 100%; background: var(--green); color: white; border: none; border-radius: 12px; padding: 16px; font-size: 16px; font-weight: 700; cursor: pointer; transition: opacity .2s; letter-spacing: .04em; }
+.btn-submit:disabled { opacity: .5; cursor: not-allowed; }
+.btn-submit:not(:disabled):active { opacity: .8; }
+
+/* ── Conditional sections ── */
+.conditional { display: none; }
+
+/* ── Complete screen ── */
+#complete { display: none; min-height: 100vh; background: white; padding: 48px 24px; text-align: center; }
+.complete-icon { font-size: 60px; }
+.complete-title { font-size: 20px; font-weight: 800; margin-top: 16px; }
+.complete-body { font-size: 14px; color: var(--gray); margin-top: 10px; line-height: 1.7; }
+.complete-detail { background: var(--bg); border-radius: 12px; padding: 16px; margin-top: 24px; text-align: left; }
+.complete-detail p { font-size: 13px; line-height: 2.1; }
+.btn-close { margin-top: 28px; background: var(--green); color: white; border: none; border-radius: 12px; padding: 15px 48px; font-size: 15px; font-weight: 700; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<!-- ── Loading ── -->
+<div id="loading">
+  <div class="spinner"></div>
+  <p style="font-size:13px;color:var(--gray);">読み込み中...</p>
+</div>
+
+<!-- ── App ── -->
+<div id="app" style="display:none;">
+  <div class="header">
+    <div class="header-title">HACOS × HMC ご予約</div>
+    <div class="header-sub">毎週日曜 AM7:30〜 / 観音寺 HACOS</div>
+    <div class="user-chip">✅ <span id="user-name-chip">ログイン済み</span></div>
+    <div style="font-size:11px;color:var(--gray);margin-top:4px;">お名前の入力は不要です😊</div>
+  </div>
+
+  <form id="reserve-form" class="form-body" onsubmit="handleSubmit(event)" novalidate>
+
+    <!-- 参加希望日 -->
+    <div class="section">
+      <div class="section-title">参加希望日<span class="required">必須</span></div>
+      <div id="sessions-list">
+        <p style="color:var(--gray);font-size:13px;text-align:center;padding:12px 0;">日程を取得しています...</p>
+      </div>
+    </div>
+
+    <!-- 参加区分 -->
+    <div class="section">
+      <div class="section-title">参加区分<span class="required">必須</span></div>
+      <div class="options">
+        <label class="opt"><input type="radio" name="category" value="体験" required>
+          <span class="opt-label">はじめての体験<span class="opt-price">体験パーソナル ¥3,500</span></span></label>
+        <label class="opt"><input type="radio" name="category" value="会員">
+          <span class="opt-label">HMC 会員<span class="opt-price">¥2,000／回</span></span></label>
+        <label class="opt"><input type="radio" name="category" value="ビジター">
+          <span class="opt-label">ビジター<span class="opt-price">¥3,000／回</span></span></label>
+        <label class="opt"><input type="radio" name="category" value="相談">
+          <span class="opt-label">迷っている・相談したい</span></label>
+      </div>
+    </div>
+
+    <!-- 朝RUN（条件表示） -->
+    <div class="section conditional" id="morning-run-section">
+      <div class="section-title">朝RUN（6:30〜）への参加</div>
+      <p class="section-note">朝RUNの開催日は 7/5・7/19 です（7/12は開催なし）</p>
+      <div class="options">
+        <label class="opt"><input type="radio" name="morning_run" value="join">
+          <span class="opt-label">参加したい</span></label>
+        <label class="opt"><input type="radio" name="morning_run" value="skip">
+          <span class="opt-label">参加しない</span></label>
+        <label class="opt"><input type="radio" name="morning_run" value="decide">
+          <span class="opt-label">当日決める</span></label>
+      </div>
+    </div>
+
+    <!-- お弁当（条件表示） -->
+    <div class="section conditional" id="bento-section">
+      <div class="section-title">お弁当のご予約</div>
+      <p class="section-note">ご注文は開催日前日までにお願いします</p>
+      <div class="options" id="bento-options"></div>
+    </div>
+
+    <!-- TACOS（条件表示） -->
+    <div class="section conditional" id="tacos-section">
+      <div class="section-title">🌮 TACOS Party（7/19 午後）への参加</div>
+      <p class="section-note">7/19（日）12:00〜21:00 ／ 参加費（タコス込み）¥3,000<br>タコス × サウナ × コーヒー × アルコール</p>
+      <div class="options">
+        <label class="opt"><input type="radio" name="tacos" value="join">
+          <span class="opt-label">参加したい</span></label>
+        <label class="opt"><input type="radio" name="tacos" value="maybe">
+          <span class="opt-label">興味あり・検討中</span></label>
+        <label class="opt"><input type="radio" name="tacos" value="no">
+          <span class="opt-label">参加しない</span></label>
+      </div>
+    </div>
+
+    <!-- メッセージ -->
+    <div class="section">
+      <div class="section-title">ご質問・メッセージ</div>
+      <textarea name="message" placeholder="はじめての方は、気になること・不安なことを何でもどうぞ😊"></textarea>
+    </div>
+
+    <div class="error-msg" id="form-error"></div>
+
+  </form>
+
+  <div class="submit-area">
+    <button type="submit" form="reserve-form" class="btn-submit" id="btn-submit">予約する</button>
+  </div>
+</div>
+
+<!-- ── 完了画面 ── -->
+<div id="complete">
+  <div class="complete-icon">✅</div>
+  <div class="complete-title">ご予約ありがとうございます！</div>
+  <div class="complete-body">確認メッセージをLINEでお送りしました。<br>当日は動きやすい服装でお越しください。</div>
+  <div class="complete-detail" id="complete-detail"></div>
+  <button class="btn-close" onclick="closeLiff()">閉じる</button>
+</div>
+
+<script>
+const LIFF_ID = '__LIFF_ID__';
+let profile = null;
+let sessions = [];
+let selectedIds = new Set();
+
+async function init() {
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
+    profile = await liff.getProfile();
+    document.getElementById('user-name-chip').textContent = profile.displayName;
+    await loadSessions();
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+  } catch (e) {
+    document.getElementById('loading').innerHTML =
+      '<p style="color:var(--red);padding:24px;font-size:14px;">読み込みに失敗しました。<br>LINEアプリから再度お試しください。</p>';
+    console.error(e);
+  }
+}
+
+async function loadSessions() {
+  const ref = new URLSearchParams(location.search).get('ref') || '';
+  if (ref) sessionStorage.setItem('ref', ref);
+
+  const res = await fetch('/api/liff/sessions');
+  const data = await res.json();
+  sessions = data.sessions;
+
+  const list = document.getElementById('sessions-list');
+  list.innerHTML = '';
+
+  if (!sessions.length) {
+    list.innerHTML = '<p style="color:var(--gray);font-size:13px;text-align:center;padding:12px 0;">現在受付中の日程がありません</p>';
+    return;
+  }
+
+  sessions.forEach(s => {
+    const isFull = s.remaining <= 0;
+    const card = document.createElement('div');
+    card.className = `session-card${isFull ? ' full' : ''}`;
+    card.dataset.id = s.id;
+    card.innerHTML = `
+      <div class="session-date">${s.display_date}</div>
+      <div class="session-title">${s.title}</div>
+      ${s.food ? `<div class="session-food">🍱 ${s.food}</div>` : ''}
+      <div class="session-tags">
+        ${s.morning_run ? '<span class="tag tag-run">🏃 朝RUN 6:30〜</span>' : ''}
+        ${s.tacos ? '<span class="tag tag-tacos">🌮 TACOS Party</span>' : ''}
+      </div>
+      ${isFull
+        ? '<div class="full-label">満席</div>'
+        : `<div class="remaining ${s.remaining <= 3 ? 'low' : 'ok'}">残り${s.remaining}席</div>`}
+      <div class="check-icon">✓</div>
+    `;
+    if (!isFull) card.addEventListener('click', () => toggleSession(s.id, card));
+    list.appendChild(card);
+  });
+}
+
+function toggleSession(id, card) {
+  if (selectedIds.has(id)) {
+    selectedIds.delete(id);
+    card.classList.remove('selected');
+  } else {
+    selectedIds.add(id);
+    card.classList.add('selected');
+  }
+  updateConditionals();
+}
+
+function updateConditionals() {
+  const sel = sessions.filter(s => selectedIds.has(s.id));
+  const hasMorningRun = sel.some(s => s.morning_run);
+  const hasTacos = sel.some(s => s.tacos);
+  const bentoItems = sel.flatMap(s => (s.bento || []).map(b => ({ ...b, session: s })));
+
+  document.getElementById('morning-run-section').style.display = hasMorningRun ? 'block' : 'none';
+  document.getElementById('tacos-section').style.display = hasTacos ? 'block' : 'none';
+
+  if (bentoItems.length > 0) {
+    document.getElementById('bento-section').style.display = 'block';
+    const opts = document.getElementById('bento-options');
+    opts.innerHTML = '';
+    bentoItems.forEach(b => {
+      const label = document.createElement('label');
+      label.className = 'opt';
+      label.innerHTML = `
+        <input type="checkbox" name="bento" value="${b.session.id}:${b.name}">
+        <span class="opt-label">${b.session.display_date} ${b.name}
+          ${b.price ? `<span class="opt-price">¥${b.price.toLocaleString()}</span>` : ''}
+        </span>`;
+      opts.appendChild(label);
+    });
+    const noneLabel = document.createElement('label');
+    noneLabel.className = 'opt';
+    noneLabel.innerHTML = '<input type="checkbox" name="bento" value="none"><span class="opt-label">予約しない</span>';
+    opts.appendChild(noneLabel);
+  } else {
+    document.getElementById('bento-section').style.display = 'none';
+  }
+}
+
+async function handleSubmit(e) {
+  e.preventDefault();
+  hideError();
+
+  if (selectedIds.size === 0) { showError('参加希望日を1つ以上選択してください'); return; }
+
+  const form = e.target;
+  const category = form.querySelector('input[name="category"]:checked')?.value;
+  if (!category) { showError('参加区分を選択してください'); return; }
+
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true;
+  btn.textContent = '送信中...';
+
+  try {
+    const idToken = await liff.getIDToken();
+    const formData = new FormData(form);
+    const bento = formData.getAll('bento').filter(v => v !== 'none');
+
+    const res = await fetch('/api/liff/reservations', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`,
+        'Idempotency-Key': crypto.randomUUID(),
+      },
+      body: JSON.stringify({
+        session_ids: [...selectedIds],
+        category,
+        morning_run: formData.get('morning_run') || null,
+        bento,
+        tacos: formData.get('tacos') || null,
+        message: formData.get('message') || '',
+        ref: sessionStorage.getItem('ref') || '',
+      }),
+    });
+
+    const result = await res.json();
+
+    if (res.status === 409) {
+      if (result.error === 'full') showError(`「${result.session_id}」は満席のため予約できませんでした`);
+      else if (result.error === 'already') showError('すでにご予約済みです');
+      else showError('予約に失敗しました。もう一度お試しください。');
+      btn.disabled = false; btn.textContent = '予約する'; return;
+    }
+    if (!res.ok) throw new Error(result.error || '送信エラー');
+
+    showComplete(result.reservations);
+  } catch (err) {
+    showError('通信エラーが発生しました。もう一度お試しください。');
+    btn.disabled = false; btn.textContent = '予約する';
+    console.error(err);
+  }
+}
+
+function showComplete(reservations) {
+  document.getElementById('app').style.display = 'none';
+  const completeEl = document.getElementById('complete');
+  completeEl.style.display = 'block';
+
+  const lines = reservations.map(r => {
+    const s = sessions.find(s => s.id === r.session_id);
+    return `▼ ${s?.display_date || r.session_id}　${s?.title || ''}`;
+  });
+  document.getElementById('complete-detail').innerHTML =
+    `<p>${lines.join('<br>')}
+    <br>AM7:30〜10:00 / 観音寺 HACOS</p>`;
+  window.scrollTo(0, 0);
+}
+
+function closeLiff() {
+  if (liff.isInClient()) liff.closeWindow();
+  else history.back();
+}
+
+function showError(msg) {
+  const el = document.getElementById('form-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function hideError() {
+  document.getElementById('form-error').style.display = 'none';
+}
+
+init();
+</script>
+</body>
+</html>
