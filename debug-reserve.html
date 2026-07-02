@@ -202,16 +202,16 @@ let selectedIds = new Set();
 
 async function init() {
   try {
-    await liff.init({ liffId: LIFF_ID });
+    window.__s='1:liff.init'; await liff.init({ liffId: LIFF_ID });
     if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
-    profile = await liff.getProfile();
+    window.__s='3:getProfile'; profile = await liff.getProfile();
     document.getElementById('user-name-chip').textContent = profile.displayName;
-    await loadSessions();
+    window.__s='5:loadSessions'; await loadSessions();
     document.getElementById('loading').style.display = 'none';
     document.getElementById('app').style.display = 'block';
   } catch (e) {
     document.getElementById('loading').innerHTML =
-      '<p style="color:var(--red);padding:24px;font-size:14px;">読み込みに失敗しました。<br>'+(e.message||e)+'</p>';
+      '<p style="color:red;padding:20px;font-size:13px;word-break:break-all;">STEP '+(window.__s||'?')+'<br>'+(e.message||e)+'</p>';
     console.error(e);
   }
 }
