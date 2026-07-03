@@ -533,6 +533,14 @@ section { padding:72px 24px; }
 
 /* ── RESERVATION FORM EMBED ── */
 .reservation-form { background:var(--cream); }
+.reserve-line-wrap { margin-top:24px; text-align:center; }
+.reserve-line-note {
+  font-size:12px; color:var(--light-text); margin-top:12px; line-height:1.7;
+}
+.reserve-form-divider {
+  font-size:12px; color:var(--light-text); margin-top:28px; line-height:1.7;
+  padding-top:20px; border-top:1px solid var(--sand);
+}
 .form-embed-wrap {
   margin-top:24px; border-radius:8px; overflow:hidden;
   background:#fff; box-shadow:0 2px 16px rgba(0,0,0,.08);
@@ -594,7 +602,7 @@ footer {
     <strong>7月の体験を予約する</strong>
     初回 ¥3,500 ・ 毎週日曜 AM7:30
   </div>
-  <a href="https://forms.gle/dpJWZtafUfZWXnvC7" target="_blank" rel="noopener noreferrer">予約する →</a>
+  <a href="#reservation">予約する →</a>
 </div>
 
 <!-- ═══ HERO ═══ -->
@@ -615,7 +623,7 @@ footer {
       <span class="hero-badge">定員10名</span>
     </div>
     <!-- ★改善①：HEROにCTAボタン追加 -->
-    <a href="https://forms.gle/dpJWZtafUfZWXnvC7" class="hero-cta" target="_blank" rel="noopener noreferrer">
+    <a href="#reservation" class="hero-cta">
       7月の体験を予約する →
     </a>
     <p class="hero-cta-sub">初回体験 ¥3,500 ｜ 無料相談あり</p>
@@ -1003,7 +1011,7 @@ footer {
         GOと1対1で、今の体とこれからの目標を話し合います。<br>
         無理な勧誘は一切なし。
       </p>
-      <a href="https://forms.gle/dpJWZtafUfZWXnvC7" class="step-cta" target="_blank" rel="noopener noreferrer">今すぐ予約する →</a>
+      <a href="#reservation" class="step-cta">今すぐ予約する →</a>
     </div>
 
     <div class="pricing-step">
@@ -1039,9 +1047,9 @@ footer {
     <div class="how-step">
       <div class="step-num">1</div>
       <div class="step-content">
-        <p class="step-title-how">フォームから予約する</p>
-        <p class="step-desc-how">参加したい日程とクラスを選んでご送信ください。</p>
-        <a href="https://forms.gle/dpJWZtafUfZWXnvC7" class="step-link" target="_blank" rel="noopener noreferrer">予約フォームはこちら →</a>
+        <p class="step-title-how">LINEで予約する</p>
+        <p class="step-desc-how">参加したい日程とクラスを選んでご送信ください。LINEを使っていない方向けのフォームもあります。</p>
+        <a href="#reservation" class="step-link">予約はこちら →</a>
       </div>
     </div>
     <div class="how-step">
@@ -1224,6 +1232,16 @@ footer {
     7月のプログラムに参加申込できます。<br>
     初回体験 ¥3,500 ｜ 無料相談あり
   </p>
+  <div class="reserve-line-wrap">
+    <a href="https://liff.line.me/2010528512-LJhoz7MP?ref=lp" class="line-cta-btn" target="_blank" rel="noopener noreferrer">
+      <div class="cta-line-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M19.365 9.863c.349 0 .63.285.63.63 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.281.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+      </div>
+      LINEで予約する（かんたん・おすすめ）
+    </a>
+    <p class="reserve-line-note">LINEアプリで予約フォームが開き、空き状況を見ながら予約できます</p>
+    <p class="reserve-form-divider">LINEを使っていない方は、下のフォームからご予約ください</p>
+  </div>
   <div class="form-embed-wrap">
     <iframe
       src="https://docs.google.com/forms/d/1f4iV9T_oQFJ1uh8tSXPMb3aQZWgXtaBsYPBGiKB1LVU/viewform?embedded=true"
@@ -1242,7 +1260,7 @@ footer {
     まずは体験から。<br>
     GOが一緒に考えます。あなたのペースで、あなたの朝を変えましょう。
   </p>
-  <a href="https://forms.gle/dpJWZtafUfZWXnvC7" class="cta-btn" target="_blank" rel="noopener noreferrer">
+  <a href="#reservation" class="cta-btn">
     体験を予約する（¥3,500）→
   </a>
   <p class="cta-sub">定員10名 ／ 毎週日曜 AM7:30〜</p>
@@ -1282,7 +1300,7 @@ footer {
   <p class="footer-name">HACOS × HMC</p>
   <p class="footer-sub">Healthy Morning Club / 観音寺</p>
   <div class="footer-links">
-    <a href="https://forms.gle/dpJWZtafUfZWXnvC7" target="_blank" rel="noopener noreferrer">予約フォーム</a>
+    <a href="#reservation">予約</a>
     <a href="https://lin.ee/TsRy6I9" target="_blank" rel="noopener noreferrer">公式LINE</a>
     <a href="https://hacos.base.shop/items/146190213" target="_blank" rel="noopener noreferrer">物販</a>
     <a href="https://www.instagram.com/hmc.day/" target="_blank" rel="noopener noreferrer">Instagram</a>
