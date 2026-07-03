@@ -17,16 +17,15 @@
 <meta property="og:site_name" content="HACOS × HMC">
 <meta name="twitter:card" content="summary_large_image">
 
-<!-- ═══ 計測タグ（GA4 / Meta Pixel）═══
-     測定IDをいただければ下記コメントを外して有効化します。
-     GA4: G-XXXXXXXXXX ／ Meta Pixel: 0000000000000000
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<!-- ═══ 計測タグ（GA4）═══ -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-4CK1EXGHYV"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-XXXXXXXXXX');
+  gtag('config', 'G-4CK1EXGHYV');
 </script>
+<!-- Meta Pixel: 広告開始時にIDを入れて有効化
 <script>
   !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
   n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
@@ -35,7 +34,7 @@
   document,'script','https://connect.facebook.net/en_US/fbevents.js');
   fbq('init','0000000000000000');fbq('track','PageView');
 </script>
-     ═══ ここまで計測タグ ═══ -->
+     ═══ ここまで Meta Pixel ═══ -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -579,6 +578,15 @@ document.querySelectorAll('.faq-q').forEach(function(btn){
     document.querySelectorAll('.faq-item').forEach(function(el){ el.classList.remove('open'); el.querySelector('.faq-a').style.maxHeight='0'; });
     if(!open){ item.classList.add('open'); ans.style.maxHeight=ans.scrollHeight+'px'; }
   });
+});
+</script>
+
+<script>
+document.addEventListener('click', function(e){
+  var a = e.target.closest('a'); if(!a || typeof gtag !== 'function') return;
+  var href = a.getAttribute('href') || '';
+  if(href.indexOf('lin.ee') !== -1){ gtag('event','line_click',{link_text:(a.textContent||'').trim().slice(0,50)}); }
+  else if(href.indexOf('#reservation') !== -1 || href.indexOf('reserve') !== -1){ gtag('event','reserve_click',{link_text:(a.textContent||'').trim().slice(0,50)}); }
 });
 </script>
 
