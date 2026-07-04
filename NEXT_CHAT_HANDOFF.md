@@ -9,7 +9,7 @@
 
 ## ✅ 完了済み
 - 構造改善TOP3（OGP/順序/画像base64脱却）・お食事メニュー(7/12,7/19)・弁当¥1,300〜1,500
-- **プレミアムLP**（第1期生・¥300,000・募集7/15・定員3名・特典=掲載協力で卒業生継続優待20%OFF/3ヶ月）
+- **プレミアムLP**（第1期生・¥300,000・募集7/31・定員3名・特典=掲載協力で卒業生継続優待20%OFF/3ヶ月）
 - メインLPに**実績ギャラリー**（顔出しの一部はぼかし済み：result-w-front.jpg）
 - **LINE連携**：浮く友だち追加ボタン＋公式LINEセクション＋QR、予約フォーム→LINE通知GAS
   - LINEボタンの遷移先＝`https://line-harness.hacos.workers.dev/auth/line?ref=lp`（別途稼働中）
@@ -27,7 +27,7 @@
 
 ## 📌 次やること（おすすめ順）
 1. **Instagramプロフィールのリンク**を `https://goup55.github.io/HACOS-/` に差し替え（ユーザー作業）
-2. **第1期生ローンチ配信**：`PREMIUM_LAUNCH_LINE.md`（募集開始6/27→締切7/15）
+2. **第1期生ローンチ配信**：`PREMIUM_LAUNCH_LINE.md`（募集開始6/27→締切7/31）
 3. **GA4/Meta Pixel 有効化**（測定IDをもらったら、両LPの<head>テンプレを解除しID差込→build→公開）
 4. 任意：他の顔出し実績画像のぼかし(result-w-front2/result-vispiral/result-m-37kg)、特商法/返金規定ページ、Netlify削除
 

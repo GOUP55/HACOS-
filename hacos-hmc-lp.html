@@ -623,7 +623,7 @@ footer {
     </div>
     <!-- ★改善②：プレミアム入口バナー（締切後はJSで非表示） -->
     <a href="premium.html" class="hero-premium-banner" id="heroPremiumBanner">
-      第1期生 募集中｜定員3名・7/15まで <span class="hpb-days"></span> →
+      第1期生 募集中｜定員3名・7/31まで <span class="hpb-days"></span> →
     </a>
     <!-- ★改善①：HEROにCTAボタン追加 -->
     <a href="#reservation" class="hero-cta">
@@ -1073,7 +1073,7 @@ footer {
       <p class="method-price-period">3ヶ月一括 ／ 分割相談可</p>
     </div>
 
-    <p class="method-capacity">📍 第1期生・定員3名 ｜ 募集は7月15日まで ｜ 7月スタート（一斉開始）</p>
+    <p class="method-capacity">📍 第1期生・定員3名 ｜ 募集は7月31日まで ｜ 7月スタート（一斉開始）</p>
 
     <a href="premium.html" class="method-cta">
       プレミアムの全貌を見る →
@@ -1305,9 +1305,9 @@ footer {
 </footer>
 
 <script>
-// ── 募集締切カウントダウン（プレミアム 2026-07-15 23:59:59 JST 締切） ──
+// ── 募集締切カウントダウン（プレミアム 2026-07-31 23:59:59 JST 締切） ──
 function hmcDaysLeft(){
-  var end = new Date('2026-07-16T00:00:00+09:00');
+  var end = new Date('2026-08-01T00:00:00+09:00');
   var diff = end - Date.now();
   return Math.ceil(diff / 86400000); // 1=最終日, 0以下=締切後
 }
@@ -1322,7 +1322,7 @@ function hmcDaysLeft(){
     if(sticky){
       var textEl = sticky.querySelector('.sticky-text');
       var linkEl = sticky.querySelector('a');
-      if(textEl){ textEl.innerHTML = '<strong>プレミアム第1期生・定員3名</strong>募集は7/15まで（' + daysLabel + '）'; }
+      if(textEl){ textEl.innerHTML = '<strong>プレミアム第1期生・定員3名</strong>募集は7/31まで（' + daysLabel + '）'; }
       if(linkEl){ linkEl.setAttribute('href', 'premium.html'); linkEl.textContent = '詳しく →'; }
     }
   }
