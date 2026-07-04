@@ -71,10 +71,13 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
   }
 
   const body = await c.req.json();
-  const { session_ids, category, morning_run, bento, tacos, message, ref } = body;
+  const { session_ids, category, morning_run, bento, message, ref, trainer } = body;
 
   if (!Array.isArray(session_ids) || session_ids.length === 0 || !category) {
     return c.json({ error: 'missing_fields' }, 400);
+  }
+  if (category === '体験' && !trainer) {
+    return c.json({ error: 'trainer_required' }, 400);
   }
 
   const reservations = [];
@@ -99,13 +102,25 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
     const reservationId = crypto.randomUUID();
     const createdAt = new Date().toISOString();
 
+    // 予約済み確認・満席チェック後の通知（新規予約・再有効化で共通利用）
+    const notifyNewReservation = async (resObj) => {
+      const counted = await c.env.DB.prepare(`
+        SELECT (capacity - (SELECT COUNT(*) FROM reservations
+                WHERE session_id = ? AND status = 'confirmed')) AS remaining
+        FROM sessions WHERE id = ?
+      `).bind(sessionId, sessionId).first();
+      c.executionCtx.waitUntil(
+        sendNotifications(userId, displayName, session, resObj, counted?.remaining ?? 0, c.env)
+      );
+    };
+
     let inserted;
     try {
       inserted = await c.env.DB.prepare(`
         INSERT INTO reservations
           (id, session_id, line_user_id, display_name, category,
-           morning_run, bento, tacos, message, ref, status, created_at)
-        SELECT ?, s.id, ?, ?, ?, ?, ?, ?, ?, ?, 'confirmed', ?
+           morning_run, bento, tacos, trainer, message, ref, status, created_at)
+        SELECT ?, s.id, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'confirmed', ?
         FROM sessions s
         WHERE s.id = ? AND s.is_open = 1
           AND (SELECT COUNT(*) FROM reservations r
@@ -114,21 +129,65 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
         reservationId, userId, displayName, category,
         morning_run || null,
         Array.isArray(bento) && bento.length ? bento.join(',') : null,
-        tacos || null,
+        null, // tacos: TACOS Partyは別枠セッション化したため今後は使用しない
+        trainer || null,
         message || null,
         ref || null,
         createdAt,
         sessionId
       ).run();
     } catch (e) {
-      if (e.message?.includes('UNIQUE')) {
+      if (!e.message?.includes('UNIQUE')) throw e;
+
+      // UNIQUE(session_id, line_user_id) に抵触＝この人はこのセッションを予約済み（confirmed）か
+      // 過去にキャンセル済み（cancelled）。cancelledのまま放置すると、一度キャンセルした人が
+      // 同じセッションを二度と予約し直せなくなる（別セッションIDでのUNIQUE制約に永久に阻まれる）
+      // バグになるため、cancelledだった場合は同じ行を再有効化する。
+      const existing = await c.env.DB.prepare(
+        `SELECT * FROM reservations WHERE session_id = ? AND line_user_id = ?`
+      ).bind(sessionId, userId).first();
+
+      if (!existing) throw e;
+
+      if (existing.status === 'confirmed') {
         // 冪等：すでに予約済みなので既存レコードを返す
-        const existing = await c.env.DB.prepare(
-          `SELECT * FROM reservations WHERE session_id = ? AND line_user_id = ?`
-        ).bind(sessionId, userId).first();
-        if (existing) { reservations.push(existing); continue; }
+        reservations.push(existing);
+        continue;
       }
-      throw e;
+
+      // cancelledだった予約を再有効化。status='cancelled'かつ残枠ありの間だけ
+      // 更新が通るガードで、同時リクエストによる二重再有効化・定員オーバーを防ぐ。
+      const reactivated = await c.env.DB.prepare(`
+        UPDATE reservations
+        SET status = 'confirmed', display_name = ?, category = ?, morning_run = ?,
+            bento = ?, trainer = ?, message = ?, ref = ?, created_at = ?
+        WHERE id = ? AND status = 'cancelled'
+          AND (SELECT COUNT(*) FROM reservations r2
+               WHERE r2.session_id = ? AND r2.status = 'confirmed') <
+              (SELECT capacity FROM sessions WHERE id = ?)
+      `).bind(
+        displayName, category, morning_run || null,
+        Array.isArray(bento) && bento.length ? bento.join(',') : null,
+        trainer || null, message || null, ref || null, createdAt,
+        existing.id, sessionId, sessionId
+      ).run();
+
+      if (!reactivated.meta || reactivated.meta.changes === 0) {
+        // 別リクエストが先に再有効化済み、またはその間に満席になった
+        const refreshed = await c.env.DB.prepare(
+          `SELECT * FROM reservations WHERE id = ?`
+        ).bind(existing.id).first();
+        if (refreshed?.status === 'confirmed') { reservations.push(refreshed); continue; }
+        return c.json({ error: 'full', session_id: sessionId }, 409);
+      }
+
+      const reactivatedRes = {
+        id: existing.id, session_id: sessionId, category,
+        display_name: displayName, trainer: trainer || null,
+      };
+      reservations.push(reactivatedRes);
+      await notifyNewReservation(reactivatedRes);
+      continue;
     }
 
     // 書き込めなかった＝この瞬間に満席になった（セッションの存在は手順2で確認済み）
@@ -136,20 +195,14 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
       return c.json({ error: 'full', session_id: sessionId }, 409);
     }
 
-    const newRes = { id: reservationId, session_id: sessionId, category, display_name: displayName };
+    const newRes = {
+      id: reservationId, session_id: sessionId, category,
+      display_name: displayName, trainer: trainer || null,
+    };
     reservations.push(newRes);
 
     // 4. Push通知（非同期・失敗しても予約は通す）
-    // 残枠はINSERT後に数え直した正確な値を使う
-    const counted = await c.env.DB.prepare(`
-      SELECT (capacity - (SELECT COUNT(*) FROM reservations
-              WHERE session_id = ? AND status = 'confirmed')) AS remaining
-      FROM sessions WHERE id = ?
-    `).bind(sessionId, sessionId).first();
-
-    c.executionCtx.waitUntil(
-      sendNotifications(userId, displayName, session, newRes, counted?.remaining ?? 0, c.env)
-    );
+    await notifyNewReservation(newRes);
   }
 
   return c.json({ ok: true, reservations });
@@ -247,6 +300,7 @@ async function sendNotifications(userId, displayName, session, reservation, rema
     `${session.display_date} ${session.title}`,
     'AM7:30〜10:00 / 観音寺 HACOS',
     `区分：${reservation.category}`,
+    ...(reservation.trainer ? [`担当：${reservation.trainer}`] : []),
     '',
     '動きやすい服装でお越しください。',
     '日曜の朝、お待ちしています🌅',
@@ -259,6 +313,7 @@ async function sendNotifications(userId, displayName, session, reservation, rema
   const staffText = [
     '🆕 新規予約',
     `${session.display_date} ／ ${reservation.category}`,
+    ...(reservation.trainer ? [`担当：${reservation.trainer}`] : []),
     `お名前(LINE)：${displayName}`,
     `残枠：${remaining}`,
   ].join('\n');
@@ -284,6 +339,7 @@ async function sendCancelNotifications(userId, displayName, reservation, env) {
   const staffText = [
     '❌ 予約キャンセル',
     `${reservation.display_date} ／ ${reservation.category}`,
+    ...(reservation.trainer ? [`担当：${reservation.trainer}`] : []),
     `お名前(LINE)：${displayName}`,
   ].join('\n');
 
