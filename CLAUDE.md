@@ -5,7 +5,7 @@
 
 ## 構成（読む前にここで判断する）
 - `hacos-hmc-lp.html` … メインLPのソース。**`index.html` は直接編集禁止**（`python3 build_index.py` で生成）
-- `premium.html` … プレミアムプランLP（第1期生・定員3名・¥300,000・締切7/15）
+- `premium.html` … プレミアムプランLP（第1期生・定員3名・¥300,000・締切7/31）
 - `line-reservation/` … LINE予約システム（liff / src / schema.sql）
 - `images/` … 画像40点（web用は長辺1200px・JPEG q82、base64化しない）
 - `*.gs` … Google Apps Script（LINE通知・Slack通知・予定同期）

@@ -174,6 +174,13 @@ body { font-family:'Noto Serif JP',serif; background:var(--warm-white); color:va
   text-align:center; font-size:11px; color:rgba(245,240,232,.5);
   font-family:'DM Sans',sans-serif; margin-top:6px;
 }
+/* ── 改善②：ヒーロー直下・プレミアム入口バナー ── */
+.hero-premium-banner {
+  display:inline-block; background:rgba(184,92,56,.92); color:var(--cream);
+  text-decoration:none; font-size:13px; font-family:'DM Sans',sans-serif;
+  padding:10px 18px; border-radius:999px; margin-top:14px;
+  line-height:1.5; min-height:44px; box-sizing:border-box;
+}
 
 /* ── TICKER ── */
 .ticker { background:var(--forest); overflow:hidden; padding:12px 0; }
@@ -575,6 +582,7 @@ footer {
 .footer-links { display:flex; justify-content:center; gap:20px; flex-wrap:wrap; margin-bottom:20px; }
 .footer-links a { font-size:12px; color:var(--light-text); text-decoration:none; display:inline-block; padding:14px 8px; }
 .footer-copy { font-size:11px; color:rgba(138,132,120,.5); font-family:'DM Sans',sans-serif; }
+.hpb-days { white-space:nowrap; }
 </style>
 </head>
 <body>
@@ -613,6 +621,10 @@ footer {
       <span class="hero-badge">観音寺 / HACOS</span>
       <span class="hero-badge">定員10名</span>
     </div>
+    <!-- ★改善②：プレミアム入口バナー（締切後はJSで非表示） -->
+    <a href="premium.html" class="hero-premium-banner" id="heroPremiumBanner">
+      第1期生 募集中｜定員3名・7/31まで <span class="hpb-days"></span> →
+    </a>
     <!-- ★改善①：HEROにCTAボタン追加 -->
     <a href="#reservation" class="hero-cta">
       7月の体験を予約する →
@@ -1029,6 +1041,53 @@ footer {
   </div>
 </section>
 
+<!-- ═══ 3ヶ月プレミアムコース（NEW） ═══ -->
+<section class="method" id="method">
+  <p class="section-label">Premium Method</p>
+  <h2 class="section-title">本気で<br><em>変わりたい人へ。</em></h2>
+  <div class="divider"></div>
+  <p class="method-lead">
+    今パーソナルに通われている方、<br>
+    もっと加速したい方へ。<br>
+    食事・フィットネス・コミュニティが全部揃った<br>
+    3ヶ月の集中プログラムです。
+  </p>
+
+  <div class="method-card">
+    <span class="method-tag">先着3名限定</span>
+    <h3 class="method-title">HACOS 3ヶ月<br>プレミアムメソッド</h3>
+    <p class="method-sub">既存パーソナル会員さまも参加可能</p>
+
+    <ul class="method-includes">
+      <li>パーソナルトレーニング（月8回・週2ペース）</li>
+      <li>HMC 毎週参加（日曜 AM7:30〜）</li>
+      <li>HACOS KITCHEN 食サポート（毎週弁当＋栄養指導）</li>
+      <li>体組成測定＋月次フィードバックレポート</li>
+      <li>GOのLINE個別サポート（毎週）</li>
+      <li>発酵食ワークショップ（月1回）</li>
+    </ul>
+
+    <div class="method-price-box">
+      <p class="method-price-old">通常 ¥350,000（3ヶ月）</p>
+      <p class="method-price-new">¥300,000</p>
+      <p class="method-price-period">3ヶ月一括 ／ 分割相談可</p>
+    </div>
+
+    <p class="method-capacity">📍 第1期生・定員3名 ｜ 募集は7月31日まで ｜ 7月スタート（一斉開始）</p>
+
+    <a href="premium.html" class="method-cta">
+      プレミアムの全貌を見る →
+    </a>
+    <a href="https://lin.ee/TsRy6I9" class="method-cta secondary" target="_blank" rel="noopener noreferrer">
+      無料カウンセリングを予約する →
+    </a>
+    <p class="method-note">
+      既存パーソナル会員の方は現在の料金との差額調整可能です。<br>
+      7月スタート枠は残りわずか。まずはLINEでご相談を。
+    </p>
+  </div>
+</section>
+
 <!-- ═══ HOW TO JOIN ═══ -->
 <section class="how" id="how">
   <p class="section-label">How to Join</p>
@@ -1167,53 +1226,6 @@ footer {
   </a>
 </section>
 
-<!-- ═══ 3ヶ月プレミアムコース（NEW） ═══ -->
-<section class="method" id="method">
-  <p class="section-label">Premium Method</p>
-  <h2 class="section-title">本気で<br><em>変わりたい人へ。</em></h2>
-  <div class="divider"></div>
-  <p class="method-lead">
-    今パーソナルに通われている方、<br>
-    もっと加速したい方へ。<br>
-    食事・フィットネス・コミュニティが全部揃った<br>
-    3ヶ月の集中プログラムです。
-  </p>
-
-  <div class="method-card">
-    <span class="method-tag">先着3名限定</span>
-    <h3 class="method-title">HACOS 3ヶ月<br>プレミアムメソッド</h3>
-    <p class="method-sub">既存パーソナル会員さまも参加可能</p>
-
-    <ul class="method-includes">
-      <li>パーソナルトレーニング（月8回・週2ペース）</li>
-      <li>HMC 毎週参加（日曜 AM7:30〜）</li>
-      <li>HACOS KITCHEN 食サポート（毎週弁当＋栄養指導）</li>
-      <li>体組成測定＋月次フィードバックレポート</li>
-      <li>GOのLINE個別サポート（毎週）</li>
-      <li>発酵食ワークショップ（月1回）</li>
-    </ul>
-
-    <div class="method-price-box">
-      <p class="method-price-old">通常 ¥350,000（3ヶ月）</p>
-      <p class="method-price-new">¥300,000</p>
-      <p class="method-price-period">3ヶ月一括 ／ 分割相談可</p>
-    </div>
-
-    <p class="method-capacity">📍 第1期生・定員3名 ｜ 募集は7月15日まで ｜ 7月スタート（一斉開始）</p>
-
-    <a href="premium.html" class="method-cta">
-      プレミアムの全貌を見る →
-    </a>
-    <a href="https://lin.ee/TsRy6I9" class="method-cta secondary" target="_blank" rel="noopener noreferrer">
-      無料カウンセリングを予約する →
-    </a>
-    <p class="method-note">
-      既存パーソナル会員の方は現在の料金との差額調整可能です。<br>
-      7月スタート枠は残りわずか。まずはLINEでご相談を。
-    </p>
-  </div>
-</section>
-
 <!-- ═══ RESERVATION FORM ═══ -->
 <section class="reservation-form" id="reservation">
   <p class="section-label">Reservation</p>
@@ -1293,6 +1305,39 @@ footer {
 </footer>
 
 <script>
+// ── 募集締切カウントダウン（プレミアム 2026-07-31 23:59:59 JST 締切） ──
+function hmcDaysLeft(){
+  var end = new Date('2026-08-01T00:00:00+09:00');
+  var diff = end - Date.now();
+  return Math.ceil(diff / 86400000); // 1=最終日, 0以下=締切後
+}
+
+// ── 期間限定：プレミアム告知（sticky CTA & ヒーローバナー） ──
+(function(){
+  var days = hmcDaysLeft();
+  var daysLabel = (days === 1) ? '本日締切' : ('残り' + days + '日');
+
+  if(days >= 1){
+    var sticky = document.getElementById('stickyCta');
+    if(sticky){
+      var textEl = sticky.querySelector('.sticky-text');
+      var linkEl = sticky.querySelector('a');
+      if(textEl){ textEl.innerHTML = '<strong>プレミアム第1期生・定員3名</strong>募集は7/31まで（' + daysLabel + '）'; }
+      if(linkEl){ linkEl.setAttribute('href', 'premium.html'); linkEl.textContent = '詳しく →'; }
+    }
+  }
+
+  var heroBanner = document.getElementById('heroPremiumBanner');
+  if(heroBanner){
+    if(days >= 1){
+      var daysSpan = heroBanner.querySelector('.hpb-days');
+      if(daysSpan){ daysSpan.textContent = '（' + daysLabel + '）'; }
+    } else {
+      heroBanner.style.display = 'none';
+    }
+  }
+})();
+
 // ── Sticky CTA ──
 (function(){
   const cta = document.getElementById('stickyCta');
@@ -1335,6 +1380,7 @@ document.addEventListener('click', function(e){
   var a = e.target.closest('a'); if(!a || typeof gtag !== 'function') return;
   var href = a.getAttribute('href') || '';
   if(href.indexOf('lin.ee') !== -1){ gtag('event','line_click',{link_text:(a.textContent||'').trim().slice(0,50)}); }
+  else if(href.indexOf('premium') !== -1){ gtag('event','premium_click',{link_text:(a.textContent||'').trim().slice(0,50)}); }
   else if(href.indexOf('#reservation') !== -1 || href.indexOf('reserve') !== -1){ gtag('event','reserve_click',{link_text:(a.textContent||'').trim().slice(0,50)}); }
 });
 </script>
