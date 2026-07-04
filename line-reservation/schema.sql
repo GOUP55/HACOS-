@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS reservations (
   line_user_id  TEXT NOT NULL,
   display_name  TEXT,
   category      TEXT NOT NULL,
+  trainer       TEXT,
   morning_run   TEXT,
   bento         TEXT,
   tacos         TEXT,
@@ -47,6 +48,9 @@ INSERT OR IGNORE INTO sessions VALUES
   ('2026-07-19','2026-07-19','7/19（日）','ピラティス',
    'ビーフストロガノフ','ちひろ, ふみや（KITCHEN）',1,10,1,
    '[{"name":"ビーフストロガノフ","price":1300}]',
-   1,'朝RUN 6:30〜あり ／ 午後 TACOS Party 12:00〜21:00（参加費¥3,000）'),
+   0,'朝RUN 6:30〜あり'),
+  ('2026-07-19-tacos','2026-07-19','7/19（日）午後','TACOS Party（午後の部）',
+   NULL,NULL,0,10,1,NULL,
+   0,'12:00〜21:00 ／ 参加費（タコス込み）¥3,000 ／ タコス × サウナ × コーヒー × アルコール（ピラティスとは別枠・単独参加OK）'),
   ('2026-07-26','2026-07-26','7/26（日）','お休み',
    NULL,NULL,0,0,0,NULL,0,'スタッフ不在のためクローズ');
