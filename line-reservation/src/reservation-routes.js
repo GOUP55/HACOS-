@@ -15,6 +15,10 @@ import { verifyIdToken, pushToUser } from './line-utils.js';
 
 const reservationRoutes = new Hono();
 
+// 定員(capacity=通常10)を超えた場合に受け付ける「追加枠」の数。
+// 通常枠が埋まると、この数だけ追加で予約を受け付ける（合計 capacity + EXTRA_SLOTS まで）。
+const EXTRA_SLOTS = 3;
+
 // ── LIFF 予約フォームページを配信 ──
 reservationRoutes.get('/liff/reserve', async (c) => {
   const liffId = c.env.LIFF_ID || '';
@@ -32,7 +36,7 @@ reservationRoutes.get('/api/liff/sessions', async (c) => {
   const today = new Date().toISOString().split('T')[0];
   const { results } = await c.env.DB.prepare(`
     SELECT s.*,
-      (s.capacity - COUNT(CASE WHEN r.status = 'confirmed' THEN 1 END)) AS remaining
+      COUNT(CASE WHEN r.status = 'confirmed' THEN 1 END) AS booked
     FROM sessions s
     LEFT JOIN reservations r ON r.session_id = s.id
     WHERE s.is_open = 1 AND s.date >= ?
@@ -48,7 +52,11 @@ reservationRoutes.get('/api/liff/sessions', async (c) => {
     trainers: s.trainers,
     morning_run: s.morning_run === 1,
     capacity: s.capacity,
-    remaining: Math.max(0, s.remaining),
+    // 通常枠の残り（0未満は0）
+    base_remaining: Math.max(0, s.capacity - s.booked),
+    // 追加枠まで含めた予約可能な残り総数。これが0で「満席」
+    remaining: Math.max(0, s.capacity + EXTRA_SLOTS - s.booked),
+    extra_slots: EXTRA_SLOTS,
     tacos: s.has_tacos === 1,
     bento: s.bento_json ? JSON.parse(s.bento_json) : [],
     note: s.note,
@@ -83,10 +91,10 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
   const reservations = [];
 
   for (const sessionId of session_ids) {
-    // 2. 残枠チェック（定員オーバー防止）
+    // 2. 残枠チェック（定員＋追加枠を超えたら満席）
     const session = await c.env.DB.prepare(`
       SELECT s.*,
-        (s.capacity - COUNT(CASE WHEN r.status = 'confirmed' THEN 1 END)) AS remaining
+        (s.capacity + ${EXTRA_SLOTS} - COUNT(CASE WHEN r.status = 'confirmed' THEN 1 END)) AS remaining
       FROM sessions s
       LEFT JOIN reservations r ON r.session_id = s.id
       WHERE s.id = ? AND s.is_open = 1
@@ -105,12 +113,17 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
     // 予約済み確認・満席チェック後の通知（新規予約・再有効化で共通利用）
     const notifyNewReservation = async (resObj) => {
       const counted = await c.env.DB.prepare(`
-        SELECT (capacity - (SELECT COUNT(*) FROM reservations
-                WHERE session_id = ? AND status = 'confirmed')) AS remaining
+        SELECT
+          (capacity + ${EXTRA_SLOTS} - (SELECT COUNT(*) FROM reservations
+                WHERE session_id = ? AND status = 'confirmed')) AS remaining,
+          (capacity - (SELECT COUNT(*) FROM reservations
+                WHERE session_id = ? AND status = 'confirmed')) AS base_remaining
         FROM sessions WHERE id = ?
-      `).bind(sessionId, sessionId).first();
+      `).bind(sessionId, sessionId, sessionId).first();
+      const remain = Math.max(0, counted?.remaining ?? 0);
+      const isExtra = (counted?.base_remaining ?? 1) <= 0;
       c.executionCtx.waitUntil(
-        sendNotifications(userId, displayName, session, resObj, counted?.remaining ?? 0, c.env)
+        sendNotifications(userId, displayName, session, resObj, remain, isExtra, c.env)
       );
     };
 
@@ -124,7 +137,7 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
         FROM sessions s
         WHERE s.id = ? AND s.is_open = 1
           AND (SELECT COUNT(*) FROM reservations r
-               WHERE r.session_id = s.id AND r.status = 'confirmed') < s.capacity
+               WHERE r.session_id = s.id AND r.status = 'confirmed') < s.capacity + ${EXTRA_SLOTS}
       `).bind(
         reservationId, userId, displayName, category,
         morning_run || null,
@@ -164,7 +177,7 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
         WHERE id = ? AND status = 'cancelled'
           AND (SELECT COUNT(*) FROM reservations r2
                WHERE r2.session_id = ? AND r2.status = 'confirmed') <
-              (SELECT capacity FROM sessions WHERE id = ?)
+              (SELECT capacity + ${EXTRA_SLOTS} FROM sessions WHERE id = ?)
       `).bind(
         displayName, category, morning_run || null,
         Array.isArray(bento) && bento.length ? bento.join(',') : null,
@@ -291,7 +304,7 @@ export async function sendReminders(env) {
   }
 }
 
-async function sendNotifications(userId, displayName, session, reservation, remaining, env) {
+async function sendNotifications(userId, displayName, session, reservation, remaining, isExtra, env) {
   // 本人への確認メッセージ
   const userText = [
     '✅ ご予約ありがとうございます！',
@@ -311,11 +324,11 @@ async function sendNotifications(userId, displayName, session, reservation, rema
 
   // スタッフ通知
   const staffText = [
-    '🆕 新規予約',
+    isExtra ? '🆕 新規予約（追加枠）' : '🆕 新規予約',
     `${session.display_date} ／ ${reservation.category}`,
     ...(reservation.trainer ? [`担当：${reservation.trainer}`] : []),
     `お名前(LINE)：${displayName}`,
-    `残枠：${remaining}`,
+    `残枠：${remaining}${isExtra ? '（追加枠）' : ''}`,
   ].join('\n');
 
   const staffIds = (env.STAFF_USER_IDS || '').split(',').map(s => s.trim()).filter(Boolean);

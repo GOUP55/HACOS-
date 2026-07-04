@@ -54,6 +54,7 @@ body { font-family: -apple-system, 'Hiragino Sans', 'Yu Gothic', sans-serif; bac
 .remaining { position: absolute; top: 10px; right: 12px; font-size: 11px; font-weight: 700; }
 .remaining.ok { color: var(--green); }
 .remaining.low { color: var(--red); }
+.remaining.extra { color: #fff; background: var(--orange); border-radius: 4px; padding: 2px 8px; }
 .full-label { position: absolute; top: 10px; right: 12px; background: #ccc; color: white; font-size: 11px; font-weight: 700; border-radius: 4px; padding: 2px 8px; }
 .check-icon { position: absolute; bottom: 10px; right: 12px; font-size: 20px; color: var(--green); opacity: 0; transition: opacity .15s; }
 .session-card.selected .check-icon { opacity: 1; }
@@ -253,7 +254,18 @@ async function loadSessions() {
   }
 
   sessions.forEach(s => {
+    // remaining = 追加枠まで含めた予約可能な残り総数（0で満席）
+    // base_remaining = 通常枠の残り。通常枠が0でも remaining>0 なら「追加枠」として受付
     const isFull = s.remaining <= 0;
+    const base = s.base_remaining ?? s.remaining;
+    let badge;
+    if (isFull) {
+      badge = '<div class="full-label">満席</div>';
+    } else if (base > 0) {
+      badge = `<div class="remaining ${base <= 3 ? 'low' : 'ok'}">残り${base}席</div>`;
+    } else {
+      badge = `<div class="remaining extra">追加枠 残り${s.remaining}席</div>`;
+    }
     const card = document.createElement('div');
     card.className = `session-card${isFull ? ' full' : ''}`;
     card.dataset.id = s.id;
@@ -264,9 +276,7 @@ async function loadSessions() {
       <div class="session-tags">
         ${s.morning_run ? '<span class="tag tag-run">🏃 朝RUN 6:30〜</span>' : ''}
       </div>
-      ${isFull
-        ? '<div class="full-label">満席</div>'
-        : `<div class="remaining ${s.remaining <= 3 ? 'low' : 'ok'}">残り${s.remaining}席</div>`}
+      ${badge}
       <div class="check-icon">✓</div>
     `;
     if (!isFull) card.addEventListener('click', () => toggleSession(s.id, card));
