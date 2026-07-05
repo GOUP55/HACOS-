@@ -66,6 +66,8 @@ body { font-family: -apple-system, 'Hiragino Sans', 'Yu Gothic', sans-serif; bac
 .opt input { accent-color: var(--green); width: 18px; height: 18px; flex-shrink: 0; cursor: pointer; }
 .opt-label { font-size: 13px; flex: 1; line-height: 1.4; }
 .opt-price { font-size: 11px; color: var(--gray); display: block; margin-top: 1px; }
+.btn-month { width: 100%; padding: 11px 12px; border: 1.5px solid var(--green); background: var(--green-light); color: var(--green); border-radius: 9px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.btn-month:disabled { opacity: .7; cursor: default; }
 
 /* ── Textarea ── */
 textarea { width: 100%; border: 1.5px solid var(--border); border-radius: 9px; padding: 11px 12px; font-size: 13px; font-family: inherit; resize: vertical; min-height: 90px; outline: none; transition: border-color .15s; }
@@ -144,10 +146,16 @@ textarea:focus { border-color: var(--green); }
           <span class="opt-label">はじめての体験<span class="opt-price">体験パーソナル ¥3,500</span></span></label>
         <label class="opt"><input type="radio" name="category" value="会員">
           <span class="opt-label">HMC 会員<span class="opt-price">¥2,000／回</span></span></label>
+        <label class="opt"><input type="radio" name="category" value="回数券">
+          <span class="opt-label">回数券（月まとめ買い）<span class="opt-price">¥2,000／回・その月の開催回数ぶんをまとめて購入</span></span></label>
         <label class="opt"><input type="radio" name="category" value="ビジター">
           <span class="opt-label">ビジター<span class="opt-price">¥3,000／回</span></span></label>
         <label class="opt"><input type="radio" name="category" value="相談">
           <span class="opt-label">迷っている・相談したい</span></label>
+      </div>
+      <div id="kaisuken-helper" style="display:none;margin-top:8px;">
+        <button type="button" id="select-month-btn" class="btn-month">今月の開催日をまとめて選択</button>
+        <p class="section-note" style="margin-top:6px;">回数券はその月のみ有効（繰り越し不可）。月の途中からは残りの開催回数ぶんのご購入になります。</p>
       </div>
     </div>
 
@@ -336,6 +344,30 @@ async function cancelReservation(r, btn) {
     alert('キャンセルに失敗しました。時間をおいてもう一度お試しください。');
     console.error(e);
   }
+}
+
+function setupKaisukenHelper() {
+  const helper = document.getElementById('kaisuken-helper');
+  const monthBtn = document.getElementById('select-month-btn');
+
+  document.querySelectorAll('input[name="category"]').forEach(input => {
+    input.addEventListener('change', () => {
+      helper.style.display = (input.checked && input.value === '回数券') ? 'block' : 'none';
+    });
+  });
+
+  monthBtn.addEventListener('click', () => {
+    const thisMonth = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 7);
+    const todayStr = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
+    sessions.forEach(s => {
+      if (s.date >= todayStr && s.remaining > 0 && s.date.slice(0, 7) === thisMonth && !selectedIds.has(s.id)) {
+        const card = document.querySelector(`#sessions-list [data-id="${s.id}"]`);
+        if (card) toggleSession(s.id, card);
+      }
+    });
+    monthBtn.textContent = '✓ 今月の開催日を選択しました';
+    monthBtn.disabled = true;
+  });
 }
 
 function toggleSession(id, card) {
