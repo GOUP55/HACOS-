@@ -51,10 +51,10 @@ body { font-family: -apple-system, 'Hiragino Sans', 'Yu Gothic', sans-serif; bac
 .session-tags { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
 .tag { font-size: 10px; border-radius: 4px; padding: 2px 7px; font-weight: 600; }
 .tag-run { background: #fff3e0; color: #e65100; }
-.tag-tacos { background: #fce4ec; color: #c62828; }
 .remaining { position: absolute; top: 10px; right: 12px; font-size: 11px; font-weight: 700; }
 .remaining.ok { color: var(--green); }
 .remaining.low { color: var(--red); }
+.remaining.extra { color: #fff; background: var(--orange); border-radius: 4px; padding: 2px 8px; }
 .full-label { position: absolute; top: 10px; right: 12px; background: #ccc; color: white; font-size: 11px; font-weight: 700; border-radius: 4px; padding: 2px 8px; }
 .check-icon { position: absolute; bottom: 10px; right: 12px; font-size: 20px; color: var(--green); opacity: 0; transition: opacity .15s; }
 .session-card.selected .check-icon { opacity: 1; }
@@ -142,8 +142,6 @@ textarea:focus { border-color: var(--green); }
     <div class="section">
       <div class="section-title">参加区分<span class="required">必須</span></div>
       <div class="options">
-        <label class="opt"><input type="radio" name="category" value="体験" required>
-          <span class="opt-label">はじめての体験<span class="opt-price">体験パーソナル ¥3,500</span></span></label>
         <label class="opt"><input type="radio" name="category" value="会員">
           <span class="opt-label">HMC 会員<span class="opt-price">¥2,000／回</span></span></label>
         <label class="opt"><input type="radio" name="category" value="回数券">
@@ -152,6 +150,26 @@ textarea:focus { border-color: var(--green); }
           <span class="opt-label">ビジター<span class="opt-price">¥3,000／回</span></span></label>
         <label class="opt"><input type="radio" name="category" value="相談">
           <span class="opt-label">迷っている・相談したい</span></label>
+        <label class="opt"><input type="radio" name="category" value="体験">
+          <span class="opt-label">体験パーソナル<span class="opt-price">初回 ¥3,500</span></span></label>
+      </div>
+    </div>
+
+    <!-- 体験パーソナルの担当（条件表示） -->
+    <div class="section conditional" id="trainer-section">
+      <div class="section-title">ご希望の担当トレーナー<span class="required">必須</span></div>
+      <p class="section-note">体験パーソナルはご希望の担当をお選びください</p>
+      <div class="options">
+        <label class="opt"><input type="radio" name="trainer" value="GO">
+          <span class="opt-label">GO</span></label>
+        <label class="opt"><input type="radio" name="trainer" value="片山めぐみ">
+          <span class="opt-label">片山めぐみ</span></label>
+        <label class="opt"><input type="radio" name="trainer" value="ちひろ">
+          <span class="opt-label">ちひろ</span></label>
+        <label class="opt"><input type="radio" name="trainer" value="黒田陽子">
+          <span class="opt-label">黒田陽子</span></label>
+        <label class="opt"><input type="radio" name="trainer" value="お任せ">
+          <span class="opt-label">お任せ（運営にお任せします）</span></label>
       </div>
       <div id="kaisuken-helper" style="display:none;margin-top:8px;">
         <button type="button" id="select-month-btn" class="btn-month">今月の開催日をまとめて選択</button>
@@ -178,20 +196,6 @@ textarea:focus { border-color: var(--green); }
       <div class="section-title">お弁当のご予約</div>
       <p class="section-note">ご注文は開催日前日までにお願いします</p>
       <div class="options" id="bento-options"></div>
-    </div>
-
-    <!-- TACOS（条件表示） -->
-    <div class="section conditional" id="tacos-section">
-      <div class="section-title">🌮 TACOS Party（7/19 午後）への参加</div>
-      <p class="section-note">7/19（日）12:00〜21:00 ／ 参加費（タコス込み）¥3,000<br>タコス × サウナ × コーヒー × アルコール</p>
-      <div class="options">
-        <label class="opt"><input type="radio" name="tacos" value="join">
-          <span class="opt-label">参加したい</span></label>
-        <label class="opt"><input type="radio" name="tacos" value="maybe">
-          <span class="opt-label">興味あり・検討中</span></label>
-        <label class="opt"><input type="radio" name="tacos" value="no">
-          <span class="opt-label">参加しない</span></label>
-      </div>
     </div>
 
     <!-- メッセージ -->
@@ -258,7 +262,18 @@ async function loadSessions() {
   }
 
   sessions.forEach(s => {
+    // remaining = 追加枠まで含めた予約可能な残り総数（0で満席）
+    // base_remaining = 通常枠の残り。通常枠が0でも remaining>0 なら「追加枠」として受付
     const isFull = s.remaining <= 0;
+    const base = s.base_remaining ?? s.remaining;
+    let badge;
+    if (isFull) {
+      badge = '<div class="full-label">満席</div>';
+    } else if (base > 0) {
+      badge = `<div class="remaining ${base <= 3 ? 'low' : 'ok'}">残り${base}席</div>`;
+    } else {
+      badge = `<div class="remaining extra">追加枠 残り${s.remaining}席</div>`;
+    }
     const card = document.createElement('div');
     card.className = `session-card${isFull ? ' full' : ''}`;
     card.dataset.id = s.id;
@@ -268,11 +283,8 @@ async function loadSessions() {
       ${s.food ? `<div class="session-food">🍱 ${s.food}</div>` : ''}
       <div class="session-tags">
         ${s.morning_run ? '<span class="tag tag-run">🏃 朝RUN 6:30〜</span>' : ''}
-        ${s.tacos ? '<span class="tag tag-tacos">🌮 TACOS Party</span>' : ''}
       </div>
-      ${isFull
-        ? '<div class="full-label">満席</div>'
-        : `<div class="remaining ${s.remaining <= 3 ? 'low' : 'ok'}">残り${s.remaining}席</div>`}
+      ${badge}
       <div class="check-icon">✓</div>
     `;
     if (!isFull) card.addEventListener('click', () => toggleSession(s.id, card));
@@ -302,7 +314,7 @@ async function loadMyReservations() {
       info.className = 'myres-info';
       info.innerHTML = `<span class="myres-date"></span><br><span class="myres-title"></span>`;
       info.querySelector('.myres-date').textContent = r.display_date || r.session_id;
-      info.querySelector('.myres-title').textContent = `${r.title || ''}（${r.category}）`;
+      info.querySelector('.myres-title').textContent = `${r.title || ''}（${r.category}）${r.trainer ? '　担当：' + r.trainer : ''}`;
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'btn-cancel';
@@ -370,6 +382,14 @@ function setupKaisukenHelper() {
   });
 }
 
+function updateCategoryConditionals() {
+  const category = document.querySelector('input[name="category"]:checked')?.value;
+  document.getElementById('trainer-section').style.display = category === '体験' ? 'block' : 'none';
+}
+document.querySelectorAll('input[name="category"]').forEach(el => {
+  el.addEventListener('change', updateCategoryConditionals);
+});
+
 function toggleSession(id, card) {
   if (selectedIds.has(id)) {
     selectedIds.delete(id);
@@ -384,11 +404,9 @@ function toggleSession(id, card) {
 function updateConditionals() {
   const sel = sessions.filter(s => selectedIds.has(s.id));
   const hasMorningRun = sel.some(s => s.morning_run);
-  const hasTacos = sel.some(s => s.tacos);
   const bentoItems = sel.flatMap(s => (s.bento || []).map(b => ({ ...b, session: s })));
 
   document.getElementById('morning-run-section').style.display = hasMorningRun ? 'block' : 'none';
-  document.getElementById('tacos-section').style.display = hasTacos ? 'block' : 'none';
 
   if (bentoItems.length > 0) {
     document.getElementById('bento-section').style.display = 'block';
@@ -423,6 +441,9 @@ async function handleSubmit(e) {
   const category = form.querySelector('input[name="category"]:checked')?.value;
   if (!category) { showError('参加区分を選択してください'); return; }
 
+  const trainer = form.querySelector('input[name="trainer"]:checked')?.value || null;
+  if (category === '体験' && !trainer) { showError('ご希望の担当トレーナーを選択してください'); return; }
+
   const btn = document.getElementById('btn-submit');
   btn.disabled = true;
   btn.textContent = '送信中...';
@@ -442,9 +463,9 @@ async function handleSubmit(e) {
       body: JSON.stringify({
         session_ids: [...selectedIds],
         category,
+        trainer,
         morning_run: formData.get('morning_run') || null,
         bento,
-        tacos: formData.get('tacos') || null,
         message: formData.get('message') || '',
         ref: sessionStorage.getItem('ref') || '',
       }),
