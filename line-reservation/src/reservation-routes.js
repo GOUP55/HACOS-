@@ -46,6 +46,7 @@ reservationRoutes.get('/api/liff/sessions', async (c) => {
 
   const sessions = results.map(s => ({
     id: s.id,
+    date: s.date,
     display_date: s.display_date,
     title: s.title,
     food: s.food,
@@ -324,7 +325,9 @@ async function sendNotifications(userId, displayName, session, reservation, rema
 
   // スタッフ通知
   const staffText = [
-    isExtra ? '🆕 新規予約（追加枠）' : '🆕 新規予約',
+    reservation.category === '回数券'
+      ? (isExtra ? '🎫 新規予約【回数券・追加枠】' : '🎫 新規予約【回数券】')
+      : (isExtra ? '🆕 新規予約（追加枠）' : '🆕 新規予約'),
     `${session.display_date} ／ ${reservation.category}`,
     ...(reservation.trainer ? [`担当：${reservation.trainer}`] : []),
     `お名前(LINE)：${displayName}`,
@@ -350,7 +353,7 @@ async function sendCancelNotifications(userId, displayName, reservation, env) {
   await pushToUser(userId, [{ type: 'text', text: userText }], env);
 
   const staffText = [
-    '❌ 予約キャンセル',
+    reservation.category === '回数券' ? '❌ 予約キャンセル【🎫回数券】' : '❌ 予約キャンセル',
     `${reservation.display_date} ／ ${reservation.category}`,
     ...(reservation.trainer ? [`担当：${reservation.trainer}`] : []),
     `お名前(LINE)：${displayName}`,
