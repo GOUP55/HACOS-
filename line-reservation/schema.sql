@@ -35,6 +35,22 @@ CREATE TABLE IF NOT EXISTS reservations (
 
 CREATE INDEX IF NOT EXISTS idx_res_session ON reservations(session_id, status);
 
+-- 体験パーソナルの日時リクエスト（日曜クラスと別枠。担当の空き確認後に日時確定する運用）
+CREATE TABLE IF NOT EXISTS trial_requests (
+  id             TEXT PRIMARY KEY,
+  line_user_id   TEXT NOT NULL,
+  display_name   TEXT,
+  trainer        TEXT,
+  preferred_date TEXT,   -- 第1希望日 (YYYY-MM-DD)
+  preferred_time TEXT,   -- 希望時間帯（午前/昼/午後/夜）
+  alt_note       TEXT,   -- 第2希望・ご要望（自由記述）
+  ref            TEXT,
+  status         TEXT NOT NULL DEFAULT 'pending',  -- pending / confirmed / cancelled
+  created_at     TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_trial_user ON trial_requests(line_user_id, status);
+
 -- 7月シードデータ
 INSERT OR IGNORE INTO sessions VALUES
   ('2026-07-05','2026-07-05','7/5（日）','セルフマッサージ＆ストレッチ',
