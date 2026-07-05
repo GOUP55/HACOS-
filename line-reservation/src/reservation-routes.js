@@ -258,7 +258,88 @@ reservationRoutes.get('/api/liff/my-reservations', async (c) => {
     ORDER BY s.date
   `).bind(userId).all();
 
-  return c.json({ reservations: results });
+  // 体験パーソナルの確定待ちリクエストも返す（テーブル未作成でも予約一覧は返す）
+  let trialRequests = [];
+  try {
+    const trials = await c.env.DB.prepare(`
+      SELECT id, trainer, preferred_date, preferred_time, alt_note, status, created_at
+      FROM trial_requests
+      WHERE line_user_id = ? AND status = 'pending'
+      ORDER BY created_at DESC
+    `).bind(userId).all();
+    trialRequests = trials.results;
+  } catch (e) {
+    // trial_requests テーブル未作成時は空配列のまま
+  }
+
+  return c.json({ reservations: results, trial_requests: trialRequests });
+});
+
+// ── POST /api/liff/trial-request ── 体験パーソナルの日時リクエスト（確定待ち） ──
+// 日曜クラスと違い担当の空きが分からないため即confirmedにはせず、pendingで受け付ける。
+// 担当が空きを確認して別途日時確定の連絡をする運用。
+reservationRoutes.post('/api/liff/trial-request', async (c) => {
+  const idToken = (c.req.header('Authorization') || '').replace('Bearer ', '');
+  if (!idToken) return c.json({ error: 'unauthorized' }, 401);
+
+  let userId, displayName;
+  try {
+    ({ userId, displayName } = await verifyIdToken(idToken, c.env));
+  } catch {
+    return c.json({ error: 'invalid_token' }, 401);
+  }
+
+  const { trainer, preferred_date, preferred_time, alt_note, ref } = await c.req.json();
+  if (!trainer || !preferred_date || !preferred_time) {
+    return c.json({ error: 'missing_fields' }, 400);
+  }
+
+  const id = crypto.randomUUID();
+  const createdAt = new Date().toISOString();
+  await c.env.DB.prepare(`
+    INSERT INTO trial_requests
+      (id, line_user_id, display_name, trainer, preferred_date, preferred_time, alt_note, ref, status, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)
+  `).bind(
+    id, userId, displayName, trainer, preferred_date, preferred_time,
+    alt_note || null, ref || null, createdAt
+  ).run();
+
+  c.executionCtx.waitUntil(
+    sendTrialNotifications(userId, displayName, { trainer, preferred_date, preferred_time, alt_note }, c.env)
+  );
+
+  return c.json({ ok: true, id });
+});
+
+// ── POST /api/liff/trial-request/:id/cancel ── 体験リクエストの取消 ──
+reservationRoutes.post('/api/liff/trial-request/:id/cancel', async (c) => {
+  const idToken = (c.req.header('Authorization') || '').replace('Bearer ', '');
+  if (!idToken) return c.json({ error: 'unauthorized' }, 401);
+
+  let userId, displayName;
+  try {
+    ({ userId, displayName } = await verifyIdToken(idToken, c.env));
+  } catch {
+    return c.json({ error: 'invalid_token' }, 401);
+  }
+
+  const reqId = c.req.param('id');
+  const tr = await c.env.DB.prepare(
+    `SELECT * FROM trial_requests WHERE id = ? AND line_user_id = ? AND status = 'pending'`
+  ).bind(reqId, userId).first();
+
+  if (!tr) return c.json({ error: 'not_found' }, 404);
+
+  await c.env.DB.prepare(
+    `UPDATE trial_requests SET status = 'cancelled' WHERE id = ?`
+  ).bind(reqId).run();
+
+  c.executionCtx.waitUntil(
+    sendTrialCancelNotifications(userId, displayName, tr, c.env)
+  );
+
+  return c.json({ ok: true });
 });
 
 // ── POST /api/liff/reservations/:id/cancel ── キャンセル ──
@@ -373,6 +454,55 @@ async function sendCancelNotifications(userId, displayName, reservation, env) {
     `お名前(LINE)：${displayName}`,
   ].join('\n');
 
+  const staffIds = (env.STAFF_USER_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
+  for (const staffId of staffIds) {
+    await pushToUser(staffId, [{ type: 'text', text: staffText }], env);
+  }
+}
+
+async function sendTrialNotifications(userId, displayName, t, env) {
+  const when = `${t.preferred_date} ${t.preferred_time || ''}`.trim();
+
+  const userText = [
+    '🌟 体験パーソナルのリクエストを受け付けました！',
+    '',
+    'まだ予約は確定していません。担当が空き状況を確認し、日時確定のご連絡をLINEでお送りします。少々お待ちください🙏',
+    '',
+    '▼ ご希望内容',
+    `担当：${t.trainer}`,
+    `第1希望：${when}`,
+    ...(t.alt_note ? [`ご要望：${t.alt_note}`] : []),
+  ].join('\n');
+  await pushToUser(userId, [{ type: 'text', text: userText }], env);
+
+  const staffText = [
+    '🌟 体験パーソナル【リクエスト・要日時確定】',
+    `担当希望：${t.trainer}`,
+    `第1希望：${when}`,
+    ...(t.alt_note ? [`ご要望：${t.alt_note}`] : []),
+    `お名前(LINE)：${displayName}`,
+    '※空き確認のうえ日時確定の連絡をお願いします',
+  ].join('\n');
+  const staffIds = (env.STAFF_USER_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
+  for (const staffId of staffIds) {
+    await pushToUser(staffId, [{ type: 'text', text: staffText }], env);
+  }
+}
+
+async function sendTrialCancelNotifications(userId, displayName, tr, env) {
+  const when = `${tr.preferred_date} ${tr.preferred_time || ''}`.trim();
+
+  await pushToUser(userId, [{ type: 'text', text: [
+    '❌ 体験パーソナルのリクエストを取り消しました。',
+    'またのご利用をお待ちしています🌅',
+  ].join('\n') }], env);
+
+  const staffText = [
+    '❌ 体験パーソナル リクエスト取消',
+    `担当希望：${tr.trainer}`,
+    `第1希望：${when}`,
+    `お名前(LINE)：${displayName}`,
+  ].join('\n');
   const staffIds = (env.STAFF_USER_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
   for (const staffId of staffIds) {
     await pushToUser(staffId, [{ type: 'text', text: staffText }], env);

@@ -129,7 +129,47 @@ textarea:focus { border-color: var(--green); }
     <div id="my-reservations-list"></div>
   </div>
 
+  <!-- 体験パーソナル（1対1・リクエスト型） -->
+  <div style="margin:12px 12px 0;">
+    <div class="section">
+      <div class="section-title">体験パーソナル（1対1）をご希望の方</div>
+      <p class="section-note">初回 ¥3,500。日曜クラスとは別に、ご希望の日時で1対1のパーソナルを承ります。担当が空き状況を確認のうえ、日時確定のご連絡をLINEでお送りします。</p>
+      <button type="button" id="trial-open-btn" class="btn-month">体験パーソナルを申し込む →</button>
+
+      <div id="trial-form" style="display:none;margin-top:14px;">
+        <div class="section-title" style="margin-top:4px;">ご希望の担当トレーナー<span class="required">必須</span></div>
+        <div class="options">
+          <label class="opt"><input type="radio" name="trial_trainer" value="GO"><span class="opt-label">GO</span></label>
+          <label class="opt"><input type="radio" name="trial_trainer" value="片山めぐみ"><span class="opt-label">片山めぐみ</span></label>
+          <label class="opt"><input type="radio" name="trial_trainer" value="ちひろ"><span class="opt-label">ちひろ</span></label>
+          <label class="opt"><input type="radio" name="trial_trainer" value="黒田陽子"><span class="opt-label">黒田陽子</span></label>
+          <label class="opt"><input type="radio" name="trial_trainer" value="お任せ"><span class="opt-label">お任せ（運営にお任せします）</span></label>
+        </div>
+
+        <div class="section-title" style="margin-top:14px;">第1希望日<span class="required">必須</span></div>
+        <input type="date" id="trial-date" style="width:100%;border:1.5px solid var(--border);border-radius:9px;padding:11px 12px;font-size:14px;font-family:inherit;outline:none;">
+
+        <div class="section-title" style="margin-top:14px;">ご希望の時間帯<span class="required">必須</span></div>
+        <div class="options">
+          <label class="opt"><input type="radio" name="trial_time" value="午前（9:00〜12:00）"><span class="opt-label">午前（9:00〜12:00）</span></label>
+          <label class="opt"><input type="radio" name="trial_time" value="昼（12:00〜15:00）"><span class="opt-label">昼（12:00〜15:00）</span></label>
+          <label class="opt"><input type="radio" name="trial_time" value="午後（15:00〜18:00）"><span class="opt-label">午後（15:00〜18:00）</span></label>
+          <label class="opt"><input type="radio" name="trial_time" value="夜（18:00〜21:00）"><span class="opt-label">夜（18:00〜21:00）</span></label>
+        </div>
+
+        <div class="section-title" style="margin-top:14px;">第2希望・ご要望（任意）</div>
+        <textarea id="trial-note" placeholder="他の候補日時、体の悩みや目標など、何でもどうぞ😊" style="min-height:70px;"></textarea>
+
+        <div class="error-msg" id="trial-error" style="margin-top:12px;"></div>
+
+        <button type="button" id="trial-submit-btn" class="btn-submit" style="margin-top:14px;">体験パーソナルを申し込む（リクエスト）</button>
+        <p class="section-note" style="margin-top:8px;text-align:center;">※この時点では予約は確定しません。担当より日時確定のご連絡をします。</p>
+      </div>
+    </div>
+  </div>
+
   <form id="reserve-form" class="form-body" onsubmit="handleSubmit(event)" novalidate>
+    <div class="section-title" style="padding:0 4px;margin-top:4px;">日曜の朝クラスを予約する</div>
 
     <!-- 参加希望日 -->
     <div class="section">
@@ -149,33 +189,18 @@ textarea:focus { border-color: var(--green); }
           <span class="opt-label">回数券（月まとめ買い）<span class="opt-price">¥2,000／回・その月の開催回数ぶんをまとめて購入</span></span></label>
         <label class="opt"><input type="radio" name="category" value="ビジター">
           <span class="opt-label">ビジター<span class="opt-price">¥3,000／回</span></span></label>
+        <label class="opt"><input type="radio" name="category" value="TACOS">
+          <span class="opt-label">TACOS Party<span class="opt-price">¥3,000・タコス＋お酒＋フード（7/19 午後の部）</span></span></label>
         <label class="opt"><input type="radio" name="category" value="相談">
           <span class="opt-label">迷っている・相談したい</span></label>
-        <label class="opt"><input type="radio" name="category" value="体験">
-          <span class="opt-label">体験パーソナル<span class="opt-price">初回 ¥3,500</span></span></label>
       </div>
     </div>
 
-    <!-- 体験パーソナルの担当（条件表示） -->
-    <div class="section conditional" id="trainer-section">
-      <div class="section-title">ご希望の担当トレーナー<span class="required">必須</span></div>
-      <p class="section-note">体験パーソナルはご希望の担当をお選びください</p>
-      <div class="options">
-        <label class="opt"><input type="radio" name="trainer" value="GO">
-          <span class="opt-label">GO</span></label>
-        <label class="opt"><input type="radio" name="trainer" value="片山めぐみ">
-          <span class="opt-label">片山めぐみ</span></label>
-        <label class="opt"><input type="radio" name="trainer" value="ちひろ">
-          <span class="opt-label">ちひろ</span></label>
-        <label class="opt"><input type="radio" name="trainer" value="黒田陽子">
-          <span class="opt-label">黒田陽子</span></label>
-        <label class="opt"><input type="radio" name="trainer" value="お任せ">
-          <span class="opt-label">お任せ（運営にお任せします）</span></label>
-      </div>
-      <div id="kaisuken-helper" style="display:none;margin-top:8px;">
-        <button type="button" id="select-month-btn" class="btn-month">今月の開催日をまとめて選択</button>
-        <p class="section-note" style="margin-top:6px;">回数券はその月のみ有効（繰り越し不可）。月の途中からは残りの開催回数ぶんのご購入になります。</p>
-      </div>
+    <!-- 回数券のまとめ選択（回数券選択時のみ表示） -->
+    <div class="section conditional" id="kaisuken-section">
+      <div class="section-title">回数券のまとめ選択</div>
+      <button type="button" id="select-month-btn" class="btn-month">今月の開催日をまとめて選択</button>
+      <p class="section-note" style="margin-top:8px;">回数券はその月のみ有効（繰り越し不可）。月の途中からは残りの開催回数ぶんのご購入になります。</p>
     </div>
 
     <!-- 朝RUN（条件表示） -->
@@ -304,11 +329,14 @@ async function loadMyReservations() {
     if (!res.ok) { box.style.display = 'none'; return; }
     const data = await res.json();
     const items = data.reservations || [];
+    const trials = data.trial_requests || [];
 
-    if (!items.length) { box.style.display = 'none'; return; }
+    if (!items.length && !trials.length) { box.style.display = 'none'; return; }
 
     const list = document.getElementById('my-reservations-list');
     list.innerHTML = '';
+
+    // 確定済みの予約
     items.forEach(r => {
       const row = document.createElement('div');
       row.className = 'myres-item';
@@ -322,6 +350,25 @@ async function loadMyReservations() {
       btn.className = 'btn-cancel';
       btn.textContent = 'キャンセル';
       btn.addEventListener('click', () => cancelReservation(r, btn));
+      row.appendChild(info);
+      row.appendChild(btn);
+      list.appendChild(row);
+    });
+
+    // 体験パーソナルのリクエスト（確定待ち）
+    trials.forEach(t => {
+      const row = document.createElement('div');
+      row.className = 'myres-item';
+      const info = document.createElement('div');
+      info.className = 'myres-info';
+      info.innerHTML = `<span class="myres-date"></span><br><span class="myres-title"></span>`;
+      info.querySelector('.myres-date').textContent = '🌟 体験パーソナル（確定待ち）';
+      info.querySelector('.myres-title').textContent = `${t.preferred_date} ${t.preferred_time || ''}　担当：${t.trainer}`;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn-cancel';
+      btn.textContent = '取消';
+      btn.addEventListener('click', () => cancelTrial(t, btn));
       row.appendChild(info);
       row.appendChild(btn);
       list.appendChild(row);
@@ -360,13 +407,35 @@ async function cancelReservation(r, btn) {
   }
 }
 
+async function cancelTrial(t, btn) {
+  const ok = confirm('体験パーソナルのリクエストを取り消しますか？');
+  if (!ok) return;
+  btn.disabled = true;
+  btn.textContent = '処理中...';
+  try {
+    const idToken = await liff.getIDToken();
+    const res = await fetch(`/api/liff/trial-request/${encodeURIComponent(t.id)}/cancel`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${idToken}` },
+    });
+    if (!res.ok) throw new Error('cancel_failed');
+    await loadMyReservations();
+    alert('リクエストを取り消しました。');
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = '取消';
+    alert('取り消しに失敗しました。時間をおいてもう一度お試しください。');
+    console.error(e);
+  }
+}
+
 function setupKaisukenHelper() {
-  const helper = document.getElementById('kaisuken-helper');
+  const section = document.getElementById('kaisuken-section');
   const monthBtn = document.getElementById('select-month-btn');
 
   document.querySelectorAll('input[name="category"]').forEach(input => {
     input.addEventListener('change', () => {
-      helper.style.display = (input.checked && input.value === '回数券') ? 'block' : 'none';
+      section.style.display = (input.checked && input.value === '回数券') ? 'block' : 'none';
     });
   });
 
@@ -384,13 +453,81 @@ function setupKaisukenHelper() {
   });
 }
 
-function updateCategoryConditionals() {
-  const category = document.querySelector('input[name="category"]:checked')?.value;
-  document.getElementById('trainer-section').style.display = category === '体験' ? 'block' : 'none';
+// ── 体験パーソナル（リクエスト型） ──
+function setupTrialForm() {
+  const openBtn = document.getElementById('trial-open-btn');
+  const form = document.getElementById('trial-form');
+  const dateInput = document.getElementById('trial-date');
+  // 過去日を選べないように最小日を今日(JST)に
+  dateInput.min = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
+
+  openBtn.addEventListener('click', () => {
+    const opening = form.style.display === 'none';
+    form.style.display = opening ? 'block' : 'none';
+    openBtn.textContent = opening ? '× 閉じる' : '体験パーソナルを申し込む →';
+    if (opening) form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+
+  document.getElementById('trial-submit-btn').addEventListener('click', handleTrialSubmit);
 }
-document.querySelectorAll('input[name="category"]').forEach(el => {
-  el.addEventListener('change', updateCategoryConditionals);
-});
+
+async function handleTrialSubmit() {
+  const errEl = document.getElementById('trial-error');
+  errEl.style.display = 'none';
+  const showTrialError = (m) => { errEl.textContent = m; errEl.style.display = 'block'; };
+
+  const trainer = document.querySelector('input[name="trial_trainer"]:checked')?.value;
+  const date = document.getElementById('trial-date').value;
+  const time = document.querySelector('input[name="trial_time"]:checked')?.value;
+  const note = document.getElementById('trial-note').value;
+
+  if (!trainer) { showTrialError('ご希望の担当トレーナーを選択してください'); return; }
+  if (!date) { showTrialError('第1希望日を選択してください'); return; }
+  if (!time) { showTrialError('ご希望の時間帯を選択してください'); return; }
+
+  const btn = document.getElementById('trial-submit-btn');
+  btn.disabled = true;
+  btn.textContent = '送信中...';
+
+  try {
+    const idToken = await liff.getIDToken();
+    const res = await fetch('/api/liff/trial-request', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`,
+        'Idempotency-Key': crypto.randomUUID(),
+      },
+      body: JSON.stringify({
+        trainer,
+        preferred_date: date,
+        preferred_time: time,
+        alt_note: note || '',
+        ref: sessionStorage.getItem('ref') || '',
+      }),
+    });
+    if (!res.ok) throw new Error('trial_failed');
+    showTrialComplete({ trainer, date, time });
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = '体験パーソナルを申し込む（リクエスト）';
+    showTrialError('通信エラーが発生しました。もう一度お試しください。');
+    console.error(err);
+  }
+}
+
+function showTrialComplete(t) {
+  document.getElementById('app').style.display = 'none';
+  const completeEl = document.getElementById('complete');
+  document.querySelector('#complete .complete-icon').textContent = '🌟';
+  document.querySelector('#complete .complete-title').textContent = 'リクエストを受け付けました！';
+  document.querySelector('#complete .complete-body').innerHTML =
+    'まだ予約は確定していません。<br>担当が空き状況を確認し、日時確定のご連絡をLINEでお送りします🙏';
+  document.getElementById('complete-detail').innerHTML =
+    `<p>▼ ご希望内容<br>担当：${t.trainer}<br>第1希望：${t.date} ${t.time}</p>`;
+  completeEl.style.display = 'block';
+  window.scrollTo(0, 0);
+}
 
 function toggleSession(id, card) {
   if (selectedIds.has(id)) {
@@ -443,9 +580,6 @@ async function handleSubmit(e) {
   const category = form.querySelector('input[name="category"]:checked')?.value;
   if (!category) { showError('参加区分を選択してください'); return; }
 
-  const trainer = form.querySelector('input[name="trainer"]:checked')?.value || null;
-  if (category === '体験' && !trainer) { showError('ご希望の担当トレーナーを選択してください'); return; }
-
   const btn = document.getElementById('btn-submit');
   btn.disabled = true;
   btn.textContent = '送信中...';
@@ -465,7 +599,6 @@ async function handleSubmit(e) {
       body: JSON.stringify({
         session_ids: [...selectedIds],
         category,
-        trainer,
         morning_run: formData.get('morning_run') || null,
         bento,
         message: formData.get('message') || '',
@@ -523,6 +656,7 @@ function hideError() {
 }
 
 setupKaisukenHelper();
+setupTrialForm();
 init();
 </script>
 </body>
