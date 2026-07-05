@@ -28,12 +28,26 @@ reservationRoutes.get('/liff/reserve', async (c) => {
   // ここでは KV から取得するパターンを示す
   const html = await c.env.STATIC_KV?.get('liff/reserve.html')
     ?? '<h1>予約フォームが見つかりません</h1>';
+  // LINEアプリ内ブラウザ・中間キャッシュが古いHTMLを表示し続けるのを防ぐ
+  // （KV更新後にデプロイしても画面が切り替わらない不具合の対策）
+  c.header('Cache-Control', 'no-store, must-revalidate');
   return c.html(html.replace("'__LIFF_ID__'", `'${liffId}'`));
 });
 
 // ── GET /api/sessions ── 開催予定＋残枠 ──
 reservationRoutes.get('/api/liff/sessions', async (c) => {
-  const today = new Date().toISOString().split('T')[0];
+  // Workerの内部時刻はUTC。ビジネスはJST(UTC+9)基準のため、日付はJSTで計算する。
+  // さらに「当日の朝クラスが終わった後も一日中表示され続ける」のを防ぐため、
+  // JST正午(12:00)を過ぎたらその日のセッションもクローズ扱いにする。
+  const nowJst = new Date(Date.now() + 9 * 3600 * 1000);
+  const todayJst = nowJst.toISOString().split('T')[0];
+  let cutoffDate = todayJst;
+  if (nowJst.getUTCHours() >= 12) {
+    const tomorrow = new Date(nowJst);
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+    cutoffDate = tomorrow.toISOString().split('T')[0];
+  }
+
   const { results } = await c.env.DB.prepare(`
     SELECT s.*,
       COUNT(CASE WHEN r.status = 'confirmed' THEN 1 END) AS booked
@@ -42,7 +56,7 @@ reservationRoutes.get('/api/liff/sessions', async (c) => {
     WHERE s.is_open = 1 AND s.date >= ?
     GROUP BY s.id
     ORDER BY s.date
-  `).bind(today).all();
+  `).bind(cutoffDate).all();
 
   const sessions = results.map(s => ({
     id: s.id,
