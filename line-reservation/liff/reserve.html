@@ -48,6 +48,7 @@ body { font-family: -apple-system, 'Hiragino Sans', 'Yu Gothic', sans-serif; bac
 .session-card.full .session-date { color: #999; }
 .session-title { font-size: 13px; font-weight: 600; margin-top: 3px; }
 .session-food { font-size: 11px; color: var(--gray); margin-top: 4px; }
+.session-note { font-size: 11px; color: var(--gray); margin-top: 4px; line-height: 1.6; }
 .session-tags { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
 .tag { font-size: 10px; border-radius: 4px; padding: 2px 7px; font-weight: 600; }
 .tag-run { background: #fff3e0; color: #e65100; }
@@ -281,6 +282,7 @@ async function loadSessions() {
       <div class="session-date">${s.display_date}</div>
       <div class="session-title">${s.title}</div>
       ${s.food ? `<div class="session-food">🍱 ${s.food}</div>` : ''}
+      ${s.note ? `<div class="session-note">${s.note}</div>` : ''}
       <div class="session-tags">
         ${s.morning_run ? '<span class="tag tag-run">🏃 朝RUN 6:30〜</span>' : ''}
       </div>
