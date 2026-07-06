@@ -114,8 +114,9 @@ body { font-family:'Noto Serif JP',serif; background:var(--warm-white); color:va
   padding:12px 18px; border-radius:50px;
   font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600;
   box-shadow:0 4px 16px rgba(6,199,85,.45);
-  transition:transform .2s, box-shadow .2s;
+  transition:transform .2s, box-shadow .2s, opacity .25s;
 }
+.line-fab.fab-hidden { opacity:0; pointer-events:none; }
 .line-fab:active { transform:scale(.96); }
 .line-fab .line-fab-icon {
   width:22px; height:22px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
@@ -1110,7 +1111,7 @@ footer {
     </a>
     <p class="method-note">
       既存パーソナル会員の方は現在の料金との差額調整可能です。<br>
-      7月スタート枠は残りわずか。まずはLINEでご相談を。
+      第1期生は定員3名・募集は7/31まで。まずはLINEでご相談を。
     </p>
   </div>
 </section>
@@ -1422,6 +1423,15 @@ document.querySelectorAll('.faq-q').forEach(function(btn){
 </script>
 
 <script>
+(function(){
+  var fab = document.querySelector('.line-fab');
+  var footer = document.querySelector('footer');
+  if(fab && footer && 'IntersectionObserver' in window){
+    new IntersectionObserver(function(entries){
+      fab.classList.toggle('fab-hidden', entries[0].isIntersecting);
+    }).observe(footer);
+  }
+})();
 document.addEventListener('click', function(e){
   var a = e.target.closest('a'); if(!a || typeof gtag !== 'function') return;
   var href = a.getAttribute('href') || '';
