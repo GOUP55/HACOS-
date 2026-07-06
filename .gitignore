@@ -1,0 +1,4 @@
+# テスト実行時に生成されるもの（コミットしない）
+line-reservation/tests/node_modules/
+line-reservation/tests/package-lock.json
+line-reservation/tests/kaisuken-ui.png

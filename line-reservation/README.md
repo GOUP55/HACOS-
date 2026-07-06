@@ -32,11 +32,13 @@
 ```
 line-reservation/
 ├── schema.sql              # D1 テーブル定義 + 7月シードデータ
+├── migrations/             # 本番D1向けの差分SQL（各1回だけ実行）
 ├── liff/
 │   └── reserve.html        # LIFF 予約フォーム（LINEアプリ内で表示）
-└── src/
-    ├── reservation-routes.js  # Hono ルートハンドラ（ハーネスに追加）
-    └── line-utils.js          # LINE API ヘルパー（トークン検証・Push送信）
+├── src/
+│   ├── reservation-routes.js  # Hono ルートハンドラ（ハーネスに追加）
+│   └── line-utils.js          # LINE API ヘルパー（トークン検証・Push送信）
+└── tests/                  # フォームUIの自動テスト（モック環境・本番に触らない）
 ```
 
 ## 毎月の日程追加
@@ -137,6 +139,12 @@ pnpm run deploy
 リポジトリ直下の `line-notification.gs`（Googleフォーム予約用のGAS通知）は
 **未設定のまま予備扱い**とし、新たにセットアップしない。
 Googleフォーム予約を廃止する場合は `line-notification.gs` ごと削除してよい。
+
+## 2026-07-06 の本番反映
+
+回数券対応（PR #16）＋バグ修正（PR #17）＋体験パーソナルのリクエスト型独立（PR #18）を
+LINE Harness側セッションから本番Workerに反映済み（手順と記録は `DEPLOY_KAISUKEN.md`）。
+以後、`reserve.html` を変更したときはデプロイ前に `tests/` の自動テストを実行すること。
 
 ## 2026-07-04 の変更（マイグレーション必須）
 
