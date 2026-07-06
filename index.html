@@ -474,6 +474,19 @@ section { padding:72px 24px; }
 .result-cell .num { color:var(--forest); font-weight:600; font-family:'DM Sans',sans-serif; }
 .voices-disclaimer { font-size:11px; color:var(--light-text); margin-top:14px; line-height:1.7; }
 
+/* ── FREE GUIDE（低ハードル導線・控えめな帯セクション） ── */
+.guide-strip { background:var(--cream); text-align:center; padding:56px 24px; }
+.guide-strip .section-label { color:var(--forest-light); }
+.guide-strip .divider { margin:20px auto; }
+.guide-strip .section-body { margin-bottom:24px; }
+.guide-cta {
+  display:inline-block; background:transparent; color:var(--forest);
+  border:1px solid var(--forest); text-decoration:none; font-weight:500;
+  font-family:'DM Sans',sans-serif; font-size:13px; padding:13px 28px;
+  border-radius:6px; letter-spacing:.02em;
+}
+.guide-cta-note { font-size:11px; color:var(--light-text); margin-top:12px; line-height:1.7; }
+
 /* ── HOW TO JOIN ── */
 .how { background:var(--cream); }
 .steps-list { display:flex; flex-direction:column; gap:0; margin-top:28px; }
@@ -537,6 +550,9 @@ section { padding:72px 24px; }
   min-height:44px; padding:6px 0;
 }
 .cta-line-icon { width:32px; height:32px; background:#06c755; border-radius:8px; display:flex; align-items:center; justify-content:center; }
+.cta-guide-sub { margin-top:28px; padding-top:20px; border-top:1px dashed rgba(245,240,232,.25); }
+.cta-guide-sub-intro { font-size:12px; color:rgba(245,240,232,.55); font-family:'DM Sans',sans-serif; margin-bottom:6px; }
+.cta-guide-sub-link { color:rgba(245,240,232,.85); font-size:13px; text-decoration:underline; font-family:'DM Sans',sans-serif; }
 
 /* ── RESERVATION FORM EMBED ── */
 .reservation-form { background:var(--cream); }
@@ -1084,10 +1100,10 @@ footer {
 
     <p class="method-capacity">📍 第1期生・定員3名 ｜ 募集は7月31日まで ｜ 7月スタート（一斉開始）</p>
 
-    <a href="premium.html" class="method-cta">
+    <a href="premium.html" class="method-cta" data-ga-event="cta_lp_to_premium" data-ga-loc="method">
       プレミアムの全貌を見る →
     </a>
-    <a href="https://lin.ee/TsRy6I9" class="method-cta secondary" target="_blank" rel="noopener noreferrer">
+    <a href="https://lin.ee/TsRy6I9" class="method-cta secondary" target="_blank" rel="noopener noreferrer" data-ga-event="cta_counseling_line" data-ga-loc="method">
       無料カウンセリングを予約する →
     </a>
     <p class="method-note">
@@ -1162,7 +1178,21 @@ footer {
 
   </div>
   <p class="voices-disclaimer">※ 効果には個人差があります。掲載はご本人の許可を得たものです。</p>
-  <a href="premium.html" class="voices-cta">💪 本気で変わりたい人へ・プレミアムメソッド →</a>
+  <a href="premium.html" class="voices-cta" data-ga-event="cta_lp_to_premium" data-ga-loc="voices">💪 本気で変わりたい人へ・プレミアムメソッド →</a>
+</section>
+
+<!-- ═══ 無料ガイド（低ハードル導線） ═══ -->
+<section class="guide-strip">
+  <p class="section-label">first step</p>
+  <h2 class="section-title">まずは、<br><em>読むだけから。</em></h2>
+  <div class="divider"></div>
+  <p class="section-body">
+    「3ヶ月続く人の、食事と習慣スタートガイド」を無料でプレゼント。<br>
+    スマホで5〜8分、すきま時間に読める分量です。<br>
+    体験予約の前に、まずは考え方だけ覗いてみませんか。
+  </p>
+  <a href="https://lin.ee/TsRy6I9" class="guide-cta" target="_blank" rel="noopener noreferrer" data-ga-event="cta_guide_line" data-ga-loc="section">無料ガイドをもらう →</a>
+  <p class="guide-cta-note">友だち追加後「ガイド」と送るだけ。もう友だちの方もOKです。</p>
 </section>
 
 <!-- ═══ FAQ ═══ -->
@@ -1275,6 +1305,10 @@ footer {
     </div>
     LINEで相談する（無料）
   </a>
+  <div class="cta-guide-sub">
+    <p class="cta-guide-sub-intro">体験予約はまだ早いかな、という方へ。</p>
+    <a href="https://lin.ee/TsRy6I9" class="cta-guide-sub-link" target="_blank" rel="noopener noreferrer" data-ga-event="cta_guide_line" data-ga-loc="final-sub">まずは無料ガイドを読んでみる →</a>
+  </div>
 </section>
 
 <!-- ═══ 公式LINE 友だち追加 ═══ -->
@@ -1388,9 +1422,19 @@ document.querySelectorAll('.faq-q').forEach(function(btn){
 document.addEventListener('click', function(e){
   var a = e.target.closest('a'); if(!a || typeof gtag !== 'function') return;
   var href = a.getAttribute('href') || '';
-  if(href.indexOf('lin.ee') !== -1){ gtag('event','line_click',{link_text:(a.textContent||'').trim().slice(0,50)}); }
-  else if(href.indexOf('premium') !== -1){ gtag('event','premium_click',{link_text:(a.textContent||'').trim().slice(0,50)}); }
-  else if(href.indexOf('#reservation') !== -1 || href.indexOf('reserve') !== -1){ gtag('event','reserve_click',{link_text:(a.textContent||'').trim().slice(0,50)}); }
+  var linkText = (a.textContent||'').trim().slice(0,50);
+  var gaEvent = a.getAttribute('data-ga-event');
+  if(gaEvent){
+    var gaLoc = a.getAttribute('data-ga-loc') || '';
+    gtag('event', gaEvent, {location:gaLoc, link_url:href, link_text:linkText});
+    if(gaEvent === 'cta_counseling_line'){
+      gtag('event','generate_lead',{lead_type:'counseling', location:gaLoc});
+    }
+    return;
+  }
+  if(href.indexOf('lin.ee') !== -1){ gtag('event','line_click',{link_text:linkText}); }
+  else if(href.indexOf('premium') !== -1){ gtag('event','premium_click',{link_text:linkText}); }
+  else if(href.indexOf('#reservation') !== -1 || href.indexOf('reserve') !== -1){ gtag('event','reserve_click',{link_text:linkText}); }
 });
 </script>
 
