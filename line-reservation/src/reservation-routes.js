@@ -75,6 +75,8 @@ reservationRoutes.get('/api/liff/sessions', async (c) => {
     tacos: s.has_tacos === 1,
     bento: s.bento_json ? JSON.parse(s.bento_json) : [],
     note: s.note,
+    // 開催時間の表示。NULLなら既定（AM7:30〜10:00）扱い。migration未適用のDBでも undefined→null で安全
+    time_label: s.time_label || null,
   }));
 
   return c.json({ sessions });
@@ -104,6 +106,11 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
   }
 
   const reservations = [];
+  // 満席などで予約できなかった日程。途中でreturnせず最後まで処理して、
+  // 「一部は予約成立・一部は満席」を正しくクライアントへ返す
+  // （以前は最初の満席で即409を返していたため、先に成立した予約が
+  //   ユーザーに「全部失敗した」ように見えるバグがあった）。
+  const failed = [];
 
   for (const sessionId of session_ids) {
     // 2. 残枠チェック（定員＋追加枠を超えたら満席）
@@ -116,8 +123,8 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
       GROUP BY s.id
     `).bind(sessionId).first();
 
-    if (!session) return c.json({ error: 'session_not_found', session_id: sessionId }, 404);
-    if (session.remaining <= 0) return c.json({ error: 'full', session_id: sessionId }, 409);
+    if (!session) { failed.push({ session_id: sessionId, error: 'session_not_found' }); continue; }
+    if (session.remaining <= 0) { failed.push({ session_id: sessionId, error: 'full' }); continue; }
 
     // 3. 予約 INSERT（UNIQUE 制約で二重予約を自動防止）
     // 残枠チェックとINSERTを1本のSQLにまとめ、同時申込みでの定員オーバーを防ぐ。
@@ -206,7 +213,8 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
           `SELECT * FROM reservations WHERE id = ?`
         ).bind(existing.id).first();
         if (refreshed?.status === 'confirmed') { reservations.push(refreshed); continue; }
-        return c.json({ error: 'full', session_id: sessionId }, 409);
+        failed.push({ session_id: sessionId, error: 'full' });
+        continue;
       }
 
       const reactivatedRes = {
@@ -220,7 +228,8 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
 
     // 書き込めなかった＝この瞬間に満席になった（セッションの存在は手順2で確認済み）
     if (!inserted.meta || inserted.meta.changes === 0) {
-      return c.json({ error: 'full', session_id: sessionId }, 409);
+      failed.push({ session_id: sessionId, error: 'full' });
+      continue;
     }
 
     const newRes = {
@@ -233,7 +242,13 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
     await notifyNewReservation(newRes);
   }
 
-  return c.json({ ok: true, reservations });
+  // 1件も成立しなかった場合のみエラー扱い（error/session_id は旧クライアント互換のため残す）
+  if (reservations.length === 0 && failed.length > 0) {
+    const status = failed.some(f => f.error === 'full') ? 409 : 404;
+    return c.json({ error: failed[0].error, session_id: failed[0].session_id, failed }, status);
+  }
+
+  return c.json({ ok: true, reservations, failed });
 });
 
 // ── GET /api/liff/my-reservations ── 自分の予約一覧 ──
@@ -384,35 +399,50 @@ export async function sendReminders(env) {
   tomorrow.setDate(tomorrow.getDate() + 1);
   const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
+  // s.* で取得することで、time_label列のmigration未適用DBでもSQLエラーにならない
   const { results } = await env.DB.prepare(`
-    SELECT r.line_user_id, s.display_date, s.title, s.morning_run
+    SELECT r.line_user_id, s.*
     FROM reservations r
     JOIN sessions s ON s.id = r.session_id
     WHERE s.date = ? AND r.status = 'confirmed'
   `).bind(tomorrowStr).all();
 
   for (const r of results) {
-    const lines = [
-      `🌅 明日 ${r.display_date} AM7:30、HMCでお待ちしています！`,
-      r.morning_run ? '朝RUNは6:30〜。お気をつけてお越しください。' : 'お気をつけてお越しください。',
-    ];
+    // 特別枠（例: TACOS Party）は朝クラスの定型文（AM7:30・朝RUN）を使わない
+    const isSpecial = r.id !== r.date;
+    const lines = isSpecial
+      ? [
+          `🌅 明日 ${r.display_date}「${r.title}」${r.time_label ? `（${r.time_label}）` : ''}、HMCでお待ちしています！`,
+          'お気をつけてお越しください。',
+        ]
+      : [
+          `🌅 明日 ${r.display_date} AM7:30、HMCでお待ちしています！`,
+          r.morning_run ? '朝RUNは6:30〜。お気をつけてお越しください。' : 'お気をつけてお越しください。',
+        ];
     await pushToUser(r.line_user_id, [{ type: 'text', text: lines.join('\n') }], env);
   }
 }
 
 async function sendNotifications(userId, displayName, session, reservation, remaining, isExtra, env) {
+  // 開催時間はセッション個別のtime_labelを優先（未設定なら朝クラス既定）。
+  // id !== date は特別枠（例: 2026-07-19-tacos）＝朝クラスではないので、
+  // 「動きやすい服装で」「日曜の朝」の定型文を使わない。
+  const timeLabel = session.time_label || 'AM7:30〜10:00';
+  const isSpecial = session.id !== session.date;
+
   // 本人への確認メッセージ
   const userText = [
     '✅ ご予約ありがとうございます！',
     '',
     '▼ ご予約内容',
     `${session.display_date} ${session.title}`,
-    'AM7:30〜10:00 / 観音寺 HACOS',
+    `${timeLabel} / 観音寺 HACOS`,
     `区分：${reservation.category}`,
     ...(reservation.trainer ? [`担当：${reservation.trainer}`] : []),
     '',
-    '動きやすい服装でお越しください。',
-    '日曜の朝、お待ちしています🌅',
+    ...(isSpecial
+      ? ['当日のご来場をお待ちしています🌅']
+      : ['動きやすい服装でお越しください。', '日曜の朝、お待ちしています🌅']),
     '変更・キャンセルは、予約フォームを開くと画面上部の「あなたの予約」からいつでも行えます。',
   ].join('\n');
 

@@ -13,7 +13,8 @@ CREATE TABLE IF NOT EXISTS sessions (
   is_open       INTEGER NOT NULL DEFAULT 1,
   bento_json    TEXT,
   has_tacos     INTEGER DEFAULT 0,
-  note          TEXT
+  note          TEXT,
+  time_label    TEXT              -- 開催時間の表示（NULLなら既定の AM7:30〜10:00）
 );
 
 CREATE TABLE IF NOT EXISTS reservations (
@@ -56,17 +57,17 @@ INSERT OR IGNORE INTO sessions VALUES
   ('2026-07-05','2026-07-05','7/5（日）','セルフマッサージ＆ストレッチ',
    'サラダビビンそば & 発酵彩りキンパ','GO, みどり（KITCHEN）',1,10,1,
    '[{"name":"サラダビビンそば","price":null},{"name":"発酵彩りキンパ","price":900}]',
-   0,'朝RUN 6:30〜あり'),
+   0,'朝RUN 6:30〜あり',NULL),
   ('2026-07-12','2026-07-12','7/12（日）','LEAN BODY TRAINING〜燃やして締める60分〜',
    'カオマンガイ','片山めぐみ, ふみや（KITCHEN）',0,10,1,
    '[{"name":"カオマンガイ","price":1300}]',
-   0,'朝RUNなし'),
+   0,'朝RUNなし',NULL),
   ('2026-07-19','2026-07-19','7/19（日）','ピラティス',
    'ビーフストロガノフ','ちひろ, ふみや（KITCHEN）',1,10,1,
    '[{"name":"ビーフストロガノフ","price":1300}]',
-   0,'朝RUN 6:30〜あり'),
+   0,'朝RUN 6:30〜あり',NULL),
   ('2026-07-19-tacos','2026-07-19','7/19（日）午後','TACOS Party（午後の部）',
    NULL,NULL,0,10,1,NULL,
-   0,'12:00〜21:00 ／ 参加費 ¥3,000（タコス込み） ／ タコス・お酒・フードメニュー各種 × サウナ × コーヒー（ピラティスとは別枠・単独参加OK）'),
+   0,'12:00〜21:00 ／ 参加費 ¥3,000（タコス込み） ／ タコス・お酒・フードメニュー各種 × サウナ × コーヒー（ピラティスとは別枠・単独参加OK）','12:00〜21:00'),
   ('2026-07-26','2026-07-26','7/26（日）','お休み',
-   NULL,NULL,0,0,0,NULL,0,'スタッフ不在のためクローズ');
+   NULL,NULL,0,0,0,NULL,0,'スタッフ不在のためクローズ',NULL);
