@@ -113,8 +113,8 @@ pnpm run deploy
 - [x] LIFF URL（`https://liff.line.me/2010528512-LJhoz7MP`）をLINEで開くとフォームが表示される
 - [x] 予約送信後に本人のLINEに確認メッセージが届く
 - [x] スタッフのLINEに通知が届く（現在は GO 本人のみ登録）
-- [x] 満席時に「満席」表示・予約不可になる（2026-07-06 ロジック検証済み。SQLiteで定員+追加枠ちょうどで
-      締まることを確認。実機での満席表示の見た目確認は次回満席発生時に）
+- [x] 満席時に予約不可になる（2026-07-06 ロジック検証済み。SQLiteで定員+追加枠ちょうどで締まることを確認）
+- [ ] 満席時の「満席」表示の実機での見た目確認（次回満席発生時に確認する）
 
 ## 環境変数一覧
 
@@ -159,6 +159,24 @@ wrangler d1 execute line-harness --file=line-reservation/migrations/2026-07-04-t
   かつエラーハンドラがそれを「既に予約済み」と誤認してサイレントに成功扱いにしていた
   （実際には予約されていない）。cancelled行を再有効化するよう修正済み。
 
+## マイグレーション一覧（本番D1に各1回だけ実行・上から順に）
+
+適用済みかどうかが不明な場合も、いずれも再実行で壊れない書き方
+（IF NOT EXISTS / INSERT OR IGNORE / UPDATE）だが、**ALTER TABLEを含む2本
+（07-04と07-06-time-label）は2回目の実行で「duplicate column」エラーになる**。
+エラーが出たら適用済みということなので無視してよい。
+
+| ファイル | 内容 |
+|---|---|
+| `2026-07-04-trainer-and-tacos-session.sql` | reservations.trainer列追加、TACOS Party別枠化 |
+| `2026-07-06-trial-requests.sql` | trial_requestsテーブル追加（**未適用だと体験パーソナル申込が500になる**） |
+| `2026-07-06-tacos-note-and-fixes.sql` | TACOS Partyの案内文更新 |
+| `2026-07-06-time-label.sql` | sessions.time_label列追加（開催時間のセッション個別表示） |
+
+```bash
+wrangler d1 execute line-harness --file=line-reservation/migrations/<ファイル名> --remote
+```
+
 ## 2026-07-06 の変更（品質改善・マイグレーション必須）
 
 **`migrations/2026-07-06-time-label.sql` を本番D1に1回だけ実行すること。**
@@ -183,7 +201,9 @@ wrangler kv key put --binding=STATIC_KV "liff/reserve.html" --path=line-reservat
   12:00〜21:00開催のTACOS Party予約者に誤った時間が届いていた。`sessions.time_label` 列を
   追加し、セッションごとの開催時間を表示するようにした（NULLなら従来どおり朝クラス表記）。
 - **回数券の「今月まとめて選択」がTACOS Partyまで選択するバグを修正**：回数券は朝クラス
-  専用のため、特別枠（id が日付と一致しないセッション）を除外。
+  専用のため、特別枠（id が日付と一致しないセッション）を除外。さらにサーバー側でも
+  「回数券×特別枠」の組み合わせを拒否するガードを追加（UIをすり抜けても成立しない）。
+- **予約できなかった理由の出し分けを追加**：満席／受付終了／回数券対象外を別々の文言で表示。
 - **満席エラーに内部ID（`2026-07-19-tacos` 等）が表示される問題を修正**：日付＋クラス名で表示。
 - **朝RUN開催日の案内文を実データから自動生成**：「7/5・7/19」のハードコードを廃止
   （月替わりで文言が古くなるのを防止）。
