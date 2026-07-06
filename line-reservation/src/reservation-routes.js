@@ -398,6 +398,40 @@ export async function sendReminders(env) {
     ];
     await pushToUser(r.line_user_id, [{ type: 'text', text: lines.join('\n') }], env);
   }
+
+  // ── 月末：来月の開催日案内＋回数券の再購入リマインド ──
+  // 毎日呼ばれるが、JSTで「今日が月の最終日」のときだけ送信する
+  const nowJst2 = new Date(Date.now() + 9 * 3600 * 1000);
+  const tomorrowJst = new Date(nowJst2);
+  tomorrowJst.setUTCDate(tomorrowJst.getUTCDate() + 1);
+  if (tomorrowJst.toISOString().slice(8, 10) === '01') {
+    const thisMonth = nowJst2.toISOString().slice(0, 7);
+    const nextMonth = tomorrowJst.toISOString().slice(0, 7);
+    const next = await env.DB.prepare(
+      `SELECT display_date, title FROM sessions WHERE is_open = 1 AND date LIKE ? ORDER BY date`
+    ).bind(nextMonth + '%').all();
+    if (next.results?.length) {
+      const users = await env.DB.prepare(
+        `SELECT DISTINCT r.line_user_id FROM reservations r
+         JOIN sessions s ON s.id = r.session_id
+         WHERE r.status = 'confirmed' AND s.date LIKE ?`
+      ).bind(thisMonth + '%').all();
+      const n = next.results.length;
+      const text = [
+        '🗓 来月のHMC開催日が決まりました！',
+        ...next.results.map(s => `・${s.display_date} ${s.title}`),
+        '',
+        `回数券（¥2,000×${n}回=¥${(2000 * n).toLocaleString()}）は月まとめ買いがお得です。`,
+        'お支払いは初回参加日に現金でお願いします（繰り越しはできません）。',
+        '',
+        'ご予約はこちら👇',
+        'https://liff.line.me/2010528512-LJhoz7MP',
+      ].join('\n');
+      for (const u of users.results || []) {
+        await pushToUser(u.line_user_id, [{ type: 'text', text }], env);
+      }
+    }
+  }
 }
 
 async function sendNotifications(userId, displayName, session, reservation, remaining, isExtra, env) {
@@ -409,6 +443,7 @@ async function sendNotifications(userId, displayName, session, reservation, rema
     `${session.display_date} ${session.title}`,
     'AM7:30〜10:00 / 観音寺 HACOS',
     `区分：${reservation.category}`,
+    ...(reservation.category === '回数券' ? ['回数券のお支払い：初回参加日に現金でまとめてお願いします。'] : []),
     ...(reservation.trainer ? [`担当：${reservation.trainer}`] : []),
     '',
     '動きやすい服装でお越しください。',
