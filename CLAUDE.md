@@ -17,6 +17,11 @@
 - トーン: 温かく誠実、押し売りしない。「動く×食べる×つながる」「ひとりじゃない」
 - リンク: LINE `https://lin.ee/TsRy6I9` / Instagram `hmc.day`
 
+## セッションの担当分け（SESSION_ROLES.md 必読）
+- **司令塔**（企画・設計セッション）＝LP・料金・企画の設計判断とコード変更はここだけ
+- **デプロイの手**（Harnessセッション）＝LINE予約の本番反映のみ。コードは書き換えない
+- 作業前に SESSION_ROLES.md の連絡板を確認。PR直前に `git fetch` でmainの先行を確認
+
 ## チーム運用（AI_COST_GUIDE.md 参照）
 - 上位モデル（メインセッション）＝**設計・方針決め・難しい判断だけ**
 - 実装・文章量産 → `hacos-frontend` / `hacos-copywriter`（Sonnet）
