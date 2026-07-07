@@ -9,24 +9,17 @@ const HTML_PATH = path.join(__dirname, '..', 'liff', 'reserve.html');
 const PORT = 8788;
 const CHROMIUM = process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium';
 
-// ── JST基準の日付ユーティリティ ──
-function jst(offsetDays) {
-  const d = new Date(Date.now() + 9 * 3600 * 1000 + offsetDays * 86400000);
-  return d.toISOString().slice(0, 10);
-}
+// ブラウザ内の「今日」をこの日時に固定する（月末でもテストが不安定にならない）
+const FIXED_NOW = new Date('2026-07-07T09:00:00+09:00');
 
-// モックデータ: 今月×2（うち1つ満席）、来月×1
-const nextMonth = (() => {
-  const d = new Date(Date.now() + 9 * 3600 * 1000);
-  d.setUTCMonth(d.getUTCMonth() + 1, 15);
-  return d.toISOString().slice(0, 10);
-})();
-
+// モックデータ: 今月×2（うち1つ満席）、今月の特別枠×1（回数券対象外）、来月×1
+// 通常の朝クラスは id === date。特別枠（TACOS Party等）は id にサフィックスが付く
 const sessions = [
-  { id: 's-this-a', date: jst(3), display_date: '今月A', title: '朝ヨガ', food: '', note: '', morning_run: 0, remaining: 5, base_remaining: 5, trainers: null },
-  { id: 's-this-full', date: jst(5), display_date: '今月満席', title: 'ピラティス', food: '', note: '', morning_run: 0, remaining: 0, base_remaining: 0, trainers: null },
-  { id: 's-this-b', date: jst(10), display_date: '今月B', title: 'サーキット', food: '', note: '', morning_run: 0, remaining: 2, base_remaining: 2, trainers: null },
-  { id: 's-next', date: nextMonth, display_date: '来月', title: '朝ヨガ', food: '', note: '', morning_run: 0, remaining: 5, base_remaining: 5, trainers: null },
+  { id: '2026-07-12', date: '2026-07-12', display_date: '今月A', title: '朝ヨガ', food: '', note: '', morning_run: 0, remaining: 5, base_remaining: 5, trainers: null },
+  { id: '2026-07-19', date: '2026-07-19', display_date: '今月満席', title: 'ピラティス', food: '', note: '', morning_run: 0, remaining: 0, base_remaining: 0, trainers: null },
+  { id: '2026-07-26', date: '2026-07-26', display_date: '今月B', title: 'サーキット', food: '', note: '', morning_run: 0, remaining: 2, base_remaining: 2, trainers: null },
+  { id: '2026-07-19-tacos', date: '2026-07-19', display_date: '今月特別枠', title: 'TACOS Party', food: '', note: '', morning_run: 0, remaining: 5, base_remaining: 5, trainers: null },
+  { id: '2026-08-16', date: '2026-08-16', display_date: '来月', title: '朝ヨガ', food: '', note: '', morning_run: 0, remaining: 5, base_remaining: 5, trainers: null },
 ];
 
 // ── 本物のWorkerの代わりをするモックサーバー ──
@@ -68,6 +61,7 @@ function check(name, ok, detail = '') {
   const server = await startMockServer();
   const browser = await chromium.launch({ executablePath: CHROMIUM });
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await page.clock.setFixedTime(FIXED_NOW);
   page.on('pageerror', e => console.log('PAGE ERROR:', e.message));
 
   await page.goto(`http://127.0.0.1:${PORT}/liff/reserve`);
@@ -93,11 +87,12 @@ function check(name, ok, detail = '') {
   await page.locator('#select-month-btn').click();
   const selected = await page.$$eval('#sessions-list .session-card.selected',
     els => els.map(e => e.dataset.id).sort());
-  check('今月の空きセッションだけが一括選択される',
-    JSON.stringify(selected) === JSON.stringify(['s-this-a', 's-this-b']),
+  check('今月の空き朝クラスだけが一括選択される',
+    JSON.stringify(selected) === JSON.stringify(['2026-07-12', '2026-07-26']),
     `選択された: ${selected.join(', ') || 'なし'}`);
-  check('満席・来月分は選ばれない',
-    !selected.includes('s-this-full') && !selected.includes('s-next'));
+  check('満席・来月分・特別枠（TACOS等）は選ばれない',
+    !selected.includes('2026-07-19') && !selected.includes('2026-08-16')
+    && !selected.includes('2026-07-19-tacos'));
 
   const btn = page.locator('#select-month-btn');
   check('ボタンが「✓ 選択しました」表示に変わる',
