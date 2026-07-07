@@ -444,7 +444,7 @@ export async function sendReminders(env) {
     const thisMonth = nowJst2.toISOString().slice(0, 7);
     const nextMonth = tomorrowJst.toISOString().slice(0, 7);
     const next = await env.DB.prepare(
-      `SELECT display_date, title FROM sessions WHERE is_open = 1 AND date LIKE ? ORDER BY date`
+      `SELECT id, date, display_date, title FROM sessions WHERE is_open = 1 AND date LIKE ? ORDER BY date`
     ).bind(nextMonth + '%').all();
     if (next.results?.length) {
       const users = await env.DB.prepare(
@@ -452,14 +452,18 @@ export async function sendReminders(env) {
          JOIN sessions s ON s.id = r.session_id
          WHERE r.status = 'confirmed' AND s.date LIKE ?`
       ).bind(thisMonth + '%').all();
-      const n = next.results.length;
+      // 回数券の回数・金額は朝クラス（id = date）だけで数える。
+      // 特別枠（TACOS Party等）は回数券の対象外のため金額計算に含めない
+      const n = next.results.filter(s => s.id === s.date).length;
       const text = [
         '🗓 来月のHMC開催日が決まりました！',
         ...next.results.map(s => `・${s.display_date} ${s.title}`),
         '',
-        `回数券（¥2,000×${n}回=¥${(2000 * n).toLocaleString()}）は月まとめ買いがお得です。`,
-        'お支払いは初回参加日に現金でお願いします（繰り越しはできません）。',
-        '',
+        ...(n > 0 ? [
+          `回数券（¥2,000×${n}回=¥${(2000 * n).toLocaleString()}）は月まとめ買いがお得です。`,
+          'お支払いは初回参加日に現金でお願いします（繰り越しはできません）。',
+          '',
+        ] : []),
         'ご予約はこちら👇',
         'https://liff.line.me/2010528512-LJhoz7MP',
       ].join('\n');
