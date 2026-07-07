@@ -1,0 +1,11 @@
+{
+  "name": "hacos-reservation-tests",
+  "private": true,
+  "description": "LINE予約フォーム（reserve.html）のモック環境自動テスト",
+  "scripts": {
+    "test": "node kaisuken.test.js"
+  },
+  "dependencies": {
+    "playwright-core": "^1.49.0"
+  }
+}
