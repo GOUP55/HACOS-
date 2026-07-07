@@ -1,4 +1,4 @@
-# 次チャット 引き継ぎ（2026-07-06 時点）
+# 次チャット 引き継ぎ（2026-07-07 時点）
 
 > 原則：**このファイルよりコード・gitログが正**。作業前に `git log --oneline -15` で最新化を確認。
 > **⚠️ まず `SESSION_ROLES.md` を読むこと。** セッションごとの担当分け（司令塔／デプロイの手）と連絡板がある。担当外の領域は触らない。
@@ -26,6 +26,16 @@
 - **体験パーソナルをリクエスト型に独立**（PR#18）：`trial_requests` テーブル新設。TACOS Party参加区分・別枠セッション化も対応
 - guide.html公開＋プレミアムLPに2段CTA、LINEテンプレの締切を7/31に統一
 
+### 7/6〜7/7（リードマグネット導線の完成と収益設計）
+- **メインLPに無料ガイド導線**（声セクション後の帯＋最終CTAサブリンク）を公開済み
+- **GA4本実装済み**：3ページ全CTAに位置別イベント（`data-ga-event`/`data-ga-loc`）、カウンセリング系クリックで `generate_lead` 同時送信、guide.htmlに90%読了計測。**オーナー作業残: GA4管理画面で generate_lead を主要イベントに指定**
+- **LINE自動応答が開通**（Harness自動返信ルール・「ガイド」でガイドURLが返る。ユーザー実機確認済み）
+- **ガイド告知**: LINE一斉配信（予約済み）＋IG告知画像2枚納品済み（feed/story、Meta Business Suiteで予約投稿する運用）
+- **収益設計TOP5の実行資料**: `drafts/premium-close-messages.md`（第1期クロージング文面4種）／`CHALLENGE_21DAY_PLAN.md`／`PREMIUM_2ND_LAUNCH_PLAN.md`／`BENTO_SUBSCRIPTION_PLAN.md`／`MEMBERS_PLAN.md`
+- **統合決定（7/7）**: 旧「通い放題」構想は「HACOSメンバーズ」に統合（BUSINESS_RULES.md・MEMBERS_PLAN.md反映済み）
+- **自動リマインド仕込み済み**: 7/14朝・7/24朝に**司令塔セッション**（このファイルを書いたセッション）へ引き上げ配信①②のリマインドが自動着火する。新チャットで重複対応しないこと
+- お客様の声: 1件目取得済み（`drafts/voices-raw.md`・**掲載許可は未確認**）。2〜3件たまったらpremium.htmlの声セクション実装（CSSは実装済み・本文HTML未実装）
+
 ## ⚠️ 最重要の未確認事項
 **上記のLINE予約側の変更（回数券・バグ修正・trial_requests）は、このリポジトリのmainには入っているが、
 本番Worker/D1への反映は別セッションの手動作業**（手順書：`DEPLOY_KAISUKEN.md`、migrations 3本：`line-reservation/migrations/`）。
@@ -41,10 +51,12 @@
 
 ## 📌 次やること（おすすめ順）
 1. **本番Worker/D1への反映状況をユーザーに確認**（`DEPLOY_KAISUKEN.md` の手順＋migrations適用。未反映なら最優先）
-2. **第1期生ローンチ配信**：`PREMIUM_LAUNCH_LINE.md`（締切7/31＝残り約3週間）
-3. **Instagramプロフィールのリンク**を `https://goup55.github.io/HACOS-/` に差し替え（ユーザー作業・実施済みか要確認）
-4. **Meta Pixel 有効化**（IDが来たら3ページのコメント解除→build→公開）
-5. 任意：他の顔出し実績画像のぼかし(result-w-front2/result-vispiral/result-m-37kg)、特商法/返金規定ページ、Netlify削除、重複LIFF削除・STAFF_USER_IDS追加・満席表示検証（→ `LINE_HARNESS_HANDOFF.md` 残タスク）
+2. **第1期クロージング実行**：引き上げ配信①7/14・②7/24（文面: `drafts/premium-close-messages.md`。※司令塔セッションに自動リマインド仕込み済み・重複対応しない）。カウンセリング発生時は24hフォロー文面を使用
+3. **GA4で generate_lead を主要イベントに指定**（ユーザー作業・5分）＋配信後の数字レビュー（ガイド閲覧→カウンセリングCVR）
+4. **お客様の声の掲載許可確認→2〜3件たまったらpremium.htmlの声セクション実装**
+5. **8月準備**: 21日チャレンジの価格・決済方法のオーナー決定→販売開始（`CHALLENGE_21DAY_PLAN.md`）／第2期ローンチ始動（`PREMIUM_2ND_LAUNCH_PLAN.md`）
+6. **Meta Pixel 有効化**（IDが来たら3ページのコメント解除→build→公開）
+7. 任意：Instagramプロフィールリンク差し替え確認、顔出し実績画像のぼかし(result-w-front2/result-vispiral/result-m-37kg)、特商法/返金規定ページ、Netlify削除、重複LIFF削除・STAFF_USER_IDS追加・満席表示検証（→ `LINE_HARNESS_HANDOFF.md` 残タスク）
 
 ## 🔑 定数
 - LINE公式: `https://lin.ee/TsRy6I9` ／ 体験予約フォーム(Google): `https://forms.gle/dpJWZtafUfZWXnvC7`
