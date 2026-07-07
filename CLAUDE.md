@@ -10,6 +10,7 @@
 - `images/` … 画像40点（web用は長辺1200px・JPEG q82、base64化しない）
 - `*.gs` … Google Apps Script（LINE通知・Slack通知・予定同期）
 - 企画・運用ドキュメントはルートの各 `*.md`（必要なものだけ読む）
+- **料金・締切・回数券などの決定事項は `BUSINESS_RULES.md` が正本**（記憶やチャット履歴より優先）
 
 ## ブランド
 - 配色: `--cream:#F5F0E8` `--forest:#3D5A3E` `--amber:#C8833A` `--rust:#B85C38` `--dark:#1C1C1A`
