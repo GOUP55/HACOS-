@@ -1,7 +1,7 @@
 # PREMIUM 第1期生 ローンチ「集客 × 計測」プラン
 
 > 対象: HACOS 3ヶ月プレミアムメソッド 第1期生
-> 募集締切: **2026-07-15** ／ 定員: **3名** ／ スタート: 2026年7月
+> 募集締切: **2026-07-31** ／ 定員: **3名** ／ スタート: 2026年7月
 > プレミアムLP: https://goup55.github.io/HACOS-/premium.html ／ メインLP: https://goup55.github.io/HACOS-/
 > 主CTA: 無料カウンセリング予約（LINE `https://lin.ee/TsRy6I9`）
 > 作成日: 2026-06-26 ／ 担当: hacos-growth
@@ -101,7 +101,10 @@
 
 ---
 
-## 4. 配信カレンダー（2026-06-26 〜 07-15）
+## 4. 配信カレンダー（旧版・実施済み期間を含む）
+
+> ⚠️ この節は旧スケジュール（6/26〜7/15計画・締切延長前）。**実行はしない**こと。
+> 最新の実行版は `PREMIUM_LAUNCH_CALENDAR.md` を参照。
 
 役割分担: 文面は copywriter が作成（本表は「いつ・どのチャネル・狙い・遷移先」を定義）。
 **UTM規約**: `utm_source`(line/instagram) / `utm_medium`(broadcast/feed/story/bio) / `utm_campaign=premium_2026q3` / `utm_content`(配信回ラベル例 d0626_teaser)。
