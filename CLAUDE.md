@@ -11,6 +11,7 @@
 - `*.gs` … Google Apps Script（LINE通知・Slack通知・予定同期）
 - 企画・運用ドキュメントはルートの各 `*.md`（必要なものだけ読む）
 - **料金・締切・回数券などの決定事項は `BUSINESS_RULES.md` が正本**（記憶やチャット履歴より優先）
+- 計画から外れた判断は **その場で `DECISION_LOG.md` に3行記録**。未知・食い違いの棚卸しは `UNKNOWNS.md`（大きな変更後は `OWNER_QUIZ.md` の更新も）
 
 ## ブランド
 - 配色: `--cream:#F5F0E8` `--forest:#3D5A3E` `--amber:#C8833A` `--rust:#B85C38` `--dark:#1C1C1A`
