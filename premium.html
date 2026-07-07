@@ -117,6 +117,7 @@ section { padding:64px 24px; }
 .p-eyebrow { font-family:'DM Sans',sans-serif; font-size:11px; letter-spacing:.18em; color:var(--amber-light); text-transform:uppercase; }
 .p-hero h1 { font-family:'Cormorant Garamond',serif; font-weight:300; color:var(--cream); font-size:clamp(34px,9vw,60px); line-height:1.15; }
 .p-hero h1 em { font-style:italic; color:var(--amber-light); }
+.p-hero-target { font-size:13px; color:var(--amber-light); line-height:1.8; letter-spacing:.02em; }
 .p-hero-sub { font-size:14px; color:rgba(245,240,232,.78); line-height:1.9; border-left:2px solid var(--amber); padding-left:14px; }
 .p-badges { display:flex; flex-wrap:wrap; gap:8px; }
 .p-badge { background:rgba(200,131,58,.18); border:1px solid rgba(200,131,58,.45); color:var(--amber-light); font-size:11px; padding:5px 12px; border-radius:20px; font-family:'DM Sans',sans-serif; }
@@ -283,6 +284,7 @@ footer a { color:var(--amber-light); text-decoration:none; display:inline-block;
   <div class="p-hero-inner">
     <p class="p-eyebrow">HACOS Premium Method — 3 Months</p>
     <h1>3ヶ月で、<br><em>根本から変わる。</em></h1>
+    <p class="p-hero-target">ジムも自己流ダイエットも、3ヶ月と続かなかった30〜50代のあなたへ。</p>
     <p class="p-hero-sub">
       運動 × 食事 × コミュニティ。<br>
       ひとりでは続かなかったあなたを、<br>
@@ -299,10 +301,10 @@ footer a { color:var(--amber-light); text-decoration:none; display:inline-block;
       <p class="term">募集は 7月31日 まで<span class="days-left"></span></p>
       <p class="cap">定員3名 ｜ 7月スタート ｜ 同じ志の仲間と、3ヶ月をともに。</p>
     </div>
-    <a href="https://lin.ee/TsRy6I9" class="cta-line" target="_blank" rel="noopener noreferrer">LINEで無料カウンセリングを予約 →</a>
+    <a href="https://lin.ee/TsRy6I9" class="cta-line" target="_blank" rel="noopener noreferrer" data-ga-event="cta_counseling_line" data-ga-loc="hero">LINEで無料カウンセリングを予約 →</a>
     <p class="cta-sub" style="color:rgba(245,240,232,.5);">30分・オンライン(Zoom)も可 ／ 話を聞くだけでもOK・勧誘なし</p>
     <div class="cta-guide-wrap">
-      <a href="https://lin.ee/TsRy6I9" class="cta-guide" target="_blank" rel="noopener noreferrer">まずは無料ガイドを読む</a>
+      <a href="https://lin.ee/TsRy6I9" class="cta-guide" target="_blank" rel="noopener noreferrer" data-ga-event="cta_guide_line" data-ga-loc="hero-sub">まずは無料ガイドを読む</a>
       <p class="cta-sub" style="color:rgba(245,240,232,.5);">友だち追加後「ガイド」と送るだけ。3ヶ月続く食事と習慣のヒントを無料でお届けします。</p>
     </div>
   </div>
@@ -566,11 +568,11 @@ footer a { color:var(--amber-light); text-decoration:none; display:inline-block;
     <div class="s"><b>STEP 2</b>　24時間以内に確定のご連絡 → 現状と目標を整理</div>
     <div class="s"><b>STEP 3</b>　納得したら、第1期生としてスタート（分割相談可）</div>
   </div>
-  <a href="https://lin.ee/TsRy6I9" class="cta-line" target="_blank" rel="noopener noreferrer">LINEで無料カウンセリングを予約 →</a>
+  <a href="https://lin.ee/TsRy6I9" class="cta-line" target="_blank" rel="noopener noreferrer" data-ga-event="cta_counseling_line" data-ga-loc="final">LINEで無料カウンセリングを予約 →</a>
   <p class="cta-sub" style="color:rgba(245,240,232,.55);">「カウンセリング希望」とLINEするだけ。勧誘なし・あなたのペースで。</p>
   <div class="cta-guide-wrap">
     <p class="cta-guide-intro">今すぐの予約に迷う方は、まずはこちらから。</p>
-    <a href="https://lin.ee/TsRy6I9" class="cta-guide" target="_blank" rel="noopener noreferrer">無料ガイドだけ受け取る</a>
+    <a href="https://lin.ee/TsRy6I9" class="cta-guide" target="_blank" rel="noopener noreferrer" data-ga-event="cta_guide_line" data-ga-loc="final-sub">無料ガイドだけ受け取る</a>
     <p class="cta-sub" style="color:rgba(245,240,232,.5);">友だち追加後「ガイド」と送るだけ。カウンセリングは、読んでから考えても大丈夫です。</p>
   </div>
 </section>
@@ -587,7 +589,7 @@ footer a { color:var(--amber-light); text-decoration:none; display:inline-block;
     <strong>第1期生 募集は7/31まで<span class="days-left"></span></strong>
     定員3名 ・ 無料カウンセリング受付
   </div>
-  <a href="https://lin.ee/TsRy6I9" target="_blank" rel="noopener noreferrer">LINEで予約 →</a>
+  <a href="https://lin.ee/TsRy6I9" target="_blank" rel="noopener noreferrer" data-ga-event="cta_counseling_line" data-ga-loc="sticky">LINEで予約 →</a>
 </div>
 
 <script>
@@ -619,8 +621,18 @@ document.querySelectorAll('.faq-q').forEach(function(btn){
 document.addEventListener('click', function(e){
   var a = e.target.closest('a'); if(!a || typeof gtag !== 'function') return;
   var href = a.getAttribute('href') || '';
-  if(href.indexOf('lin.ee') !== -1){ gtag('event','line_click',{link_text:(a.textContent||'').trim().slice(0,50)}); }
-  else if(href.indexOf('#reservation') !== -1 || href.indexOf('reserve') !== -1){ gtag('event','reserve_click',{link_text:(a.textContent||'').trim().slice(0,50)}); }
+  var linkText = (a.textContent||'').trim().slice(0,50);
+  var gaEvent = a.getAttribute('data-ga-event');
+  if(gaEvent){
+    var gaLoc = a.getAttribute('data-ga-loc') || '';
+    gtag('event', gaEvent, {location:gaLoc, link_url:href, link_text:linkText});
+    if(gaEvent === 'cta_counseling_line'){
+      gtag('event','generate_lead',{lead_type:'counseling', location:gaLoc});
+    }
+    return;
+  }
+  if(href.indexOf('lin.ee') !== -1){ gtag('event','line_click',{link_text:linkText}); }
+  else if(href.indexOf('#reservation') !== -1 || href.indexOf('reserve') !== -1){ gtag('event','reserve_click',{link_text:linkText}); }
 });
 </script>
 

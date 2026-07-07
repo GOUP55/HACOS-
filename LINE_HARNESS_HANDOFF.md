@@ -1,7 +1,6 @@
-# LINE Harness × HACOS 引き継ぎ資料（2026-07-02 更新版）
+# LINE Harness × HACOS 引き継ぎ資料（2026-07-06 更新版）
 
-前チャットの引き継ぎ（`claude/line-harness-lp-integration-qyhlfe` ブランチ版）を受けて、
-本ブランチ（`claude/line-harness-handoff-setup-fvlsao`）でタスク①②③を実施した後の最新状態。
+2026-07-02版（タスク①②③完了）を基点に、7/4〜7/6の変更（回数券・バグ修正・体験リクエスト型）を反映した最新状態。
 
 ## 🔑 最重要の前提（読み飛ばし厳禁）
 
@@ -30,38 +29,35 @@
 
 ### GitHub（このLPリポジトリ）
 - リポジトリ: `GOUP55/HACOS-`
-- 本番: https://hmclife.netlify.app （Netlify、`main`ブランチ自動デプロイ）
-- 予約API・LIFFの正式版コード置き場: **`line-reservation/` フォルダ（本ブランチで整理済み）**
+- 本番LP: **GitHub Pages** https://goup55.github.io/HACOS-/（Netlifyはクレジット切れで停止・使わない）
+- 予約API・LIFFの正式版コード置き場: **`line-reservation/` フォルダ**（liff / src / schema.sql / migrations）
 
-## ✅ タスク①②③の実施状況（本ブランチ、2026-07-02）
+## ✅ 2026-07-02時点で完了（詳細は git 履歴参照）
+- ① debug版の修正を `line-reservation/` に正式反映＋README全面改訂（Worker反映済み・動作確認済み）
+- ② LP予約セクションに「LINEで予約する」ボタン（`https://liff.line.me/2010528512-LJhoz7MP?ref=lp`）。
+  Googleフォームは「LINEを使っていない方向け」として併存
+- ③ 通知はLIFF経由に一本化。`line-notification.gs`（Googleフォーム用GAS）は予備扱い（設定すると二重通知）
 
-### ① 修正の正式化 → 完了
-- `debug-reservation-routes.js` の中身を `line-reservation/src/reservation-routes.js` に反映
-  （`/api/liff/sessions`・`/api/liff/reservations` の公開パス版）
-- `debug-reserve.html` の中身を `line-reservation/liff/reserve.html` に反映
-- `line-reservation/README.md` を全面改訂（誤った `/api/sessions` パス・新規D1作成・
-  `[assets]`・`export default` 丸ごと追加・`npx wrangler deploy` を訂正）
-- 旧ブランチ `claude/line-harness-lp-integration-qyhlfe`（debug-*ファイル入り）と
-  `claude/hacos-lp-improvements-kd5q2t`（古い401版）は、本ブランチのマージ後に削除してよい
-- **Workerへの再反映は不要**（修正版は既にデプロイ・動作確認済み。今回はリポジトリ整理のみ）
+## 🆕 2026-07-04〜06 の変更（このリポジトリのmainには反映済み）
 
-### ② 予約フォームへの動線 → LP側完了・リッチメニューは手動作業待ち
-- LP（`hacos-hmc-lp.html`）の予約セクション（#reservation）に
-  「LINEで予約する」ボタンを追加。リンク先: `https://liff.line.me/2010528512-LJhoz7MP?ref=lp`
-  （`reserve.html` は `?ref=` を sessionStorage に保存するので流入計測可能）
-- Googleフォームは「LINEを使っていない方向け」として併存（置き換えは未実施・ユーザー判断待ち）
-- リッチメニューへの予約ボタン設置は LINE Official Account Manager での手動作業（コード不可）。
-  手順はチャットで案内済み／必要なら再案内
+| 変更 | 内容 | 関連 |
+|---|---|---|
+| 回数券対応 | reserve.htmlに「回数券（月まとめ買い）¥2,000／回」区分＋今月一括選択ボタン。routes側は3行（sessions返却に`date`追加・通知に【回数券】表示）。Playwrightテスト3項目合格(7/5) | PR#16 / `DEPLOY_KAISUKEN.md` |
+| バグ3件修正 | JST日付ずれ・キャッシュで古いフォーム表示・TACOS説明未表示 | PR#17 |
+| 体験リクエスト型 | 体験パーソナルを日時リクエスト型に独立（`trial_requests`テーブル新設）。トレーナー選択・TACOS Party別枠セッション化 | PR#18 / migrations |
 
-### ③ 通知の重複整理 → 方針決定・反映済み
-- **LINE予約フォーム（LIFF）経由の通知に一本化**（予約者本人＋STAFF_USER_IDSへPush、動作確認済み）
-- `line-notification.gs`（Googleフォーム用GAS通知）はファイル冒頭に
-  「予備扱い・セットアップ不要・設定すると通知が二重になる」旨の警告を追記。設定はしない
+### 本番反映に必要なもの（⚠️ 反映済みかは未確認 → ユーザーに確認すること）
+1. **Workerコード＋KV**: `DEPLOY_KAISUKEN.md` の貼り付け用プロンプトの手順
+   （KVへ reserve.html を put → routes置換 → `pnpm run deploy`。LINEアプリ内LIFFで動作確認）
+2. **D1 migrations（各1回だけ実行）**: `line-reservation/migrations/`
+   - `2026-07-04-trainer-and-tacos-session.sql`（trainer列追加・TACOS別枠セッション）
+   - `2026-07-06-trial-requests.sql`（体験リクエストのテーブル新設）
+   - `2026-07-06-tacos-note-and-fixes.sql`（TACOS案内文の更新のみ）
+3. 切り戻し: KVに旧reserve.htmlを戻し、旧routesで `pnpm run deploy`
 
 ## 🗂️ 残タスク・要フォロー事項
 
-- [ ] 本ブランチを main にマージするか（PR作成）→ **ユーザーに確認**。マージするとLPの
-      「LINEで予約する」ボタンが本番（Netlify）に出る
+- [ ] **上記「本番反映」の実施状況をユーザーに確認**（未反映なら最優先）
 - [ ] リッチメニューに予約ボタン設置（LINE Official Account Manager、手動）
 - [ ] `STAFF_USER_IDS` に GO 本人以外のスタッフIDを追加
       （友だち登録済みスタッフがメッセージを送る → friends テーブルから line_user_id を取得
@@ -70,4 +66,4 @@
 - [ ] LIFFの「友だち追加オプション」の最終状態確認（推奨: On/Aggressive）
 - [ ] リッチメニュー500エラーの再検証（再デプロイで直っている可能性あり、未テスト）
 - [ ] 満席時の「満席」表示・予約不可の動作確認（未検証）
-- [ ] 旧ブランチ2本（qyhlfe / kd5q2t）の削除（本ブランチのマージ後）
+- [x] 旧ブランチ整理・mainマージ（PR#16〜18で反映済み）
