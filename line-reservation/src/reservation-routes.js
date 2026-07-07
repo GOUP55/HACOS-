@@ -75,6 +75,8 @@ reservationRoutes.get('/api/liff/sessions', async (c) => {
     tacos: s.has_tacos === 1,
     bento: s.bento_json ? JSON.parse(s.bento_json) : [],
     note: s.note,
+    // 開催時間の表示。NULLなら既定（AM7:30〜10:00）扱い。migration未適用のDBでも undefined→null で安全
+    time_label: s.time_label || null,
   }));
 
   return c.json({ sessions });
@@ -104,8 +106,14 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
   }
 
   const reservations = [];
+  // 満席などで予約できなかった日程。途中でreturnせず最後まで処理して、
+  // 「一部は予約成立・一部は満席」を正しくクライアントへ返す
+  // （以前は最初の満席で即409を返していたため、先に成立した予約が
+  //   ユーザーに「全部失敗した」ように見えるバグがあった）。
+  const failed = [];
 
-  for (const sessionId of session_ids) {
+  // API直叩きで同一IDが重複していても1回だけ処理する（UI経由ではSetなので起きない）
+  for (const sessionId of [...new Set(session_ids)]) {
     // 2. 残枠チェック（定員＋追加枠を超えたら満席）
     const session = await c.env.DB.prepare(`
       SELECT s.*,
@@ -116,8 +124,14 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
       GROUP BY s.id
     `).bind(sessionId).first();
 
-    if (!session) return c.json({ error: 'session_not_found', session_id: sessionId }, 404);
-    if (session.remaining <= 0) return c.json({ error: 'full', session_id: sessionId }, 409);
+    if (!session) { failed.push({ session_id: sessionId, error: 'session_not_found' }); continue; }
+    // 回数券は朝クラス専用。特別枠（TACOS Party等、idが日付と異なるセッション）は
+    // 料金体系が違うため、UIをすり抜けてもサーバー側で拒否する
+    if (category === '回数券' && session.id !== session.date) {
+      failed.push({ session_id: sessionId, error: 'not_kaisuken' });
+      continue;
+    }
+    if (session.remaining <= 0) { failed.push({ session_id: sessionId, error: 'full' }); continue; }
 
     // 3. 予約 INSERT（UNIQUE 制約で二重予約を自動防止）
     // 残枠チェックとINSERTを1本のSQLにまとめ、同時申込みでの定員オーバーを防ぐ。
@@ -206,7 +220,8 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
           `SELECT * FROM reservations WHERE id = ?`
         ).bind(existing.id).first();
         if (refreshed?.status === 'confirmed') { reservations.push(refreshed); continue; }
-        return c.json({ error: 'full', session_id: sessionId }, 409);
+        failed.push({ session_id: sessionId, error: 'full' });
+        continue;
       }
 
       const reactivatedRes = {
@@ -220,7 +235,8 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
 
     // 書き込めなかった＝この瞬間に満席になった（セッションの存在は手順2で確認済み）
     if (!inserted.meta || inserted.meta.changes === 0) {
-      return c.json({ error: 'full', session_id: sessionId }, 409);
+      failed.push({ session_id: sessionId, error: 'full' });
+      continue;
     }
 
     const newRes = {
@@ -233,7 +249,16 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
     await notifyNewReservation(newRes);
   }
 
-  return c.json({ ok: true, reservations });
+  // 1件も成立しなかった場合のみエラー扱い（error/session_id は旧クライアント互換のため残す）。
+  // トップレベルのerrorとHTTPステータスは必ず同じ要素から導出する
+  // （failed全体からstatusを決めると、error='session_not_found'なのに409のような不整合が起きる）
+  if (reservations.length === 0 && failed.length > 0) {
+    const primary = failed.find(f => f.error === 'full') || failed[0];
+    const status = primary.error === 'session_not_found' ? 404 : 409;
+    return c.json({ error: primary.error, session_id: primary.session_id, failed }, status);
+  }
+
+  return c.json({ ok: true, reservations, failed });
 });
 
 // ── GET /api/liff/my-reservations ── 自分の予約一覧 ──
@@ -384,19 +409,30 @@ export async function sendReminders(env) {
   tomorrow.setDate(tomorrow.getDate() + 1);
   const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
+  // s.* で取得することで、time_label列のmigration未適用DBでもSQLエラーにならない。
+  // session_id/session_dateはs.*の後に明示エイリアスで付け直す
+  // （素のs.id/s.dateのままだと、行オブジェクトのidが「セッションのid」であることが
+  //   コード上読み取れず、将来の列追加で静かに壊れるため）
   const { results } = await env.DB.prepare(`
-    SELECT r.line_user_id, s.display_date, s.title, s.morning_run
+    SELECT r.line_user_id, s.*, s.id AS session_id, s.date AS session_date
     FROM reservations r
     JOIN sessions s ON s.id = r.session_id
     WHERE s.date = ? AND r.status = 'confirmed'
   `).bind(tomorrowStr).all();
 
-  for (const r of results) {
-    const lines = [
-      `🌅 明日 ${r.display_date} AM7:30、HMCでお待ちしています！`,
-      r.morning_run ? '朝RUNは6:30〜。お気をつけてお越しください。' : 'お気をつけてお越しください。',
-    ];
-    await pushToUser(r.line_user_id, [{ type: 'text', text: lines.join('\n') }], env);
+  for (const row of results) {
+    // 特別枠（例: TACOS Party）は朝クラスの定型文（AM7:30・朝RUN）を使わない
+    const isSpecial = row.session_id !== row.session_date;
+    const lines = isSpecial
+      ? [
+          `🌅 明日 ${row.display_date}「${row.title}」${row.time_label ? `（${row.time_label}）` : ''}、HMCでお待ちしています！`,
+          'お気をつけてお越しください。',
+        ]
+      : [
+          `🌅 明日 ${row.display_date} AM7:30、HMCでお待ちしています！`,
+          row.morning_run ? '朝RUNは6:30〜。お気をつけてお越しください。' : 'お気をつけてお越しください。',
+        ];
+    await pushToUser(row.line_user_id, [{ type: 'text', text: lines.join('\n') }], env);
   }
 
   // ── 月末：来月の開催日案内＋回数券の再購入リマインド ──
@@ -408,7 +444,7 @@ export async function sendReminders(env) {
     const thisMonth = nowJst2.toISOString().slice(0, 7);
     const nextMonth = tomorrowJst.toISOString().slice(0, 7);
     const next = await env.DB.prepare(
-      `SELECT display_date, title FROM sessions WHERE is_open = 1 AND date LIKE ? ORDER BY date`
+      `SELECT id, date, display_date, title FROM sessions WHERE is_open = 1 AND date LIKE ? ORDER BY date`
     ).bind(nextMonth + '%').all();
     if (next.results?.length) {
       const users = await env.DB.prepare(
@@ -416,14 +452,18 @@ export async function sendReminders(env) {
          JOIN sessions s ON s.id = r.session_id
          WHERE r.status = 'confirmed' AND s.date LIKE ?`
       ).bind(thisMonth + '%').all();
-      const n = next.results.length;
+      // 回数券の回数・金額は朝クラス（id = date）だけで数える。
+      // 特別枠（TACOS Party等）は回数券の対象外のため金額計算に含めない
+      const n = next.results.filter(s => s.id === s.date).length;
       const text = [
         '🗓 来月のHMC開催日が決まりました！',
         ...next.results.map(s => `・${s.display_date} ${s.title}`),
         '',
-        `回数券（¥2,000×${n}回=¥${(2000 * n).toLocaleString()}）は月まとめ買いがお得です。`,
-        'お支払いは初回参加日に現金でお願いします（繰り越しはできません）。',
-        '',
+        ...(n > 0 ? [
+          `回数券（¥2,000×${n}回=¥${(2000 * n).toLocaleString()}）は月まとめ買いがお得です。`,
+          'お支払いは初回参加日に現金でお願いします（繰り越しはできません）。',
+          '',
+        ] : []),
         'ご予約はこちら👇',
         'https://liff.line.me/2010528512-LJhoz7MP',
       ].join('\n');
@@ -435,19 +475,26 @@ export async function sendReminders(env) {
 }
 
 async function sendNotifications(userId, displayName, session, reservation, remaining, isExtra, env) {
+  // 開催時間はセッション個別のtime_labelを優先（未設定なら朝クラス既定）。
+  // id !== date は特別枠（例: 2026-07-19-tacos）＝朝クラスではないので、
+  // 「動きやすい服装で」「日曜の朝」の定型文を使わない。
+  const timeLabel = session.time_label || 'AM7:30〜10:00';
+  const isSpecial = session.id !== session.date;
+
   // 本人への確認メッセージ
   const userText = [
     '✅ ご予約ありがとうございます！',
     '',
     '▼ ご予約内容',
     `${session.display_date} ${session.title}`,
-    'AM7:30〜10:00 / 観音寺 HACOS',
+    `${timeLabel} / 観音寺 HACOS`,
     `区分：${reservation.category}`,
     ...(reservation.category === '回数券' ? ['回数券のお支払い：初回参加日に現金でまとめてお願いします。'] : []),
     ...(reservation.trainer ? [`担当：${reservation.trainer}`] : []),
     '',
-    '動きやすい服装でお越しください。',
-    '日曜の朝、お待ちしています🌅',
+    ...(isSpecial
+      ? ['当日のご来場をお待ちしています🌅']
+      : ['動きやすい服装でお越しください。', '日曜の朝、お待ちしています🌅']),
     '変更・キャンセルは、予約フォームを開くと画面上部の「あなたの予約」からいつでも行えます。',
   ].join('\n');
 

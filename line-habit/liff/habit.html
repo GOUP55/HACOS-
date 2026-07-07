@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>HACOS × HMC きょうの記録</title>
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<style>
+/* 予約フォーム(reserve.html)とデザイン言語を揃える */
+:root {
+  --green: #06C755;
+  --green-light: #f0fff4;
+  --dark: #1a1a1a;
+  --gray: #666;
+  --border: #e0e0e0;
+  --bg: #f5f5f5;
+  --red: #e53935;
+  --amber: #C8833A;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, 'Hiragino Sans', 'Yu Gothic', sans-serif; background: var(--bg); color: var(--dark); -webkit-font-smoothing: antialiased; }
+
+#loading { display: flex; align-items: center; justify-content: center; min-height: 100vh; flex-direction: column; gap: 16px; background: white; }
+.spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--green); border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.header { background: white; padding: 20px 16px 14px; border-bottom: 1px solid var(--border); }
+.header-title { font-size: 17px; font-weight: 700; letter-spacing: .02em; }
+.header-sub { font-size: 12px; color: var(--gray); margin-top: 3px; }
+.user-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--green-light); color: #2e7d32; border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 600; margin-top: 8px; }
+
+.body { padding: 12px 12px 28px; display: flex; flex-direction: column; gap: 12px; }
+.section { background: white; border-radius: 12px; padding: 16px; }
+.section-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+.section-note { font-size: 11px; color: var(--gray); line-height: 1.5; }
+
+/* ── 統計 ── */
+.stats { display: flex; gap: 10px; }
+.stat { flex: 1; background: white; border-radius: 12px; padding: 14px 10px; text-align: center; }
+.stat-num { font-size: 26px; font-weight: 800; color: var(--green); }
+.stat-num .unit { font-size: 13px; font-weight: 600; margin-left: 1px; }
+.stat-label { font-size: 11px; color: var(--gray); margin-top: 3px; }
+
+/* ── 直近7日 ── */
+.week { display: flex; gap: 6px; }
+.day { flex: 1; text-align: center; border: 1.5px solid var(--border); border-radius: 9px; padding: 8px 0 7px; }
+.day.today { border-color: var(--green); background: var(--green-light); }
+.day-label { font-size: 10px; color: var(--gray); }
+.day-dots { margin-top: 5px; font-size: 11px; line-height: 1.5; min-height: 33px; }
+.day-dots .off { opacity: .15; }
+
+/* ── 記録フォーム ── */
+.date-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+.date-tab { flex: 1; padding: 9px 0; border: 1.5px solid var(--border); background: white; border-radius: 9px; font-size: 13px; font-weight: 600; color: var(--gray); cursor: pointer; }
+.date-tab.active { border-color: var(--green); background: var(--green-light); color: #2e7d32; }
+
+.toggle { display: flex; align-items: center; gap: 12px; width: 100%; padding: 15px 14px; border: 2px solid var(--border); background: white; border-radius: 12px; cursor: pointer; margin-bottom: 10px; text-align: left; transition: border-color .15s, background .15s; }
+.toggle.on { border-color: var(--green); background: var(--green-light); }
+.toggle-emoji { font-size: 26px; }
+.toggle-text { flex: 1; }
+.toggle-title { font-size: 14px; font-weight: 700; }
+.toggle-sub { font-size: 11px; color: var(--gray); margin-top: 2px; }
+.toggle-check { font-size: 20px; color: var(--green); opacity: 0; transition: opacity .15s; }
+.toggle.on .toggle-check { opacity: 1; }
+
+textarea { width: 100%; border: 1.5px solid var(--border); border-radius: 9px; padding: 11px 12px; font-size: 13px; font-family: inherit; resize: vertical; min-height: 64px; outline: none; }
+textarea:focus { border-color: var(--green); }
+
+.error-msg { background: #fff0f0; color: var(--red); border-radius: 9px; padding: 12px 14px; font-size: 13px; text-align: center; display: none; margin-top: 10px; }
+
+.btn-save { width: 100%; background: var(--green); color: white; border: none; border-radius: 12px; padding: 16px; font-size: 16px; font-weight: 700; cursor: pointer; letter-spacing: .04em; margin-top: 12px; transition: opacity .2s, background .2s; }
+.btn-save:disabled { opacity: .6; cursor: default; }
+.btn-save.saved { background: #2e7d32; }
+
+.footer-note { text-align: center; font-size: 12px; color: var(--gray); line-height: 1.8; padding: 4px 16px 0; }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <p style="font-size:13px;color:var(--gray);">読み込み中...</p>
+</div>
+
+<div id="app" style="display:none;">
+  <div class="header">
+    <div class="header-title">きょうの記録</div>
+    <div class="header-sub">動く × 食べる × つながる — 1日10秒の習慣づけ</div>
+    <div class="user-chip">✅ <span id="user-name-chip">ログイン済み</span></div>
+  </div>
+
+  <div class="body">
+    <!-- 統計 -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-num"><span id="stat-streak">0</span><span class="unit">日</span></div>
+        <div class="stat-label">連続記録</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num"><span id="stat-month">0</span><span class="unit">日</span></div>
+        <div class="stat-label">今月の記録</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num"><span id="stat-moved">0</span><span class="unit">日</span></div>
+        <div class="stat-label">今月 動いた</div>
+      </div>
+    </div>
+
+    <!-- 直近7日 -->
+    <div class="section">
+      <div class="section-title">この7日間</div>
+      <div class="week" id="week-strip"></div>
+      <p class="section-note" style="margin-top:8px;">🏃=動いた　🥗=食べ方に気をつけた</p>
+    </div>
+
+    <!-- 記録 -->
+    <div class="section">
+      <div class="section-title">記録する</div>
+      <div class="date-tabs">
+        <button type="button" class="date-tab active" id="tab-today">今日</button>
+        <button type="button" class="date-tab" id="tab-yesterday">昨日</button>
+      </div>
+
+      <button type="button" class="toggle" id="toggle-moved">
+        <span class="toggle-emoji">🏃</span>
+        <span class="toggle-text">
+          <span class="toggle-title">動いた</span>
+          <span class="toggle-sub" style="display:block;">散歩10分でも、ストレッチだけでもOK</span>
+        </span>
+        <span class="toggle-check">✓</span>
+      </button>
+
+      <button type="button" class="toggle" id="toggle-ate">
+        <span class="toggle-emoji">🥗</span>
+        <span class="toggle-text">
+          <span class="toggle-title">食べ方に気をつけた</span>
+          <span class="toggle-sub" style="display:block;">よく噛んだ、野菜から食べた、そんなことでOK</span>
+        </span>
+        <span class="toggle-check">✓</span>
+      </button>
+
+      <textarea id="note" maxlength="500" placeholder="ひとことメモ（任意）。体の変化、気づき、しんどかったこと、何でも😊"></textarea>
+      <p class="section-note" style="margin-top:6px;">メモはHMCのスタッフにも共有されます。返信が届くことがあります🌱</p>
+
+      <div class="error-msg" id="form-error"></div>
+      <button type="button" class="btn-save" id="btn-save">記録する</button>
+    </div>
+
+    <p class="footer-note">
+      できなかった日があっても大丈夫。<br>
+      また今日から。ひとりじゃないです🌅
+    </p>
+  </div>
+</div>
+
+<script>
+const LIFF_ID = '__HABIT_LIFF_ID__';
+let logs = [];        // サーバーが返す窓（直近28日 or 月初以降の長い方）の記録
+let streak = 0;       // 連続記録日数（サーバー計算。全期間ベース）
+let todayStr = '';    // サーバー基準のJST今日 (YYYY-MM-DD)
+let selectedDate = ''; // 記録対象日
+let state = { moved: false, ate: false };
+let dirty = false;    // 保存していない入力があるか（タブ切替での無警告破棄を防ぐ）
+
+// note等のDB由来文字列をinnerHTMLに出す場合は必ずこのesc()を通すこと。
+// 現状noteは .value 代入のみでinnerHTMLに出していないが、一覧表示等を足すときの事故防止
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g,
+  ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
+
+// todayStr(YYYY-MM-DD)からn日前の日付文字列
+const dateStr = (base, daysAgo) => {
+  const d = new Date(base + 'T00:00:00Z');
+  d.setUTCDate(d.getUTCDate() - daysAgo);
+  return d.toISOString().slice(0, 10);
+};
+const md = (s) => `${Number(s.slice(5, 7))}/${Number(s.slice(8, 10))}`;
+const youbi = (s) => '日月火水木金土'[new Date(s + 'T00:00:00Z').getUTCDay()];
+
+async function init() {
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
+    const profile = await liff.getProfile();
+    document.getElementById('user-name-chip').textContent = profile.displayName;
+    await loadSummary();
+    setupForm();
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+  } catch (e) {
+    document.getElementById('loading').innerHTML =
+      '<p style="color:var(--red);padding:24px;font-size:14px;">読み込みに失敗しました。<br>LINEアプリから再度お試しください。</p>';
+    console.error(e);
+  }
+}
+
+async function loadSummary() {
+  const idToken = await liff.getIDToken();
+  const res = await fetch('/api/liff/habit/summary', {
+    headers: { 'Authorization': `Bearer ${idToken}` },
+  });
+  if (!res.ok) throw new Error('summary_failed');
+  const data = await res.json();
+  logs = data.logs || [];
+  streak = data.streak || 0;
+  todayStr = data.today;
+  // 日付が変わっていた（深夜0時をまたいだ）場合に、選択日が
+  // 「一昨日以前」になって保存できなくなるのを防ぐ
+  if (!selectedDate || (selectedDate !== todayStr && selectedDate !== dateStr(todayStr, 1))) {
+    selectedDate = todayStr;
+  }
+  render();
+}
+
+function logOf(date) { return logs.find(l => l.log_date === date); }
+
+function render() {
+  // 統計（連続記録はサーバー計算値を使う。クライアントの窓は28日程度しかなく、
+  // 28日以上続いている人ほど過小表示になるため）
+  const month = todayStr.slice(0, 7);
+  const monthLogs = logs.filter(l => l.log_date.slice(0, 7) === month);
+  document.getElementById('stat-streak').textContent = streak;
+  document.getElementById('stat-month').textContent = monthLogs.length;
+  document.getElementById('stat-moved').textContent = monthLogs.filter(l => l.moved).length;
+
+  // 直近7日
+  const strip = document.getElementById('week-strip');
+  strip.innerHTML = '';
+  for (let d = 6; d >= 0; d--) {
+    const date = dateStr(todayStr, d);
+    const log = logOf(date);
+    const el = document.createElement('div');
+    el.className = 'day' + (date === todayStr ? ' today' : '');
+    el.innerHTML = `
+      <div class="day-label">${md(date)}(${youbi(date)})</div>
+      <div class="day-dots">
+        <span class="${log?.moved ? '' : 'off'}">🏃</span><br>
+        <span class="${log?.ate_well ? '' : 'off'}">🥗</span>
+      </div>`;
+    strip.appendChild(el);
+  }
+
+  // フォームを選択日の既存記録で埋める
+  const log = logOf(selectedDate);
+  state.moved = !!log?.moved;
+  state.ate = !!log?.ate_well;
+  document.getElementById('note').value = log?.note || '';
+  syncToggles();
+  dirty = false;
+
+  // 前の操作のエラー表示が残らないように消す
+  document.getElementById('form-error').style.display = 'none';
+
+  const btn = document.getElementById('btn-save');
+  btn.disabled = false;
+  btn.classList.remove('saved');
+  btn.textContent = log ? '記録を更新する' : '記録する';
+}
+
+function syncToggles() {
+  document.getElementById('toggle-moved').classList.toggle('on', state.moved);
+  document.getElementById('toggle-ate').classList.toggle('on', state.ate);
+}
+
+function setupForm() {
+  const tabToday = document.getElementById('tab-today');
+  const tabYesterday = document.getElementById('tab-yesterday');
+  tabYesterday.textContent = `昨日 ${md(dateStr(todayStr, 1))}`;
+  tabToday.textContent = `今日 ${md(todayStr)}`;
+
+  const selectTab = (date) => {
+    if (date === selectedDate) return;
+    // 未保存の入力があるまま切り替えると無警告で消えてしまうので確認する
+    if (dirty && !confirm('入力した内容がまだ保存されていません。切り替えると消えますが、よろしいですか？')) {
+      return;
+    }
+    selectedDate = date;
+    tabToday.classList.toggle('active', date === todayStr);
+    tabYesterday.classList.toggle('active', date !== todayStr);
+    render();
+  };
+  tabToday.addEventListener('click', () => selectTab(todayStr));
+  tabYesterday.addEventListener('click', () => selectTab(dateStr(todayStr, 1)));
+
+  document.getElementById('toggle-moved').addEventListener('click', () => {
+    state.moved = !state.moved; dirty = true; syncToggles();
+  });
+  document.getElementById('toggle-ate').addEventListener('click', () => {
+    state.ate = !state.ate; dirty = true; syncToggles();
+  });
+  document.getElementById('note').addEventListener('input', () => { dirty = true; });
+
+  document.getElementById('btn-save').addEventListener('click', save);
+}
+
+async function save() {
+  const errEl = document.getElementById('form-error');
+  errEl.style.display = 'none';
+  const note = document.getElementById('note').value.trim();
+
+  if (!state.moved && !state.ate && !note) {
+    errEl.textContent = 'どちらかにチェックするか、メモをひとこと書いてね😊';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const btn = document.getElementById('btn-save');
+  btn.disabled = true;
+  btn.textContent = '保存中...';
+  const showErr = (msg) => { errEl.textContent = msg; errEl.style.display = 'block'; };
+
+  // 深夜0時をまたいで開きっぱなしだった場合、画面の「今日」と実際の日付が
+  // ズレたまま保存され、意図しない日に記録がつくのを防ぐ
+  const clientJst = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
+  if (clientJst !== todayStr) {
+    try { await loadSummary(); } catch {}
+    btn.disabled = false;
+    btn.textContent = '記録する';
+    showErr('日付が変わったため画面を更新しました。内容を確認して、もう一度保存してください。');
+    return;
+  }
+
+  // 1) 保存
+  try {
+    const idToken = await liff.getIDToken();
+    const res = await fetch('/api/liff/habit/log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+      body: JSON.stringify({
+        log_date: selectedDate,
+        moved: state.moved,
+        ate_well: state.ate,
+        note,
+      }),
+    });
+    if (!res.ok) throw new Error('save_failed');
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = '記録する';
+    showErr('通信エラーが発生しました。もう一度お試しください。');
+    console.error(e);
+    return;
+  }
+
+  // 2) 表示の更新（ここで失敗しても保存自体は済んでいるので、
+  //    「通信エラー」と混同させる誤った失敗表示はしない）
+  dirty = false;
+  let reloadFailed = false;
+  try {
+    await loadSummary();
+  } catch (e) {
+    reloadFailed = true;
+    console.error(e);
+  }
+
+  btn.classList.add('saved');
+  btn.textContent = '✅ 記録しました';
+  btn.disabled = true;
+  if (reloadFailed) {
+    showErr('保存はできています。表示の更新に失敗したので、開き直すと最新になります。');
+  }
+  setTimeout(() => {
+    btn.classList.remove('saved');
+    btn.disabled = false;
+    btn.textContent = logOf(selectedDate) ? '記録を更新する' : '記録する';
+  }, 1800);
+}
+
+init();
+</script>
+</body>
+</html>

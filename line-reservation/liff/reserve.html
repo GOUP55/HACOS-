@@ -206,7 +206,7 @@ textarea:focus { border-color: var(--green); }
     <!-- 朝RUN（条件表示） -->
     <div class="section conditional" id="morning-run-section">
       <div class="section-title">朝RUN（6:30〜）への参加</div>
-      <p class="section-note">朝RUNの開催日は 7/5・7/19 です（7/12は開催なし）</p>
+      <p class="section-note" id="morning-run-note"></p>
       <div class="options">
         <label class="opt"><input type="radio" name="morning_run" value="join">
           <span class="opt-label">参加したい</span></label>
@@ -254,6 +254,28 @@ let profile = null;
 let sessions = [];
 let selectedIds = new Set();
 
+// DB由来の文字列をinnerHTMLに埋め込む前のエスケープ（スタッフ入力でも事故防止のため一律通す）
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g,
+  ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
+
+// session_id（内部ID）をユーザー向けの表示名に変換
+const sessionLabel = (id) => {
+  const s = sessions.find(s => s.id === id);
+  return s ? `${s.display_date} ${s.title}` : id;
+};
+
+// 予約できなかった日程の理由別メッセージを組み立てる（満席／受付終了／回数券対象外）。
+// エラー時・一部成立時の両方で同じ文言を使い、表記ゆれを防ぐ
+function failedMessage(failedArr) {
+  const byReason = { full: [], session_not_found: [], not_kaisuken: [] };
+  failedArr.forEach(f => (byReason[f.error] || byReason.session_not_found).push(`「${sessionLabel(f.session_id)}」`));
+  const parts = [];
+  if (byReason.full.length) parts.push(`${byReason.full.join('、')}は満席のため予約できませんでした`);
+  if (byReason.not_kaisuken.length) parts.push(`${byReason.not_kaisuken.join('、')}は回数券の対象外です（会員・ビジター等でご予約ください）`);
+  if (byReason.session_not_found.length) parts.push(`${byReason.session_not_found.join('、')}は受付を終了しています`);
+  return parts.join('。');
+}
+
 async function init() {
   try {
     await liff.init({ liffId: LIFF_ID });
@@ -282,6 +304,18 @@ async function loadSessions() {
   const list = document.getElementById('sessions-list');
   list.innerHTML = '';
 
+  // 「今月まとめて選択」ボタンを初期状態に戻す（キャンセル後の再取得時など）
+  const monthBtn = document.getElementById('select-month-btn');
+  monthBtn.disabled = false;
+  monthBtn.textContent = '今月の開催日をまとめて選択';
+
+  // 朝RUN開催日の案内を実データから生成（ハードコードだと月替わりで古くなる）
+  const runDays = sessions.filter(s => s.morning_run).map(s => s.display_date);
+  const runNote = document.getElementById('morning-run-note');
+  runNote.textContent = runDays.length
+    ? `朝RUNの開催日は ${runDays.join('・')} です`
+    : '';
+
   if (!sessions.length) {
     list.innerHTML = '<p style="color:var(--gray);font-size:13px;text-align:center;padding:12px 0;">現在受付中の日程がありません</p>';
     return;
@@ -304,10 +338,10 @@ async function loadSessions() {
     card.className = `session-card${isFull ? ' full' : ''}`;
     card.dataset.id = s.id;
     card.innerHTML = `
-      <div class="session-date">${s.display_date}</div>
-      <div class="session-title">${s.title}</div>
-      ${s.food ? `<div class="session-food">🍱 ${s.food}</div>` : ''}
-      ${s.note ? `<div class="session-note">${s.note}</div>` : ''}
+      <div class="session-date">${esc(s.display_date)}</div>
+      <div class="session-title">${esc(s.title)}</div>
+      ${s.food ? `<div class="session-food">🍱 ${esc(s.food)}</div>` : ''}
+      ${s.note ? `<div class="session-note">${esc(s.note)}</div>` : ''}
       <div class="session-tags">
         ${s.morning_run ? '<span class="tag tag-run">🏃 朝RUN 6:30〜</span>' : ''}
       </div>
@@ -443,7 +477,9 @@ function setupKaisukenHelper() {
     const thisMonth = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 7);
     const todayStr = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
     sessions.forEach(s => {
-      if (s.date >= todayStr && s.remaining > 0 && s.date.slice(0, 7) === thisMonth && !selectedIds.has(s.id)) {
+      // s.id === s.date は通常の朝クラス。特別枠（TACOS Party等、idにサフィックス付き）は
+      // 回数券の対象外なので、まとめて選択に含めない
+      if (s.id === s.date && s.date >= todayStr && s.remaining > 0 && s.date.slice(0, 7) === thisMonth && !selectedIds.has(s.id)) {
         const card = document.querySelector(`#sessions-list [data-id="${s.id}"]`);
         if (card) toggleSession(s.id, card);
       }
@@ -555,8 +591,8 @@ function updateConditionals() {
       const label = document.createElement('label');
       label.className = 'opt';
       label.innerHTML = `
-        <input type="checkbox" name="bento" value="${b.session.id}:${b.name}">
-        <span class="opt-label">${b.session.display_date} ${b.name}
+        <input type="checkbox" name="bento" value="${esc(b.session.id)}:${esc(b.name)}">
+        <span class="opt-label">${esc(b.session.display_date)} ${esc(b.name)}
           ${b.price ? `<span class="opt-price">¥${b.price.toLocaleString()}</span>` : ''}
         </span>`;
       opts.appendChild(label);
@@ -608,15 +644,20 @@ async function handleSubmit(e) {
 
     const result = await res.json();
 
-    if (res.status === 409) {
-      if (result.error === 'full') showError(`「${result.session_id}」は満席のため予約できませんでした`);
-      else if (result.error === 'already') showError('すでにご予約済みです');
-      else showError('予約に失敗しました。もう一度お試しください。');
+    if (res.status === 409 || res.status === 404) {
+      // 1件も予約が成立しなかった場合。内部IDではなく日付＋クラス名で、理由別に伝える
+      const failedArr = result.failed || [{ session_id: result.session_id, error: result.error }];
+      showError(failedMessage(failedArr) || '予約に失敗しました。もう一度お試しください。');
+      // 残席表示が変わっている可能性が高いので日程一覧を取り直す
+      selectedIds.clear();
+      await loadSessions();
+      updateConditionals();
       btn.disabled = false; btn.textContent = '予約する'; return;
     }
     if (!res.ok) throw new Error(result.error || '送信エラー');
 
-    showComplete(result.reservations);
+    // 一部の日程だけ満席だった場合も、成立した分は完了画面で正しく伝える
+    showComplete(result.reservations, result.failed || []);
   } catch (err) {
     showError('通信エラーが発生しました。もう一度お試しください。');
     btn.disabled = false; btn.textContent = '予約する';
@@ -624,18 +665,36 @@ async function handleSubmit(e) {
   }
 }
 
-function showComplete(reservations) {
+function showComplete(reservations, failed = []) {
   document.getElementById('app').style.display = 'none';
   const completeEl = document.getElementById('complete');
-  completeEl.style.display = 'block';
 
+  // 体験フォーム側で書き換えられている可能性があるため毎回明示的に設定する
+  document.querySelector('#complete .complete-icon').textContent = '✅';
+  document.querySelector('#complete .complete-title').textContent = 'ご予約ありがとうございます！';
+
+  // 全予約が特別枠（TACOS Party等）なら「動きやすい服装」の案内は不要
+  const booked = reservations.map(r => sessions.find(s => s.id === r.session_id)).filter(Boolean);
+  const allSpecial = booked.length > 0 && booked.every(s => s.id !== s.date);
+  document.querySelector('#complete .complete-body').innerHTML = allSpecial
+    ? '確認メッセージをLINEでお送りしました。<br>当日のご来場をお待ちしています！'
+    : '確認メッセージをLINEでお送りしました。<br>当日は動きやすい服装でお越しください。';
+
+  // 開催時間はセッションごとに表示（特別枠は朝の時間ではないため一括表記をやめた）
   const lines = reservations.map(r => {
     const s = sessions.find(s => s.id === r.session_id);
-    return `▼ ${s?.display_date || r.session_id}　${s?.title || ''}`;
+    return `▼ ${esc(s?.display_date || r.session_id)}　${esc(s?.title || '')}<br>` +
+           `${esc(s?.time_label || 'AM7:30〜10:00')} / 観音寺 HACOS`;
   });
-  document.getElementById('complete-detail').innerHTML =
-    `<p>${lines.join('<br>')}
-    <br>AM7:30〜10:00 / 観音寺 HACOS</p>`;
+  let html = `<p>${lines.join('<br>')}</p>`;
+
+  // 予約できなかった日程があれば、成立分と区別して理由付きで明示する
+  if (failed.length) {
+    html += `<p style="color:var(--red);margin-top:10px;">※${esc(failedMessage(failed))}</p>`;
+  }
+  document.getElementById('complete-detail').innerHTML = html;
+
+  completeEl.style.display = 'block';
   window.scrollTo(0, 0);
 }
 
