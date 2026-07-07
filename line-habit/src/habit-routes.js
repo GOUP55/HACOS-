@@ -43,14 +43,34 @@ habitRoutes.get('/api/liff/habit/summary', async (c) => {
     return c.json({ error: 'invalid_token' }, 401);
   }
 
+  // 取得範囲は「直近28日」と「今月1日」の早い方から。
+  // 直近28日固定だと31日ある月の月末に月初の記録が窓から落ち、
+  // 「今月の記録」統計が実際より少なく表示されるため
+  const today = jstDate(0);
+  const monthStart = today.slice(0, 8) + '01';
+  const windowStart = monthStart < jstDate(27) ? monthStart : jstDate(27);
+
   const { results } = await c.env.DB.prepare(`
     SELECT log_date, moved, ate_well, note
     FROM habit_logs
     WHERE line_user_id = ? AND log_date >= ?
     ORDER BY log_date
-  `).bind(userId, jstDate(27)).all();
+  `).bind(userId, windowStart).all();
 
-  return c.json({ today: jstDate(0), logs: results });
+  // 連続記録はサーバー側で全期間から計算する（クライアントに渡す窓が
+  // 28日程度しかないため、28日以上続いている人ほど過小表示になるのを防ぐ）。
+  // 400日を超える連続は400でカンスト（十分長いので実用上問題ない）
+  const { results: dateRows } = await c.env.DB.prepare(`
+    SELECT log_date FROM habit_logs
+    WHERE line_user_id = ?
+    ORDER BY log_date DESC LIMIT 400
+  `).bind(userId).all();
+  const dates = new Set(dateRows.map(r => r.log_date));
+  // 今日まだつけていなくても、昨日までの連続は途切れていない扱い
+  let streak = 0;
+  for (let i = dates.has(today) ? 0 : 1; dates.has(jstDate(i)); i++) streak++;
+
+  return c.json({ today, streak, logs: results });
 });
 
 // ── POST /api/liff/habit/log ── 今日/昨日の記録を保存（同じ日は上書き） ──
@@ -99,7 +119,7 @@ habitRoutes.post('/api/liff/habit/log', async (c) => {
       note         = excluded.note,
       updated_at   = excluded.updated_at
   `).bind(
-    crypto.randomUUID(), userId, displayName, logDate,
+    crypto.randomUUID(), userId, displayName || null, logDate,
     moved, ateWell, note || null, now, now
   ).run();
 
@@ -139,7 +159,9 @@ export async function sendWeeklyHabitDigest(env) {
   `).bind(since, until).all();
   const notesByUser = {};
   for (const n of noteRows) {
-    (notesByUser[n.line_user_id] ??= []).push(n.note);
+    // メモ内の改行は潰す。改行入りのメモで他ユーザーの集計行を装う
+    // 「なりすまし表示」をダイジェスト上でできなくするため
+    (notesByUser[n.line_user_id] ??= []).push(String(n.note).replace(/\s+/g, ' '));
   }
 
   const fmt = (d) => `${Number(d.slice(5, 7))}/${Number(d.slice(8, 10))}`;

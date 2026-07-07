@@ -16,5 +16,6 @@ CREATE TABLE IF NOT EXISTS habit_logs (
   UNIQUE(line_user_id, log_date)
 );
 
-CREATE INDEX IF NOT EXISTS idx_habit_user_date ON habit_logs(line_user_id, log_date);
+-- UNIQUE(line_user_id, log_date) が同カラムの一意インデックスを自動生成するため、
+-- (line_user_id, log_date) の個別インデックスは不要。日付側だけ週間集計用に張る
 CREATE INDEX IF NOT EXISTS idx_habit_date ON habit_logs(log_date);
