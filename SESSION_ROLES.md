@@ -23,7 +23,7 @@
 | 日付 | セッション | 触っているファイル | 状態 |
 |---|---|---|---|
 | （例）7/6 | 司令塔 | hacos-hmc-lp.html（回数券） | 完了・消してOK |
-| 7/7 | 司令塔（claude/url-content-linkingブランチ） | line-reservation/（品質修正済み・デプロイ待ち）、line-habit/（新規・習慣トラッキング） | 作業中 |
+| 7/8 | デプロイの手 | line-reservation の本番反映（**指示書: `DEPLOY_20260708.md`**）。任意で line-habit 新設（`line-habit/README.md`） | 依頼中・未着手。完了したらこの行を消す |
 
 <!-- ここに作業中の行を追加。完了したら行ごと削除 -->
 
