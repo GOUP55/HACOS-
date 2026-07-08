@@ -1,0 +1,9 @@
+{
+  "name": "hacos-companion-tests",
+  "private": true,
+  "type": "module",
+  "description": "コンパニオンWorkerモジュールの自動テスト（ネットワーク不要）",
+  "scripts": {
+    "test": "node companion.test.js"
+  }
+}
