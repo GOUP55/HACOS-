@@ -79,18 +79,23 @@
 - ②は①のPhase 2に半分吸収される設計にした（別々に作ると二重投資）
 - ③だけは**待つのが正解**: 材料（第1期の実施実績）が9月末まで存在しない。焦って作ると「実績なきメソッド商品」になり、実績捏造禁止の規律と衝突する
 
+## 進捗（2026-07-07更新）
+
+**①Phase 0は完了済み** → 成果物: `drafts/companion-persona.md`（想定問答52本＋人格定義。QA2周・高/中ゼロ）。
+**次の一歩はGOの赤入れ**（52本に○△×を付ける）。赤入れが済んだら、下の指示文で新チャットからPhase 1を発注する。
+
 ## 新チャットへの引継ぎ（この指示文をコピペ）
 
 ```
-S_CLASS_PROJECTS.md を読んでください。①HACOSコンパニオンのPhase 0を
-/heavy-task で開始します。
+S_CLASS_PROJECTS.md と drafts/companion-persona.md（赤入れ済みv1）を
+読んでください。①HACOSコンパニオンのPhase 1を /heavy-task で開始します。
 
-■ 背景: S_CLASS_PROJECTS.md ①の通り（メンバーズの中核特典となる寄り添いAI）
-■ 完成の定義: 想定問答50本と「HACOSらしい返答」の正解集
-  （drafts/companion-persona.md）。カテゴリ＝食事報告/弱音/質問/長期無反応/
-  転送すべき相談。各返答にトーンの根拠1行。hacos-qaで高/中ゼロ。
-■ 裁量: 問答の分類・文面表現は自由。医療系の転送リスト・トーンの正本は
-  BUSINESS_RULES.md と CLAUDE.md に従う。API実装はまだしない。
+■ 背景: S_CLASS_PROJECTS.md ①の通り。人格の正本はcompanion-persona.md v1
+■ 完成の定義: LINE Harness WorkerにClaude API（Haiku級）を接続する実装設計書
+  ＋実装＋テスト。§8（即転送）のスタッフLINE即時通知を必須要件に含む。
+  β対象5名限定のフィルタ。全ログのD1保存。hacos-qaで高/中ゼロ。
+■ 裁量: 実装方式・モデル選定は自由。本番デプロイはHarnessセッション経由
+  （SESSION_ROLES.md厳守）。人格文面の変更はv1に従い勝手に変えない。
 ```
 
 > 併読: `AI_HEAVY_TASK_PLAYBOOK.md`（進め方の正本）・`REVENUE_SIMULATION.md`（数字の根拠）
