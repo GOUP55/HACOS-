@@ -61,6 +61,13 @@ ok('通常メッセージは誤検知しない', () => {
   assert.equal(checkUrgent('モチベーションが続きません'), null);
   assert.equal(checkUrgent('体重が戻ってしまいました'), null); // 「戻してしま」と区別
 });
+ok('断食: HACOS案内の範囲は通常会話、危険ラインだけ緊急', () => {
+  assert.equal(checkUrgent('プチ断食を試しています'), null);
+  assert.equal(checkUrgent('16時間断食やってます'), null);
+  assert.equal(checkUrgent('3日間の断食をしようと思います').category, '極端な絶食');
+  assert.equal(checkUrgent('断食を5日やります').category, '極端な絶食');
+  assert.equal(checkUrgent('今日から絶食します').category, '極端な絶食');
+});
 ok('緊急固定文: 電話番号は環境変数がある時だけ入る', () => {
   const rule = checkUrgent('消えたい');
   const without = rule.reply({});
