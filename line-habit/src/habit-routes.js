@@ -134,7 +134,12 @@ habitRoutes.post('/api/liff/habit/log', async (c) => {
 // 日次処理を追加できるよう、この関数を日次の入口として使っている。
 // ※会員本人への自動送信は絶対にしない（通知先はSTAFF_USER_IDSのみ。HACOSの運用ルール）
 export async function sendWeeklyHabitDigest(env) {
-  await sendLapseAlerts(env); // 毎日実行（対象者がいる日だけ送信される）
+  // 離脱アラートの失敗が週間ダイジェスト送信を巻き添えにしないよう隔離する
+  try {
+    await sendLapseAlerts(env); // 毎日実行（対象者がいる日だけ送信される）
+  } catch (e) {
+    console.error('sendLapseAlerts failed:', e);
+  }
 
   const nowJst = new Date(Date.now() + 9 * 3600 * 1000);
   if (nowJst.getUTCDay() !== 1) return; // 週間ダイジェストはJSTの月曜のみ
@@ -247,11 +252,29 @@ async function sendLapseAlerts(env) {
   await pushToStaff(text, env);
 }
 
-// スタッフ全員へ送る共通処理。通知先はSTAFF_USER_IDSのみ（会員本人には送らない）
+// スタッフ全員へ送る共通処理。通知先はSTAFF_USER_IDSのみ（会員本人には送らない）。
+// LINEのテキストは1通約5000字が上限のため、超える場合は改行単位で分割して複数通で送る
+// （上限超過はAPIエラーになり、スタッフに何も届かないサイレント失敗になるため）
+const MSG_CHAR_LIMIT = 4500;
 async function pushToStaff(text, env) {
+  const chunks = [];
+  let buf = '';
+  for (const line of text.split('\n')) {
+    if (buf && (buf.length + 1 + line.length) > MSG_CHAR_LIMIT) {
+      chunks.push(buf);
+      buf = line;
+    } else {
+      buf = buf ? `${buf}\n${line}` : line;
+    }
+  }
+  if (buf) chunks.push(buf);
+
   const staffIds = (env.STAFF_USER_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
   for (const staffId of staffIds) {
-    await pushToUser(staffId, [{ type: 'text', text }], env);
+    // pushは1回の呼び出しで最大5メッセージまで
+    for (let i = 0; i < chunks.length; i += 5) {
+      await pushToUser(staffId, chunks.slice(i, i + 5).map(t => ({ type: 'text', text: t })), env);
+    }
   }
 }
 
