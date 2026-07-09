@@ -126,12 +126,23 @@ habitRoutes.post('/api/liff/habit/log', async (c) => {
   return c.json({ ok: true });
 });
 
-// ── Cron: 週間ダイジェスト（スタッフ向け） ──
-// 既存の毎日cron（UTC 9:00 = JST 18:00）から毎日呼ばれる前提で、
-// JSTの月曜だけ「先週月曜〜日曜」の集計をスタッフに送る。
+// ── Cron: スタッフ向け通知（毎日呼ばれる入口） ──
+// 既存の毎日cron（UTC 9:00 = JST 18:00）から毎日呼ばれる前提。
+// ・毎日: 「記録が2日止まった人」の当日限り通知（下のsendLapseAlerts）
+// ・JST月曜のみ: 先週月曜〜日曜の週間ダイジェスト
+// 関数名は歴史的経緯でWeeklyのままだが、index.ts側の呼び出しを変えずに
+// 日次処理を追加できるよう、この関数を日次の入口として使っている。
+// ※会員本人への自動送信は絶対にしない（通知先はSTAFF_USER_IDSのみ。HACOSの運用ルール）
 export async function sendWeeklyHabitDigest(env) {
+  // 離脱アラートの失敗が週間ダイジェスト送信を巻き添えにしないよう隔離する
+  try {
+    await sendLapseAlerts(env); // 毎日実行（対象者がいる日だけ送信される）
+  } catch (e) {
+    console.error('sendLapseAlerts failed:', e);
+  }
+
   const nowJst = new Date(Date.now() + 9 * 3600 * 1000);
-  if (nowJst.getUTCDay() !== 1) return; // JSTの月曜のみ
+  if (nowJst.getUTCDay() !== 1) return; // 週間ダイジェストはJSTの月曜のみ
 
   const since = jstDate(7); // 先週月曜
   const until = jstDate(1); // 先週日曜
@@ -148,7 +159,20 @@ export async function sendWeeklyHabitDigest(env) {
     ORDER BY log_days DESC, name
   `).bind(since, until).all();
 
-  if (!results.length) return; // 記録ゼロの週は送らない
+  // 「先週は記録ゼロだが、その前の28日間には記録があった」＝記録が止まった人。
+  // 声かけが一番必要な人ほど集計から消えて見えなくなるのを防ぐ
+  const { results: lapsed } = await env.DB.prepare(`
+    SELECT line_user_id, MAX(display_name) AS name
+    FROM habit_logs
+    WHERE log_date >= ? AND log_date < ?
+      AND line_user_id NOT IN (
+        SELECT line_user_id FROM habit_logs WHERE log_date BETWEEN ? AND ?
+      )
+    GROUP BY line_user_id
+    ORDER BY name
+  `).bind(jstDate(35), since, since, until).all();
+
+  if (!results.length && !lapsed.length) return; // 対象が誰もいない週は送らない
 
   // メモは別クエリでまとめて取り、ユーザーごとに連結（週の様子への返信のネタにする）
   const { results: noteRows } = await env.DB.prepare(`
@@ -170,15 +194,87 @@ export async function sendWeeklyHabitDigest(env) {
     '一人ひとりに「見てるよ」のひとことを返してあげてください🌱',
     '',
   ];
-  for (const r of results) {
-    lines.push(`● ${r.name || '(名前未取得)'}：記録${r.log_days}日／🏃${r.moved_days}日・🥗${r.ate_days}日`);
-    const notes = (notesByUser[r.line_user_id] || []).join(' ／ ');
-    if (notes) lines.push(`　💬 ${notes.length > 120 ? notes.slice(0, 120) + '…' : notes}`);
+  if (results.length) {
+    for (const r of results) {
+      lines.push(`● ${r.name || '(名前未取得)'}：記録${r.log_days}日／🏃${r.moved_days}日・🥗${r.ate_days}日`);
+      const notes = (notesByUser[r.line_user_id] || []).join(' ／ ');
+      if (notes) lines.push(`　💬 ${notes.length > 120 ? notes.slice(0, 120) + '…' : notes}`);
+    }
+  } else {
+    lines.push('（先週の記録はありませんでした）');
   }
+
+  // 記録が止まった人（声かけ候補）
+  if (lapsed.length) {
+    lines.push('');
+    lines.push(`⚠️ 先週は記録なし（声かけ候補）：${lapsed.map(l => l.name || '(名前未取得)').join('、')}`);
+  }
+
+  await pushToStaff(lines.join('\n'), env);
+}
+
+// ── 毎日: 記録が止まった人の当日限り通知 ──
+// 「一昨日まで3日以上続けていた人が、昨日・一昨日と2日連続で空白になった」その日だけ
+// スタッフに知らせる。判定条件そのものが特定の1日しか成立しない形
+// （3日前に記録あり・昨日と一昨日が空白）なので、空白が続いても翌日以降は
+// 条件から外れ、同じ人への再送は状態管理なしで自然に起きない。
+// 今日すでに記録した人（自力で復帰済み）は対象外。
+async function sendLapseAlerts(env) {
+  const { results } = await env.DB.prepare(`
+    SELECT line_user_id, log_date, display_name
+    FROM habit_logs
+    WHERE log_date >= ?
+    ORDER BY log_date
+  `).bind(jstDate(5)).all();
+  if (!results.length) return;
+
+  const byUser = {};
+  for (const r of results) {
+    const u = (byUser[r.line_user_id] ??= { dates: new Set(), name: null });
+    u.dates.add(r.log_date);
+    if (r.display_name) u.name = r.display_name; // 日付順なので最後の名前が残る
+  }
+
+  const targets = [];
+  for (const [, u] of Object.entries(byUser)) {
+    const has = (i) => u.dates.has(jstDate(i));
+    // 空白: 今日(まだ)・昨日・一昨日 ／ 直前に3日以上の連続: 3・4・5日前
+    if (!has(0) && !has(1) && !has(2) && has(3) && has(4) && has(5)) {
+      targets.push(u.name || '(名前未取得)');
+    }
+  }
+  if (!targets.length) return;
+
+  const text = [
+    ...targets.map(name => `🌱 ${name}さんの記録が2日止まっています。ひとことどうぞ`),
+    '（本人への自動送信はしていません。声かけはスタッフから）',
+  ].join('\n');
+  await pushToStaff(text, env);
+}
+
+// スタッフ全員へ送る共通処理。通知先はSTAFF_USER_IDSのみ（会員本人には送らない）。
+// LINEのテキストは1通約5000字が上限のため、超える場合は改行単位で分割して複数通で送る
+// （上限超過はAPIエラーになり、スタッフに何も届かないサイレント失敗になるため）
+const MSG_CHAR_LIMIT = 4500;
+async function pushToStaff(text, env) {
+  const chunks = [];
+  let buf = '';
+  for (const line of text.split('\n')) {
+    if (buf && (buf.length + 1 + line.length) > MSG_CHAR_LIMIT) {
+      chunks.push(buf);
+      buf = line;
+    } else {
+      buf = buf ? `${buf}\n${line}` : line;
+    }
+  }
+  if (buf) chunks.push(buf);
 
   const staffIds = (env.STAFF_USER_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
   for (const staffId of staffIds) {
-    await pushToUser(staffId, [{ type: 'text', text: lines.join('\n') }], env);
+    // pushは1回の呼び出しで最大5メッセージまで
+    for (let i = 0; i < chunks.length; i += 5) {
+      await pushToUser(staffId, chunks.slice(i, i + 5).map(t => ({ type: 'text', text: t })), env);
+    }
   }
 }
 
