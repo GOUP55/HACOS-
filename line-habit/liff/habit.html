@@ -51,8 +51,10 @@ body { font-family: -apple-system, 'Hiragino Sans', 'Yu Gothic', sans-serif; bac
 
 /* ── 記録フォーム ── */
 .date-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
-.date-tab { flex: 1; padding: 9px 0; border: 1.5px solid var(--border); background: white; border-radius: 9px; font-size: 13px; font-weight: 600; color: var(--gray); cursor: pointer; }
+.date-tab { flex: 1; padding: 9px 0; border: 1.5px solid var(--border); background: white; border-radius: 9px; font-size: 13px; font-weight: 600; color: var(--gray); cursor: pointer; position: relative; }
 .date-tab.active { border-color: var(--green); background: var(--green-light); color: #2e7d32; }
+/* 昨日が未記録のとき、拾える記録があることに気づかせる小さなドット */
+.date-tab.has-dot::after { content: ''; position: absolute; top: 6px; right: 8px; width: 7px; height: 7px; border-radius: 50%; background: var(--amber); }
 
 .toggle { display: flex; align-items: center; gap: 12px; width: 100%; padding: 15px 14px; border: 2px solid var(--border); background: white; border-radius: 12px; cursor: pointer; margin-bottom: 10px; text-align: left; transition: border-color .15s, background .15s; }
 .toggle.on { border-color: var(--green); background: var(--green-light); }
@@ -146,7 +148,7 @@ textarea:focus { border-color: var(--green); }
       <button type="button" class="btn-save" id="btn-save">記録する</button>
     </div>
 
-    <p class="footer-note">
+    <p class="footer-note" id="footer-note">
       できなかった日があっても大丈夫。<br>
       また今日から。ひとりじゃないです🌅
     </p>
@@ -239,6 +241,24 @@ function render() {
     strip.appendChild(el);
   }
 
+  // 昨日が未記録なら「昨日」タブにドットを出す（1日の欠落を2日にしない）
+  const yTab = document.getElementById('tab-yesterday');
+  const missedYesterday = !logOf(dateStr(todayStr, 1));
+  yTab.classList.toggle('has-dot', missedYesterday);
+  // ドットは視覚のみの表現なので、スクリーンリーダー向けに状態をテキストでも伝える
+  if (missedYesterday) yTab.setAttribute('aria-label', '昨日（未記録あり）');
+  else yTab.removeAttribute('aria-label');
+
+  // フッターを状態に応じて出し分ける（続いている実感／復帰の後押し）
+  const footer = document.getElementById('footer-note');
+  if (streak > 0) {
+    footer.innerHTML = `${Number(streak) || 0}日続いています🌱<br>マイペースがいちばん。ひとりじゃないです🌅`;
+  } else if (logs.length > 0) {
+    footer.innerHTML = 'おかえりなさい。今日つければまた始まります🌱<br>ひとりじゃないです🌅';
+  } else {
+    footer.innerHTML = 'できなかった日があっても大丈夫。<br>また今日から。ひとりじゃないです🌅';
+  }
+
   // フォームを選択日の既存記録で埋める
   const log = logOf(selectedDate);
   state.moved = !!log?.moved;
@@ -292,6 +312,22 @@ function setupForm() {
   document.getElementById('btn-save').addEventListener('click', save);
 }
 
+// 節目の連続日数（3・7・14日は習慣化の分水嶺なので特に手厚く、以降は30日ごと）
+const isMilestone = (n) =>
+  n === 3 || n === 7 || n === 14 || (n >= 30 && n % 30 === 0);
+// (from, to] の範囲に含まれる最大の節目。0なら節目なし。
+// 昨日の分を後から埋めると古い連続記録とつながってstreakが一気に跳ぶことがあり、
+// 「ちょうど節目に着地」だけを見ると節目を通過してもお祝いされないため範囲で判定する
+const milestoneIn = (from, to) => {
+  for (let n = to; n > from; n--) if (isMilestone(n)) return n;
+  return 0;
+};
+const milestoneMsg = (n) =>
+  n === 3  ? '🎉 3日連続！いい滑り出しです'
+: n === 7  ? '🎉 7日連続！いいリズムです'
+: n === 14 ? '🎉 14日連続！習慣になってきました'
+:            `🎉 ${n}日連続！すごい継続です`;
+
 async function save() {
   const errEl = document.getElementById('form-error');
   errEl.style.display = 'none';
@@ -344,6 +380,7 @@ async function save() {
   // 2) 表示の更新（ここで失敗しても保存自体は済んでいるので、
   //    「通信エラー」と混同させる誤った失敗表示はしない）
   dirty = false;
+  const prevStreak = streak; // お祝い判定用に保存前の連続日数を控える
   let reloadFailed = false;
   try {
     await loadSummary();
@@ -352,8 +389,14 @@ async function save() {
     console.error(e);
   }
 
+  // 連続日数が「今回の保存で」節目に到達・通過したときだけ祝う
+  // （同じ日の記録の編集し直しでは streak が変わらないので繰り返し祝われない）
+  const hitMilestone = (!reloadFailed && streak > prevStreak)
+    ? milestoneIn(prevStreak, streak) : 0;
+  const celebrated = hitMilestone > 0;
+
   btn.classList.add('saved');
-  btn.textContent = '✅ 記録しました';
+  btn.textContent = celebrated ? milestoneMsg(hitMilestone) : '✅ 記録しました';
   btn.disabled = true;
   if (reloadFailed) {
     showErr('保存はできています。表示の更新に失敗したので、開き直すと最新になります。');
@@ -362,7 +405,7 @@ async function save() {
     btn.classList.remove('saved');
     btn.disabled = false;
     btn.textContent = logOf(selectedDate) ? '記録を更新する' : '記録する';
-  }, 1800);
+  }, celebrated ? 3600 : 1800); // お祝いは読める長さだけ表示
 }
 
 init();
