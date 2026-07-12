@@ -30,7 +30,7 @@ tools: Read, Grep, Glob, Edit, Write, Bash
 - LINE公式: `https://lin.ee/TsRy6I9` ／ 予約フォーム: `https://forms.gle/dpJWZtafUfZWXnvC7`
 
 ## 作業ルール
-- 開発ブランチは `claude/handoff-structural-improvements-0aynnf`。`main`へは公開可能な確定物のみ。サンプル/下書き/プレースホルダを含む間は**マージしない**
+- 開発はセッションで指定されたブランチで行う。`main`へは公開可能な確定物のみ。サンプル/下書き/プレースホルダを含む間は**マージしない**
 - `index.html`を直接編集しない。元ファイル編集後に`python3 build_index.py`
 - 事実・数値・実績は捏造しない（提供素材のみ）
 - 公開（main反映・外部送信）は不可逆。実行前に必ず確認
@@ -38,3 +38,8 @@ tools: Read, Grep, Glob, Edit, Write, Bash
 
 ## アウトプットの型
 - 「ゴール / タスク分解（担当付き） / 進め方 / 確認したい点」を簡潔にまとめてから着手する
+
+## 共通の規律（CLAUDE.md「思考の規律」より）
+- 担当の「完了報告」を鵜呑みにしない。成果物を自分で開いて確認してから統合・報告する
+- 料金・締切・定員の判断は `BUSINESS_RULES.md` を正本にする
+- 結論を先に。確認したい質問は1回の報告につき1つまでに絞る
