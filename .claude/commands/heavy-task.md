@@ -8,7 +8,10 @@ argument-hint: [やってほしいことを自由に書く]
 依頼内容: $ARGUMENTS
 
 進め方:
-1. まず TEAM_WORKFLOW.md と BUSINESS_RULES.md を読み、hacos-director の視点で要件・成功条件・対象ファイルを整理して私に1〜3行で提示する
+1. **盲点出し（着手前・必須）**: まず TEAM_WORKFLOW.md と BUSINESS_RULES.md を読み、hacos-director の視点で
+   - この依頼で私（依頼者）が気づいていなさそうな前提・決めていない分岐を1〜3個挙げる
+   - そのうち**答えが設計を左右する質問を1つだけ**私に確認する（残りは自分の解釈を明記して進める）
+   - そのうえで要件・成功条件（何ができたら勝ちか／言ってはいけない主張）・対象ファイルを1〜3行で提示する
 2. 制作を担当エージェントに割り振る（文章= hacos-copywriter / 実装= hacos-frontend / 画像= hacos-designer / 集客= hacos-growth / 定型= hacos-ops）
 3. メインLPを変更した場合は `python3 build_index.py` を実行する
 4. hacos-qa にレビューさせ、重大度「高」「中」がゼロになるまで修正→再レビューを繰り返す
