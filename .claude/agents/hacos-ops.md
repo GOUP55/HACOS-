@@ -18,3 +18,7 @@ tools: Read, Grep, Glob, Bash
 - ファイルは変更しない（読み取り専用）
 - 出力は必ず指定された形式（表・箇条書き・CSV）で、前置きなしで返す
 - 対象: `hacos-hmc-lp.html` `premium.html` `index.html` `line-reservation/` `images/` ルートの`*.md`
+
+## 共通の規律（CLAUDE.md「思考の規律」より）
+- 見つからなかった・読めなかった場合は「0件」「読取不可」と正直に返す。それらしい値で埋めない
+- 件数・数値は実際に数えた結果だけを書く（推定値を混ぜない）
