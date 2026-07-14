@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>朝6:30だョ❣ 全員週5 — 1週間のフィットネスリトリート | HACOS × HMC</title>
+<title>HACOS Wellness Journey — 食べて、動いて、整う。1週間のフィットネスリトリート</title>
 
-<!-- ⚠️ ドラフト: 料金・日程はオーナー未決定。公開時はこの noindex を外す -->
+<!-- ⚠️ 未公開ドラフト: 公開条件＝保健所確認・規約承認・オーナー最終承認。公開時にこの noindex を外す -->
 <meta name="robots" content="noindex">
 
 <!-- ═══ SEO / OGP META ═══ -->
-<meta name="description" content="食べて動いて整う。ウェルネスジャーニー。朝のRUNとワークアウト、美味しいお弁当で過ごす、泊まらない1週間のフィットネスリトリート。定員5名。">
+<meta name="description" content="食べて、動いて、整う。泊まらない1週間のフィットネスリトリート。毎朝のRUNと美味しいごはん、仲間と過ごす7日間。定員5名・第1期申込締切7/31。">
 <link rel="canonical" href="https://goup55.github.io/HACOS-/retreat.html">
-<meta property="og:title" content="朝6:30だョ❣ 全員週5 — 1週間のフィットネスリトリート">
-<meta property="og:description" content="食べて動いて整う。ウェルネスジャーニー。週5のRUNと週2回のワークアウト、美味しいごはん。定員5名の1週間プログラム。">
+<meta property="og:title" content="HACOS Wellness Journey — 1週間のフィットネスリトリート">
+<meta property="og:description" content="7日間で、自分に合う健康習慣を知る。30日間で、それを日常にする。定員5名・第1期申込締切7/31。">
 <meta property="og:image" content="https://goup55.github.io/HACOS-/images/ogp.jpg">
 <meta property="og:url" content="https://goup55.github.io/HACOS-/retreat.html">
 <meta property="og:type" content="website">
@@ -82,19 +82,14 @@ section { padding:64px 24px; }
   font-family:'DM Sans',sans-serif; font-size:10px; letter-spacing:.2em;
   color:var(--amber); text-transform:uppercase; margin-bottom:12px;
 }
-.title {
+.jp-title { font-family:'Noto Serif JP',serif; font-size:clamp(20px,5.5vw,30px); font-weight:600; line-height:1.5; margin-bottom:8px; }
+.title-en {
   font-family:'Cormorant Garamond',serif; font-size:clamp(28px,7.5vw,46px);
   font-weight:300; line-height:1.2; margin-bottom:8px;
 }
-.title em { font-style:italic; color:var(--forest); }
-.jp-title { font-family:'Noto Serif JP',serif; font-size:clamp(20px,5.5vw,30px); font-weight:600; line-height:1.5; margin-bottom:8px; }
+.title-en em { font-style:italic; color:var(--forest); }
 .divider { width:40px; height:1px; background:var(--amber); margin:18px 0; }
 .lead { font-size:14px; color:var(--mid); line-height:1.95; }
-.placeholder {
-  border:1px dashed var(--amber); background:rgba(200,131,58,.06);
-  border-radius:8px; padding:14px 16px; margin:10px 0;
-  font-size:12px; color:var(--mid); font-family:'DM Sans',sans-serif;
-}
 .note { font-size:11px; color:var(--light-text); margin-top:10px; }
 
 /* ── 七宝柄（しっぽう）ストリップ ── */
@@ -129,9 +124,10 @@ section { padding:64px 24px; }
 .burst em { font-style:normal; color:var(--rust); }
 .goto {
   font-family:'Reggae One',cursive; font-weight:400;
-  font-size:clamp(56px,17vw,110px); line-height:1.05; letter-spacing:.01em;
-  color:var(--dark); margin:6px 0 18px;
+  font-size:clamp(52px,15vw,100px); line-height:1.05; letter-spacing:.01em;
+  color:var(--dark); margin:6px 0 6px;
 }
+.hero-timenote { font-size:11px; color:var(--light-text); margin-bottom:14px; }
 .hero-theme { font-size:clamp(15px,4.2vw,19px); font-weight:600; color:var(--forest); letter-spacing:.06em; }
 .hero-sub { font-family:'DM Sans',sans-serif; font-size:12px; letter-spacing:.18em; color:var(--amber); text-transform:uppercase; margin:8px 0 20px; }
 .hero-copy { font-size:14px; color:var(--mid); line-height:2.05; margin-bottom:24px; }
@@ -142,6 +138,7 @@ section { padding:64px 24px; }
   border-radius:999px; padding:6px 14px; background:var(--cream);
 }
 .badge.strong { background:var(--forest); color:var(--cream); }
+.badge.deadline { background:var(--rust); border-color:var(--rust); color:#fff; }
 .cta-btn {
   display:inline-block; background:#06c755; color:#fff; text-decoration:none;
   font-family:'DM Sans',sans-serif; font-weight:600; font-size:15px;
@@ -156,6 +153,22 @@ section { padding:64px 24px; }
   color:var(--forest); margin:22px 0; border:none;
 }
 
+/* ── 週の流れ ── */
+.week-flow { list-style:none; margin-top:24px; }
+.week-flow li {
+  display:flex; gap:14px; align-items:flex-start;
+  background:#fff; border:1px solid var(--sand-light); border-radius:8px;
+  padding:13px 16px; margin-bottom:10px;
+}
+.week-flow .day {
+  font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600; letter-spacing:.05em;
+  background:var(--forest); color:var(--cream); border-radius:6px;
+  padding:6px 10px; flex-shrink:0; min-width:52px; text-align:center;
+}
+.week-flow li.rest .day { background:var(--sand); color:var(--mid); }
+.week-flow .wf-name { font-size:14px; font-weight:600; }
+.week-flow .wf-desc { font-size:12px; color:var(--mid); line-height:1.8; }
+
 /* ── 1日の流れ（タイムライン）── */
 .timeline { list-style:none; margin-top:26px; }
 .timeline li { display:flex; gap:16px; padding:0 0 28px; position:relative; }
@@ -169,12 +182,6 @@ section { padding:64px 24px; }
 .tl-name { font-size:16px; font-weight:600; margin:2px 0 4px; }
 .tl-desc { font-size:13px; color:var(--mid); line-height:1.9; }
 
-/* ── 1週間の流れ ── */
-.week-table { width:100%; border-collapse:collapse; margin-top:22px; font-size:13px; }
-.week-table th, .week-table td { border:1px solid var(--sand); padding:10px 12px; text-align:left; vertical-align:top; }
-.week-table th { background:var(--cream); font-family:'DM Sans',sans-serif; font-size:11px; letter-spacing:.08em; white-space:nowrap; }
-.week-table td strong { color:var(--forest); }
-
 /* ── 含まれるもの ── */
 .includes { list-style:none; margin-top:22px; display:grid; gap:12px; }
 .includes li {
@@ -185,6 +192,11 @@ section { padding:64px 24px; }
 .includes .ico { font-size:20px; line-height:1.4; flex-shrink:0; }
 .includes strong { display:block; font-size:14px; }
 .includes span.desc { font-size:12px; color:var(--mid); }
+.excluded {
+  margin-top:18px; background:rgba(200,131,58,.06); border:1px solid var(--sand);
+  border-radius:8px; padding:14px 16px; font-size:12px; color:var(--mid); line-height:1.9;
+}
+.excluded strong { color:var(--dark); }
 
 /* ── PRICE ── */
 .price { background:var(--cream); }
@@ -192,16 +204,29 @@ section { padding:64px 24px; }
   background:#fff; border:1px solid var(--sand); border-radius:12px;
   padding:28px 22px; text-align:center; margin-top:22px;
 }
+.price-strike { font-size:15px; color:var(--light-text); text-decoration:line-through; font-family:'DM Sans',sans-serif; }
 .price-amount { font-family:'Cormorant Garamond',serif; font-size:52px; line-height:1.1; color:var(--forest); }
 .price-amount small { font-size:18px; font-family:'Noto Serif JP',serif; }
 .price-tax { font-size:11px; color:var(--light-text); margin-top:4px; }
-.next-list { list-style:none; margin-top:20px; display:grid; gap:10px; }
-.next-list li {
-  background:#fff; border-left:3px solid var(--amber); border-radius:0 8px 8px 0;
-  padding:12px 16px; font-size:13px; line-height:1.8;
-  box-shadow:0 1px 4px rgba(28,28,26,.05);
+.price-badge {
+  display:inline-block; background:var(--rust); color:#fff; border-radius:999px;
+  font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600; letter-spacing:.05em;
+  padding:5px 14px; margin-bottom:10px;
 }
-.next-list strong { color:var(--rust); }
+.price-detail { font-size:12px; color:var(--mid); text-align:left; margin-top:18px; line-height:2; }
+.price-detail li { list-style:none; padding-left:1.2em; text-indent:-1.2em; }
+.price-detail li::before { content:"・"; color:var(--amber); }
+
+/* ── 30DAYS / 3段階 ── */
+.steps { display:grid; gap:12px; margin-top:24px; }
+.step-card {
+  background:#fff; border:1px solid var(--sand-light); border-radius:10px; padding:18px;
+}
+.step-card.current { border:2px solid var(--forest); }
+.step-num { font-family:'DM Sans',sans-serif; font-size:10px; letter-spacing:.15em; color:var(--amber); text-transform:uppercase; }
+.step-name { font-size:17px; font-weight:600; margin:4px 0 2px; }
+.step-price { font-family:'DM Sans',sans-serif; font-size:13px; color:var(--forest); font-weight:600; }
+.step-desc { font-size:12px; color:var(--mid); line-height:1.9; margin-top:6px; }
 
 /* ── FAQ ── */
 .faq details { border-bottom:1px solid var(--sand-light); padding:16px 4px; }
@@ -210,10 +235,15 @@ section { padding:64px 24px; }
 .faq details[open] summary::after { content:"−"; }
 .faq p { font-size:13px; color:var(--mid); padding-top:10px; line-height:1.95; }
 
+/* ── RULES ── */
+.rules { font-size:12px; color:var(--mid); line-height:2; }
+.rules li { list-style:none; padding-left:1.2em; text-indent:-1.2em; }
+.rules li::before { content:"・"; color:var(--amber); }
+
 /* ── CLOSING ── */
 .closing { text-align:center; padding:72px 24px 64px; }
 .closing .goto-mini { font-family:'Reggae One',cursive; font-size:clamp(24px,7vw,36px); margin:14px 0 8px; }
-.disclaimer { font-size:10px; color:var(--light-text); margin-top:26px; }
+.disclaimer { font-size:10px; color:var(--light-text); margin-top:26px; line-height:1.9; }
 </style>
 </head>
 <body>
@@ -231,22 +261,24 @@ section { padding:64px 24px; }
 
   <div class="hero-body">
     <p class="burst"><span class="slash">＼</span> 朝<em>6:30</em>だョ❣ <span class="slash">／</span></p>
-    <h1 class="goto">全員週5</h1>
-    <p class="hero-theme">食べて動いて整う。ウェルネスジャーニー</p>
-    <p class="hero-sub">1 WEEK FITNESS RETREAT</p>
+    <h1 class="goto">全員集合</h1>
+    <p class="hero-timenote">※朝のスタート時間（6:00 or 6:30）は、参加メンバーみんなで決めます</p>
+    <p class="hero-theme">食べて、動いて、整う。</p>
+    <p class="hero-sub">HACOS Wellness Journey — 7DAYS TRIAL</p>
     <p class="hero-copy">
-      週5回の朝RUNと、週2回のワークアウト。<br>
-      そして毎朝の、美味しいお弁当。<br>
-      ハコメンとカラダを動かす、<br>
-      泊まらない1週間のフィットネスリトリート。
+      ほぼ毎朝のRUNと、美味しいごはん。<br>
+      仲間と過ごす、泊まらない<br>
+      1週間のフィットネスリトリート。<br>
+      7日間で、自分に合う健康習慣を知る。
     </p>
     <div class="badges">
       <span class="badge strong">定員 最大5名</span>
-      <span class="badge">最小催行 3名</span>
-      <span class="badge">オーダーメイドプログラム</span>
+      <span class="badge">最少催行 3名</span>
+      <span class="badge">8月開催</span>
+      <span class="badge deadline">申込締切 7/31(金)</span>
     </div>
     <a class="cta-btn" href="https://lin.ee/TsRy6I9" onclick="gtag('event','line_click',{position:'retreat_hero'})">LINEで相談してみる</a>
-    <p class="cta-note">開催日程は公式LINEでご案内します</p>
+    <p class="cta-note">「話を聞くだけ」でも大丈夫です</p>
   </div>
 
   <div class="shippo-wrap fade-top">
@@ -261,95 +293,125 @@ section { padding:64px 24px; }
 <section class="about">
   <div class="inner">
     <p class="label">Wellness Journey</p>
-    <h2 class="title"><em>Retreat</em>, without leaving.</h2>
+    <h2 class="title-en"><em>Retreat</em>, without leaving.</h2>
     <p class="jp-title">泊まらない、通うリトリート。</p>
     <div class="divider"></div>
     <p class="lead">
       リトリートといえば、遠くへ行くもの。でもこのリトリートは、いつもの街で、いつもの暮らしのまま。
-      朝30分だけ早起きして仲間と走り、お弁当を持って仕事へ行き、週に2回カラダを動かして、夜はフォームローラーで整えて眠る。
+      朝少しだけ早起きして仲間と走り、お弁当を持って仕事へ行き、夜は用意されたおかずを食べて、フォームローラーで整えて眠る。
       それを1週間、全員で続けます。
     </p>
     <blockquote>一緒に、健康を味わおう。</blockquote>
     <p class="lead">
       ガマンする食事制限も、追い込みすぎる運動もありません。
-      美味しく食べて、気持ちよく動いて、ちゃんと眠る。
-      あなたに合わせた1週間のオーダーメイドプランで、「続けられる習慣」の入口をつくります。
+      7日間で、自分に合う健康習慣を知る。30日間で、それを日常にする。
+      このプログラムは、その入口です。
     </p>
   </div>
 </section>
 
-<!-- ═══════════ 1日の流れ ═══════════ -->
+<!-- ═══════════ 週の流れ ═══════════ -->
 <section>
   <div class="inner">
+    <p class="label">One Week</p>
+    <h2 class="jp-title">1週間の流れ</h2>
+    <div class="divider"></div>
+    <p class="lead">開催週は8月。<strong>参加メンバーみんなの都合に合わせて決めます</strong>（第1候補は8/1スタートの週）。</p>
+    <ul class="week-flow">
+      <li><span class="day">土</span><div><p class="wf-name">スタートカウンセリング</p><p class="wf-desc">目標づくり・測定・朝の時間決め。夕食用の冷凍おかず7食分＋保冷バッグをお渡しします</p></div></li>
+      <li><span class="day">日</span><div><p class="wf-name">初回RUN</p><p class="wf-desc">日曜朝RUN（6:30〜）に合流して、旅のはじまり</p></div></li>
+      <li class="rest"><span class="day">月</span><div><p class="wf-name">おやすみ</p><p class="wf-desc">休むこともプログラムのうち。おうちごはんとセルフケアを</p></div></li>
+      <li><span class="day">火〜土</span><div><p class="wf-name">毎朝RUN ＆ ストレッチ（45分）</p><p class="wf-desc">運動後はスムージー。お弁当と間食を持って「いってらっしゃい」。週2回は夕方にグループトレーニング</p></div></li>
+      <li><span class="day">土</span><div><p class="wf-name">最終RUN → 結果発表</p><p class="wf-desc">7日間の変化をウェルネスレポートにしてお渡し。これからの続け方を一緒に考えます</p></div></li>
+      <li><span class="day">日</span><div><p class="wf-name">卒業RUN</p><p class="wf-desc">日曜朝RUNに合流。リトリートの仲間から、コミュニティの一員へ</p></div></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═══════════ 1日の流れ ═══════════ -->
+<section class="about">
+  <div class="inner">
     <p class="label">One Day</p>
-    <h2 class="jp-title">リトリート期間中の、1日の流れ</h2>
+    <h2 class="jp-title">期間中の、1日の流れ</h2>
     <div class="divider"></div>
     <ul class="timeline">
       <li>
         <span class="tl-dot"></span>
         <div>
-          <p class="tl-time">AM 6:30 – 7:00（週5回）</p>
-          <p class="tl-name">RUN ＆ STRETCH（30分）</p>
-          <p class="tl-desc">朝の空気の中、仲間と一緒に走って、伸ばして。1日のスイッチが入る30分です。走るのが苦手な方はペースを合わせるのでご安心を。</p>
+          <p class="tl-time">朝（6:00 or 6:30 スタート・45分）</p>
+          <p class="tl-name">RUN ＆ ストレッチ</p>
+          <p class="tl-desc">走る・歩く・ラン＆ウォークは、あなたの体力に合わせて調整。呼吸とコンディショニングまで含めた45分です。</p>
         </div>
       </li>
       <li>
         <span class="tl-dot"></span>
         <div>
-          <p class="tl-time">AM 7:00 –</p>
-          <p class="tl-name">お弁当を持って、いってらっしゃい</p>
-          <p class="tl-desc">HACOSキッチンの美味しいお弁当を受け取って、そのままお仕事へ。「食べること」も、このリトリートのプログラムです。</p>
+          <p class="tl-time">運動のあと</p>
+          <p class="tl-name">スムージー → お弁当を持って、いってらっしゃい</p>
+          <p class="tl-desc">プロテインスムージーで整えて、HACOSキッチンのお弁当と間食を受け取って、そのままお仕事へ。</p>
         </div>
       </li>
       <li>
         <span class="tl-dot"></span>
         <div>
-          <p class="tl-time">週2回（希望により最大4回）</p>
-          <p class="tl-name">WORKOUT ＆ STRETCH</p>
-          <p class="tl-desc">スタジオでのワークアウト。あなたの目的と体力に合わせたオーダーメイドの内容で行います。</p>
+          <p class="tl-time">週2回・夕方</p>
+          <p class="tl-name">グループトレーニング</p>
+          <p class="tl-desc">あなたの目的と体力に合わせた内容で、少人数で行います。曜日はみんなの予定で調整します。</p>
         </div>
       </li>
       <li>
         <span class="tl-dot"></span>
         <div>
-          <p class="tl-time">おやすみ前（自宅で）</p>
-          <p class="tl-name">寝る前のフォームローラー</p>
-          <p class="tl-desc">1日がんばったカラダを、寝る前にほぐして整えます。やり方は初日にレクチャー。おウチでの数分が、翌朝のコンディションを変えます。</p>
+          <p class="tl-time">夜（自宅で）</p>
+          <p class="tl-name">冷凍おかずの夕食 ＆ 寝る前のフォームローラー</p>
+          <p class="tl-desc">帰ったら、用意しておいた冷凍おかずで夕食。寝る前の数分のセルフケアで、明日の朝が変わります。</p>
         </div>
       </li>
     </ul>
   </div>
 </section>
 
-<!-- ═══════════ 1週間の流れ ═══════════ -->
-<section class="about">
+<!-- ═══════════ 食 ═══════════ -->
+<section>
   <div class="inner">
-    <p class="label">One Week</p>
-    <h2 class="jp-title">1週間のウェルネスジャーニー</h2>
+    <p class="label">Food</p>
+    <h2 class="jp-title">7日分の夕食が、最初にそろう。</h2>
     <div class="divider"></div>
-    <table class="week-table">
-      <tr><th>DAY 1</th><td><strong>カウンセリング＋スタート測定</strong>＋RUN＆STRETCH。1週間のオーダーメイドプランをお渡しします</td></tr>
-      <tr><th>DAY 2–6</th><td>毎朝のRUN＆STRETCH＋お弁当。週2回のWORKOUT＆STRETCH。夜はフォームローラー</td></tr>
-      <tr><th>最終日</th><td><strong>結果発表＆クロージング</strong>。1週間の変化をふりかえり、この先の続け方を一緒に考えます</td></tr>
-    </table>
-    <p class="note">※ 曜日の割り振り・開催週は現在調整中です。効果には個人差があります。</p>
+    <p class="lead">
+      スタートの日、まずお渡しするのは<strong>冷凍おかず7食分</strong>。
+      作るのは、HACOSキッチンのみどりさんとふみやさん。
+      あなたの目標・活動量・アレルギーに合わせて、量と組み合わせを調整します。
+    </p>
+    <p class="lead" style="margin-top:14px;">
+      我慢の食事制限は、ありません。<strong>美味しく食べることが、プログラムです。</strong>
+      毎朝のスムージー、お弁当、間食まで、7日間の「食べる」を丸ごと用意します。
+    </p>
   </div>
 </section>
 
 <!-- ═══════════ 含まれるもの ═══════════ -->
-<section>
+<section class="about">
   <div class="inner">
     <p class="label">Included</p>
-    <h2 class="jp-title">1週間の健康プランに含まれるもの</h2>
+    <h2 class="jp-title">7DAYS TRIAL に含まれるもの</h2>
     <div class="divider"></div>
     <ul class="includes">
-      <li><span class="ico">🏃</span><div><strong>RUN ＆ STRETCH × 週5回</strong><span class="desc">朝6:30〜7:00の30分。全員で走ります</span></div></li>
-      <li><span class="ico">💪</span><div><strong>WORKOUT ＆ STRETCH × 週2回</strong><span class="desc">オーダーメイド内容（ご希望で最大週4回まで）</span></div></li>
-      <li><span class="ico">🍱</span><div><strong>HACOSキッチンのお弁当 × 5日分</strong><span class="desc">RUNのあと、毎朝お渡しします</span></div></li>
-      <li><span class="ico">📋</span><div><strong>あなた専用の1週間プラン</strong><span class="desc">初日のカウンセリングと測定をもとに設計</span></div></li>
-      <li><span class="ico">🌙</span><div><strong>寝る前フォームローラーのレクチャー</strong><span class="desc">おウチで続けられるセルフケア</span></div></li>
-      <li><span class="ico">🎉</span><div><strong>結果発表＆クロージング</strong><span class="desc">1週間の変化をふりかえる時間</span></div></li>
+      <li><span class="ico">📋</span><div><strong>スタートカウンセリング＋あなた専用プラン</strong><span class="desc">測定・目標づくり・カロリーとPFCの簡易設計</span></div></li>
+      <li><span class="ico">🏃</span><div><strong>朝のRUN ＆ ストレッチ（週6日）</strong><span class="desc">日曜の初回RUN＋火〜土の毎朝45分。月曜はおやすみ</span></div></li>
+      <li><span class="ico">💪</span><div><strong>グループトレーニング × 2回</strong><span class="desc">少人数・オーダーメイド内容</span></div></li>
+      <li><span class="ico">🥤</span><div><strong>プロテインスムージー × 5回</strong><span class="desc">毎朝、運動のあとに</span></div></li>
+      <li><span class="ico">🍱</span><div><strong>HACOS弁当＋間食（平日分）</strong><span class="desc">朝、保冷バッグに入れてお渡し</span></div></li>
+      <li><span class="ico">🥘</span><div><strong>冷凍夕食おかず × 7食分</strong><span class="desc">初日にまとめてお渡し（保冷バッグ付き）</span></div></li>
+      <li><span class="ico">🌙</span><div><strong>ホームケアの宿題</strong><span class="desc">寝る前のフォームローラー・呼吸（各自ご用意・貸出もOK）</span></div></li>
+      <li><span class="ico">💬</span><div><strong>専用LINEグループのサポート</strong><span class="desc">食事写真・体調・睡眠の記録にフィードバック</span></div></li>
+      <li><span class="ico">📄</span><div><strong>結果発表＆ウェルネスレポート</strong><span class="desc">7日間の変化と「次の30日でやること」を1枚に</span></div></li>
+      <li><span class="ico">🎓</span><div><strong>卒業RUN</strong><span class="desc">日曜朝RUNへ合流。仲間が増える最終日</span></div></li>
     </ul>
+    <div class="excluded">
+      <strong>含まれないもの（正直に書きます）:</strong>
+      個別の時間変更・参加者都合の振替／個別パーソナル／医療的な食事療法／期間外のLINEサポート。
+      追加のトレーニングやお弁当はオプションでご案内できます。
+    </div>
   </div>
 </section>
 
@@ -359,33 +421,49 @@ section { padding:64px 24px; }
     <p class="label">Price</p>
     <h2 class="jp-title">参加費</h2>
     <div class="divider"></div>
-    <div class="placeholder">⚠️ ドラフト表記：料金はオーナー決定待ちの仮案です。確定後に BUSINESS_RULES.md へ記載し、この注意書きを外します。</div>
     <div class="price-card">
-      <p style="font-size:13px; color:var(--mid);">1週間のフィットネスリトリート（仮）</p>
-      <p class="price-amount"><small>¥</small>29,800</p>
-      <p class="price-tax">RUN×5・WORKOUT×2・お弁当×5・オーダーメイドプラン込み</p>
+      <p class="price-badge">第1期モニター特典</p>
+      <p class="price-strike">通常 ¥39,800</p>
+      <p class="price-amount"><small>¥</small>34,800</p>
+      <p class="price-tax">税込・食事すべて込み／写真と感想の掲載にご協力いただける方</p>
+      <ul class="price-detail">
+        <li>お友達と一緒のお申込みで <strong>ふたり割 各¥2,000オフ</strong>（特典はどちらか一方の適用）</li>
+        <li>お支払い: 現金 または STORESオンライン決済</li>
+        <li>お申込みは仮予約。<strong>ご入金（3日以内）で席が確定</strong>します</li>
+        <li>食事は受注生産のため、製造開始後の食事部分は原則返金できません</li>
+      </ul>
     </div>
-
-    <h3 class="jp-title" style="font-size:18px; margin-top:36px;">1週間を終えたら、次の一歩も。</h3>
-    <p class="lead">最終日のクロージングで、続けたい方には次のコースをご案内します（いずれも仮案・調整中）。</p>
-    <ul class="next-list">
-      <li><strong>もう1週間、延長する</strong> — 初回より少しおトクに</li>
-      <li><strong>1ヶ月、続けてみる</strong> — 週あたりの料金が下がります</li>
-      <li><strong>3ヶ月、本気で取り組む</strong> — いちばんおトクな集中コースへ</li>
-      <li><strong>フィットネスだけ続ける</strong> — セミパーソナル通い放題（内容調整中）</li>
-    </ul>
   </div>
 </section>
 
-<!-- ═══════════ 定員 ═══════════ -->
+<!-- ═══════════ 3段階（30DAYSへ）═══════════ -->
 <section>
-  <div class="inner" style="text-align:center;">
-    <p class="label" style="text-align:center;">Members</p>
-    <h2 class="jp-title">定員は、最大5名。</h2>
-    <p class="lead">
-      全員の顔が見えて、全員のペースに寄り添える人数で行います。<br>
-      最小催行人数は3名。集まらない週は日程を調整して、必ず全員で走り出します。
-    </p>
+  <div class="inner">
+    <p class="label">Your Journey</p>
+    <h2 class="jp-title">7日で知って、30日で定着させる。</h2>
+    <div class="divider"></div>
+    <p class="lead">Wellness Journeyは3段階。7DAYSはその入口です。</p>
+    <div class="steps">
+      <div class="step-card current">
+        <p class="step-num">Step 1 — いまここ</p>
+        <p class="step-name">7DAYS TRIAL</p>
+        <p class="step-price">¥39,800（第1期 ¥34,800）</p>
+        <p class="step-desc">7日間で、自分に合う健康習慣を知る。</p>
+      </div>
+      <div class="step-card">
+        <p class="step-num">Step 2</p>
+        <p class="step-name">30DAYS</p>
+        <p class="step-price">¥79,800</p>
+        <p class="step-desc">週2回のグループトレーニング全8回＋日曜朝活＋食事サポート（お弁当と冷凍おかずを週2回ずつ）＋週1回の進捗レビュー。見つけた習慣を、30日で日常にする。</p>
+      </div>
+      <div class="step-card">
+        <p class="step-num">Step 3</p>
+        <p class="step-name">3ヶ月プレミアム</p>
+        <p class="step-price">¥300,000</p>
+        <p class="step-desc">本気で変わる集中プログラム。<a href="premium.html" style="color:var(--forest);">詳しくはこちら</a></p>
+      </div>
+    </div>
+    <p class="note">法人向け（福利厚生・健康経営）のグループプランもご用意しています。詳しくはLINEでお問い合わせください。</p>
   </div>
 </section>
 
@@ -397,38 +475,71 @@ section { padding:64px 24px; }
     <div class="divider"></div>
     <details>
       <summary>走るのが苦手・体力に自信がありません</summary>
-      <p>大丈夫です。RUNは30分・全員のペースに合わせて走ります（歩き混じりでもOK）。ワークアウトもカウンセリングをもとにあなた用に組むので、運動が久しぶりの方こそ歓迎です。</p>
+      <p>大丈夫です。走る・歩く・ラン＆ウォークは体力に合わせて調整します。運動が久しぶりの方こそ歓迎です。</p>
     </details>
     <details>
-      <summary>仕事の前に間に合いますか？</summary>
-      <p>朝6:30〜7:00の30分で終わり、7:00にはお弁当を持って出発できます。そのまま出勤される方を想定したスケジュールです。</p>
+      <summary>朝の時間は何時からですか？仕事に間に合いますか？</summary>
+      <p>6:00か6:30スタートの45分。どちらにするかは、スタート日のカウンセリングで参加メンバーみんなで話し合って決めます。運動後はスムージーとお弁当を受け取って、そのまま出勤できます。</p>
     </details>
     <details>
       <summary>食事制限はありますか？</summary>
-      <p>ガマンする制限はしません。HACOSキッチンの美味しいお弁当を「ちゃんと食べる」ことがプログラムの一部です。アレルギー等は事前にご相談ください。</p>
+      <p>ガマンする制限はしません。美味しく食べることがプログラムの一部です。アレルギーや苦手な食材は、お申込み時とカウンセリングで確認して調整します。</p>
     </details>
     <details>
-      <summary>雨の日のRUNはどうなりますか？</summary>
-      <p>天候により内容を調整します（屋内でのSTRETCH強化など）。詳細は参加者LINEでご連絡します。</p>
+      <summary>冷凍おかず7食分、冷凍庫に入るか心配です</summary>
+      <p>目安は2Lペットボトル3本分ほどのスペースです。お申込みフォームで確認し、難しい場合はご相談に乗ります。</p>
     </details>
+    <details>
+      <summary>日程が合いません／申込後にキャンセルしたい</summary>
+      <p>開催週は参加メンバーの都合を最優先に決めます。まずはご相談ください（第2期・9月予定の先行案内もあります）。キャンセルは締切7/31まで全額返金。以降は食事の製造が始まるため、食事部分は原則返金できません。</p>
+    </details>
+    <details>
+      <summary>雨の日はどうなりますか？</summary>
+      <p>中止にせず、屋内でのストレッチ・コンディショニングに変更します。警報発令時は安全を優先して当日朝にLINEでご連絡します。</p>
+    </details>
+    <details>
+      <summary>持病があります。参加できますか？</summary>
+      <p>お申込み時に簡単な健康チェックがあります。該当がある場合は個別にご相談のうえ、必要に応じてかかりつけ医への確認をお願いすることがあります。無理のない参加をいちばんに考えます。</p>
+    </details>
+  </div>
+</section>
+
+<!-- ═══════════ RULES ═══════════ -->
+<section>
+  <div class="inner">
+    <p class="label">Notes</p>
+    <h2 class="jp-title">大切なお知らせ</h2>
+    <div class="divider"></div>
+    <ul class="rules">
+      <li>最少催行3名。集まらない場合は開催週を調整、または全額返金いたします</li>
+      <li>お申込みは仮予約、ご入金（3日以内）で席確定。催行判定はご入金済みの人数で行います</li>
+      <li>受け取った食品は表示された保存方法を守り、当日中に食べるものは当日中にお召し上がりください</li>
+      <li>健康情報・測定値は運営メンバーのみで管理し、ご本人の同意なく共有しません</li>
+      <li>写真・感想の掲載は、掲載範囲を選んだうえでの同意制です</li>
+      <li>本プログラムは医療行為ではありません。ウェルネスレポートは医療記録ではありません</li>
+    </ul>
   </div>
 </section>
 
 <!-- ═══════════ CLOSING ═══════════ -->
 <section class="closing">
-  <p class="burst"><span class="slash">＼</span> 朝6:30に <span class="slash">／</span></p>
+  <p class="burst"><span class="slash">＼</span> 8月のあの朝に <span class="slash">／</span></p>
   <p class="goto-mini">全員集合❣</p>
   <p class="lead" style="margin:14px 0 28px;">
     ひとりじゃ続かなかった朝が、仲間となら始まります。<br>
+    「話を聞くだけ」でも、大丈夫。<br>
     まずはLINEで、気軽に聞いてみてください。
   </p>
   <a class="cta-btn" href="https://lin.ee/TsRy6I9" onclick="gtag('event','line_click',{position:'retreat_footer'})">LINEで相談してみる</a>
-  <p class="disclaimer">効果には個人差があります。体調に不安のある方は事前にご相談ください。</p>
+  <p class="disclaimer">
+    効果には個人差があります。体調に不安のある方は事前にご相談ください。<br>
+    第1期申込締切: 2026年7月31日（金）／定員5名（入金順・定員に達し次第終了）
+  </p>
 </section>
 
 <!-- ═══════════ STICKY CTA ═══════════ -->
 <div class="sticky-cta">
-  <p class="sticky-text"><strong>1週間のフィットネスリトリート</strong>定員5名・日程はLINEでご案内</p>
+  <p class="sticky-text"><strong>7DAYS TRIAL 第1期 ¥34,800</strong>締切7/31(金)・定員5名</p>
   <a href="https://lin.ee/TsRy6I9" onclick="gtag('event','line_click',{position:'retreat_sticky'})">LINEで相談</a>
 </div>
 
