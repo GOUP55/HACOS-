@@ -179,7 +179,7 @@
 | `WELLNESS_JOURNEY_ENTRY_FORM.md` | 申込フォーム設計（締切7/31反映） |
 | `WELLNESS_JOURNEY_COUNSELING_SHEET.md` | Day0カウンセリング台本 |
 | `drafts/wellness-journey-lp-copy.md` | LP改稿案（原稿レベル） |
-| `retreat.html` | LPドラフト（旧仕様・改稿待ち・未公開） |
+| `retreat.html` | LP（**v1.0確定仕様で改稿・QA指摘修正済み**）。未公開（noindex）。公開条件: 保健所確認＋規約承認＋オーナー承認 |
 | `BUSINESS_RULES.md` | 正本（価格正式決定後に転記） |
 
 ## 10. 更新履歴
