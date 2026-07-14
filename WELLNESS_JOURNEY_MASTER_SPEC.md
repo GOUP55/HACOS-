@@ -156,6 +156,8 @@
 |---|---|---|
 | `WELLNESS_JOURNEY_CUSTOMER_JOURNEY.md` | 7日間のカスタマージャーニー | v0.4更新済み |
 | `WELLNESS_JOURNEY_PRICING_INPUTS.md` | 価格・原価の入力項目一覧 | v0.4更新済み（収益モデル追記） |
+| `WELLNESS_JOURNEY_ENTRY_FORM.md` | 参加申込フォーム設計（成果物#5） | v1.0作成済み（料金欄は決定待ち） |
+| `WELLNESS_JOURNEY_COUNSELING_SHEET.md` | Day0カウンセリング台本＋シート（成果物#6） | v1.0作成済み |
 | `WELLNESS_RETREAT_PLAN.md` | v0.1企画書 | 統合済み（参照のみ） |
 | `retreat.html` | LPドラフト（v0.1仕様） | 決定後に改稿・未公開 |
 | `BUSINESS_RULES.md` | 決定事項の正本 | 価格決定後に転記＋朝RUN時刻の確認待ち |
