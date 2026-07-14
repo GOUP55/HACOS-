@@ -17,6 +17,7 @@
 | `TEAM_WORKFLOW.md` | エージェント7体の役割と品質ループ |
 | `AI_COST_GUIDE.md` | モデルの使い分け（Fable=設計/Sonnet=実装/Haiku=定型） |
 | `SLASH_COMMANDS.md` | スラッシュコマンド20個の早見表 |
+| `AI_HEAVY_TASK_PLAYBOOK.md` | 重量級タスクの投げ方・測り方・課金判断（実行は `/heavy-task`） |
 | `LINE_HARNESS_HANDOFF.md` | LINE予約システムの構成・デプロイ手順 |
 | `FABLE5_SYSTEM_PROMPT.md` | CLAUDE.md「思考の規律」の抽出元（参照用・編集しない） |
 
@@ -34,6 +35,10 @@
 | `STRIPE_SETUP_GUIDE.md` | メンバーズ月額課金のオーナー作業手順（実施待ち） |
 | `CHALLENGE_21DAY_PLAN.md` | 21日チャレンジ（価格・実施日 未確定） |
 | `PREMIUM_2ND_LAUNCH_PLAN.md` | 第2期ローンチ計画（8〜9月・仮） |
+| `PREMIUM_2ND_LAUNCH_CALENDAR.md` | 第2期 逆算カレンダー＋LP改修案（日付すべて仮） |
+| `REVENUE_SIMULATION.md` | 全商品 収益シミュレーション（人数はすべて仮定） |
+| `S_CLASS_PROJECTS.md` | S級プロジェクト構想書3本＋引継ぎ（コンパニオン等） |
+| `DEPLOY_COMPANION.md` | コンパニオンβのデプロイ手順書（**実施待ち**・条件2つあり） |
 | `BENTO_SUBSCRIPTION_PLAN.md` | 弁当定期便（全て仮） |
 | `PROFIT_10M_ROADMAP.md` | 利益ロードマップ（全て仮・要オーナー数値） |
 | `REMOTE_OPS_SYSTEM.md` | 不在運営システム設計（方針のみ） |

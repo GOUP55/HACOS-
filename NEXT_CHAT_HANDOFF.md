@@ -1,4 +1,4 @@
-# 次チャット 引き継ぎ（2026-07-12 時点・HACOSメンバーズ公開後）
+# 次チャット 引き継ぎ（2026-07-14 時点・メンバーズ公開＋Fable5成果統合後）
 
 > 原則：**このファイルよりコード・gitログが正**。作業前に `git log --oneline -15` で最新化を確認。
 > **⚠️ まず `SESSION_ROLES.md` を読むこと。** セッションごとの担当分け（司令塔／デプロイの手）と連絡板がある。担当外の領域は触らない。
@@ -51,8 +51,15 @@
 - **運営体制ドキュメント追加**: `PROFIT_10M_ROADMAP.md`／`REMOTE_OPS_SYSTEM.md`／`STRIPE_SETUP_GUIDE.md`／`drafts/members-launch-line.md`
 - **習慣トラッキング改善**（PR#30・line-habit のみ）: 声かけ候補・離脱アラート・節目のお祝い。**コードのみで本番未反映**（下記の任意・別作業に含む）
 
-## ⚠️ デプロイ状況（7/12更新）
+### 7/10〜7/12（別セッション・PR#32/#33/#35マージ済み）
+- **Fable5週間の成果一式**（PR#32）: ハコさんコンパニオン人格v1（`drafts/companion-persona.md`・GO赤入れ済み）＋Phase1実装（`line-companion/`）／重量級タスクのプレイブック（`AI_HEAVY_TASK_PLAYBOOK.md`＋`/heavy-task`・`/model-compare`スキル）／第2期実行パッケージ（`PREMIUM_2ND_LAUNCH_CALENDAR.md`）／収益シミュレーション（`REVENUE_SIMULATION.md`）／S級構想書（`S_CLASS_PROJECTS.md`）
+- **思考の規律をチーム全体へ統合**（PR#33）: CLAUDE.md拡充＋全エージェントに役割別の「共通の規律」を追加
+- **スタッフ用の予約管理画面 `/admin/reservations` 新設**（PR#35・line-reservation）
+
+## ⚠️ デプロイ状況（7/14更新）
 - **反映済み**: 回数券ほか（7/6・記録: `DEPLOY_KAISUKEN.md`）／PR#19以降の品質修正（7/9・記録: `DEPLOY_20260708.md`）
+- **未反映（要デプロイの手）**: 予約管理画面 `/admin/reservations`（PR#35。反映記録なし・状況要確認）
+- **未反映（実施待ち・条件あり）**: コンパニオンβ（手順書: `DEPLOY_COMPANION.md`。GO赤入れ完了＋Anthropic APIキーが前提）
 - **任意・別作業（未反映）**: 習慣トラッキングLIFF新設＋PR#30改善分（`line-habit/README.md`。LINE Developersでの手作業を含む）
 
 ## ⚙️ 作業ルール（厳守）
