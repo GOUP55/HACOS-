@@ -22,6 +22,20 @@
   h2{font-size:1.7rem;color:var(--navy);text-align:center;margin-bottom:12px;line-height:1.5;}
   .lead{text-align:center;color:var(--muted);margin-bottom:44px;}
   .photo-placeholder{background:var(--green-light);border:2px dashed var(--green);border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--green);font-size:.9rem;min-height:220px;margin:24px 0;}
+  .photo{width:100%;height:auto;border-radius:12px;margin:24px 0;display:block;box-shadow:0 4px 16px rgba(0,0,0,.15);}
+  .report-paper{max-width:560px;margin:28px auto 8px;background:#fff;border:1px solid #e5e7eb;border-top:6px solid var(--gold);border-radius:10px;padding:26px 28px;box-shadow:0 8px 24px rgba(29,50,67,.14);text-align:left;}
+  .report-paper .rp-head{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--navy);padding-bottom:8px;margin-bottom:10px;}
+  .report-paper .rp-head h4{color:var(--navy);font-size:1.05rem;letter-spacing:.06em;}
+  .report-paper .rp-head .tag-sample{background:var(--gold);color:#fff;font-size:.72rem;font-weight:bold;padding:2px 12px;border-radius:999px;white-space:nowrap;flex-shrink:0;margin-left:10px;}
+  .report-paper .rp-meta{font-size:.78rem;color:var(--muted);margin-bottom:14px;}
+  .report-paper table{width:100%;border-collapse:collapse;font-size:.85rem;}
+  .report-paper th{text-align:left;color:var(--navy);font-size:.78rem;border-bottom:1px solid #e5e7eb;padding:6px 4px;}
+  .report-paper td{border-bottom:1px solid #f0f0ee;padding:8px 4px;vertical-align:top;}
+  .report-paper .dots{color:var(--green);letter-spacing:2px;white-space:nowrap;}
+  .report-paper .dots .off{color:#d8ded9;}
+  .report-paper .rp-comment{background:var(--green-light);border-radius:8px;padding:12px 16px;font-size:.85rem;margin-top:14px;}
+  .report-paper .rp-comment strong{color:var(--green);}
+  .report-note{text-align:center;font-size:.8rem;color:var(--muted);margin-bottom:8px;}
   .btn{display:inline-block;background:#06c755;color:#fff;font-weight:bold;font-size:1.1rem;padding:18px 48px;border-radius:999px;text-decoration:none;box-shadow:0 4px 14px rgba(6,199,85,.35);transition:transform .15s;}
   .btn:hover{transform:translateY(-2px);}
   .btn.sub{background:var(--navy);box-shadow:0 4px 14px rgba(29,50,67,.3);}
@@ -50,7 +64,7 @@
   .prog-card li{list-style:none;padding:8px 0 8px 24px;position:relative;font-size:.95rem;}
   .prog-card li::before{content:"●";position:absolute;left:2px;color:var(--green);font-size:.6rem;top:16px;}
   .supervisor{background:#fff;border-radius:16px;padding:24px 32px;margin-top:24px;display:flex;gap:20px;align-items:center;}
-  .supervisor .face{width:84px;height:84px;border-radius:50%;background:var(--green-light);border:2px dashed var(--green);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--green);text-align:center;}
+  .supervisor .face{width:84px;height:84px;border-radius:50%;border:2px solid var(--green);flex-shrink:0;object-fit:cover;}
   .supervisor p{font-size:.92rem;}
   .plans{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:18px;align-items:stretch;}
   .plan{background:#fff;border-radius:16px;padding:30px 24px;text-align:center;border:1px solid #e5e7eb;display:flex;flex-direction:column;}
@@ -101,7 +115,7 @@
     <h1>社員の身体を、<br class="sp">会社の資産に。</h1>
     <p class="sub">食事 × 運動の福利厚生プログラム</p>
     <p class="area">香川県観音寺市のパーソナルスタジオ HACOS</p>
-    <div class="photo-placeholder">📷 メイン写真(マンツーマン指導風景)— 後日差し替え</div>
+    <img class="photo" src="images/corp-hero.jpg" alt="自然光の入るHACOSスタジオでのトレーニング風景" width="1200" height="900">
     <a class="btn" href="https://lin.ee/TsRy6I9">LINEで無料相談する</a>
     <p class="limit">導入企業 先着5社限定 / 1社3名〜10名まで</p>
   </div>
@@ -137,13 +151,29 @@
       <span class="num">REASON 01</span>
       <h3>「登録して終わり」にさせない、伴走型</h3>
       <p>ジムの法人契約でよくある失敗は「契約したのに誰も行かない」こと。HACOSは<strong>完全マンツーマン</strong>。担当トレーナーが一人ひとりの体力・目的に合わせ、基礎づくりから自走まで4段階のフェーズで伴走します。予約リマインドやLINEフォローまで含めて、<strong>「続く仕組み」ごと提供</strong>します。</p>
-      <div class="photo-placeholder">📷 トレーナーとの会話・指導風景 — 後日差し替え</div>
+      <img class="photo" src="images/corp-reason1.jpg" alt="HACOSスタジオでストレッチに取り組む参加者たち" width="1200" height="800" loading="lazy">
     </div>
     <div class="reason">
       <span class="num">REASON 02</span>
       <h3>効果が「見える」から、会社に報告できる</h3>
       <p>初回に全員の姿勢を評価し、個人別レポートを作成。その後も体重・体脂肪・睡眠・疲労をセッションごとに記録し、<strong>変化をレポートとして会社に提出</strong>します。「導入した意味があったのか」を数字で確認でき、<strong>健康経営の取り組み実績</strong>としてもそのまま使えます。</p>
-      <div class="photo-placeholder">📷 姿勢評価レポートのサンプル — 後日差し替え</div>
+      <div class="report-paper">
+        <div class="rp-head">
+          <h4>HACOS 姿勢評価レポート</h4>
+          <span class="tag-sample">サンプル</span>
+        </div>
+        <p class="rp-meta">お名前: 山田 太郎 様（架空）｜評価日: 2026年◯月◯日｜担当トレーナー: HACOS</p>
+        <table>
+          <tr><th>評価項目</th><th>評価</th><th>所見</th></tr>
+          <tr><td>頭部の前方位置</td><td class="dots">●●<span class="off">●●●</span></td><td>デスクワークの影響で頭が前に出やすい</td></tr>
+          <tr><td>肩の高さの左右差</td><td class="dots">●●●<span class="off">●●</span></td><td>右肩がやや下がる傾向</td></tr>
+          <tr><td>骨盤の傾き</td><td class="dots">●●●<span class="off">●●</span></td><td>前傾ぎみ。腰まわりの張りに関連</td></tr>
+          <tr><td>膝のアライメント</td><td class="dots">●●●●<span class="off">●</span></td><td>大きな崩れなし</td></tr>
+          <tr><td>重心バランス</td><td class="dots">●●●<span class="off">●●</span></td><td>左右差あり。立ち姿勢で確認</td></tr>
+        </table>
+        <div class="rp-comment"><strong>トレーナーコメント:</strong> まずは「30〜60分に1回立ち上がる」ことと、胸を開くストレッチの2つから始めましょう。次回のセッションで変化を一緒に確認します。</div>
+      </div>
+      <p class="report-note">※上記はサンプルです（お名前・内容は架空）。実際のレポートは一人ひとりの評価をもとに作成し、ご本人と会社さまにお渡しします。</p>
     </div>
     <div class="reason">
       <span class="num">REASON 03</span>
@@ -178,7 +208,7 @@
       </div>
     </div>
     <div class="supervisor">
-      <div class="face">📷 みどりさん<br>写真</div>
+      <img class="face" src="images/corp-midori.jpg" alt="フードスペシャリスト みどりさん" width="84" height="84">
       <p><strong>食事プログラム監修: みどり(HACOS KITCHEN)</strong><br>
       HACOSの食を担うフードスペシャリスト。トレーニングと同じ場所から生まれる食事提案だから、身体の変化と噛み合います。</p>
     </div>
