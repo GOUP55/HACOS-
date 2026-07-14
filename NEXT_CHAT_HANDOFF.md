@@ -1,4 +1,4 @@
-# 次チャット 引き継ぎ（2026-07-07 時点・特商法ページ公開後）
+# 次チャット 引き継ぎ（2026-07-14 時点・メンバーズ公開＋Fable5成果統合後）
 
 > 原則：**このファイルよりコード・gitログが正**。作業前に `git log --oneline -15` で最新化を確認。
 > **⚠️ まず `SESSION_ROLES.md` を読むこと。** セッションごとの担当分け（司令塔／デプロイの手）と連絡板がある。担当外の領域は触らない。
@@ -45,11 +45,22 @@
 - モバイル最下部でLINE固定ボタンが特商法リンクに重なる不具合を修正（フッター表示中はフェードアウト）
 - hacos-qa品質ループ2周・高/中ゼロ判定済み
 
-## ⚠️ 最重要（7/8更新: デプロイ状況の整理）
-- **反映済み（7/6・オーナー確認済み）**: 回数券・PR#17/18のバグ修正・migrations 3本（記録: `DEPLOY_KAISUKEN.md`）
-- **未反映**: PR #19以降の品質修正（reserve.html / reservation-routes.js / migrations 2本）
-  → **指示書 `DEPLOY_20260708.md` の貼り付け用プロンプトを「デプロイの手」セッションに渡す**（連絡板に依頼中の行あり）
-- **任意・別作業**: 習慣トラッキングLIFF新設（`line-habit/README.md`。LINE Developersでの手作業を含む）
+### 7/9〜7/10（デプロイ完了＋HACOSメンバーズ公開・PR#29/#30/#31マージ済み）
+- **PR#19以降の品質修正を7/9に本番反映完了**（オーナーがLINE実機確認済み。記録: `DEPLOY_20260708.md`）
+- **HACOSメンバーズ正式公開**（PR#31）: LP Step3を「通い放題（準備中）」→メンバーズ正式内容へ（ライト¥20,000／スタンダード¥29,800）。特商法ページにメンバーズの価格・支払・解約規定を追記、電話番号は非掲載（請求時開示）に変更。全6項目確定は `BUSINESS_RULES.md`（2026-07-09）
+- **運営体制ドキュメント追加**: `PROFIT_10M_ROADMAP.md`／`REMOTE_OPS_SYSTEM.md`／`STRIPE_SETUP_GUIDE.md`／`drafts/members-launch-line.md`
+- **習慣トラッキング改善**（PR#30・line-habit のみ）: 声かけ候補・離脱アラート・節目のお祝い。**コードのみで本番未反映**（下記の任意・別作業に含む）
+
+### 7/10〜7/12（別セッション・PR#32/#33/#35マージ済み）
+- **Fable5週間の成果一式**（PR#32）: ハコさんコンパニオン人格v1（`drafts/companion-persona.md`・GO赤入れ済み）＋Phase1実装（`line-companion/`）／重量級タスクのプレイブック（`AI_HEAVY_TASK_PLAYBOOK.md`＋`/heavy-task`・`/model-compare`スキル）／第2期実行パッケージ（`PREMIUM_2ND_LAUNCH_CALENDAR.md`）／収益シミュレーション（`REVENUE_SIMULATION.md`）／S級構想書（`S_CLASS_PROJECTS.md`）
+- **思考の規律をチーム全体へ統合**（PR#33）: CLAUDE.md拡充＋全エージェントに役割別の「共通の規律」を追加
+- **スタッフ用の予約管理画面 `/admin/reservations` 新設**（PR#35・line-reservation）
+
+## ⚠️ デプロイ状況（7/14更新）
+- **反映済み**: 回数券ほか（7/6・記録: `DEPLOY_KAISUKEN.md`）／PR#19以降の品質修正（7/9・記録: `DEPLOY_20260708.md`）
+- **未反映（要デプロイの手）**: 予約管理画面 `/admin/reservations`（PR#35。反映記録なし・状況要確認）
+- **未反映（実施待ち・条件あり）**: コンパニオンβ（手順書: `DEPLOY_COMPANION.md`。GO赤入れ完了＋Anthropic APIキーが前提）
+- **任意・別作業（未反映）**: 習慣トラッキングLIFF新設＋PR#30改善分（`line-habit/README.md`。LINE Developersでの手作業を含む）
 
 ## ⚙️ 作業ルール（厳守）
 - `index.html` は直接編集しない → `hacos-hmc-lp.html` を編集 → `python3 build_index.py` で生成
@@ -60,14 +71,13 @@
 - Claudeは本番Worker/D1に直接触れない（push→ユーザーがcurl→wrangler反映の3段階）
 
 ## 📌 次やること（おすすめ順）
-1. **PR #19以降の本番反映**（指示書 `DEPLOY_20260708.md` をデプロイの手セッションへ。回数券分は7/6反映済み）
-2. **第1期クロージング実行**：引き上げ配信①7/14・②7/24（文面: `drafts/premium-close-messages.md`。※司令塔セッションに自動リマインド仕込み済み・重複対応しない）。カウンセリング発生時は24hフォロー文面を使用
+1. **第1期クロージング実行**：引き上げ配信①7/14・②7/24（文面: `drafts/premium-close-messages.md`。※司令塔セッションに自動リマインド仕込み済み・重複対応しない）。カウンセリング発生時は24hフォロー文面を使用。**募集締切7/31まであと3週間弱**
+2. **メンバーズの受付準備**: Stripe開設（オーナー作業・手順: `STRIPE_SETUP_GUIDE.md`）／先行案内配信（文面: `drafts/members-launch-line.md`）
 3. **GA4で generate_lead を主要イベントに指定**（ユーザー作業・5分）＋配信後の数字レビュー（ガイド閲覧→カウンセリングCVR）
 4. **お客様の声の掲載許可確認→2〜3件たまったらpremium.htmlの声セクション実装**
 5. **8月準備**: 21日チャレンジの価格・決済方法のオーナー決定→販売開始（`CHALLENGE_21DAY_PLAN.md`）／第2期ローンチ始動（`PREMIUM_2ND_LAUNCH_PLAN.md`）
 6. **Meta Pixel 有効化**（IDが来たら3ページのコメント解除→build→公開）
-7. **tokushoho.html の通い放題プラン価格を確定**（HACOSメンバーズ統合後の正式価格が決まり次第、「※準備中」を置き換え）
-8. 任意：Instagramプロフィールリンク差し替え確認、顔出し実績画像のぼかし(result-w-front2/result-vispiral/result-m-37kg)、Netlify削除、重複LIFF削除・STAFF_USER_IDS追加・満席表示検証（→ `LINE_HARNESS_HANDOFF.md` 残タスク）
+7. 任意：Instagramプロフィールリンク差し替え確認、顔出し実績画像のぼかし(result-w-front2/result-vispiral/result-m-37kg)、Netlify削除、重複LIFF削除・STAFF_USER_IDS追加・満席表示検証、習慣トラッキングLIFFの本番反映（→ `LINE_HARNESS_HANDOFF.md` / `line-habit/README.md` 残タスク）
 
 ## 🔑 定数
 - LINE公式: `https://lin.ee/TsRy6I9` ／ 体験予約フォーム(Google): `https://forms.gle/dpJWZtafUfZWXnvC7`

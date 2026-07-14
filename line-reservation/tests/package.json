@@ -3,7 +3,7 @@
   "private": true,
   "description": "LINE予約フォーム（reserve.html）のモック環境自動テスト",
   "scripts": {
-    "test": "node kaisuken.test.js"
+    "test": "node kaisuken.test.js && node admin-page.test.mjs"
   },
   "dependencies": {
     "playwright-core": "^1.49.0"

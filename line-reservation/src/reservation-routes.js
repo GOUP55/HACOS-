@@ -12,6 +12,7 @@
 
 import { Hono } from 'hono';
 import { verifyIdToken, pushToUser } from './line-utils.js';
+import { renderAdminReservations } from './admin-page.js';
 
 const reservationRoutes = new Hono();
 
@@ -32,6 +33,55 @@ reservationRoutes.get('/liff/reserve', async (c) => {
   // （KV更新後にデプロイしても画面が切り替わらない不具合の対策）
   c.header('Cache-Control', 'no-store, must-revalidate');
   return c.html(html.replace("'__LIFF_ID__'", `'${liffId}'`));
+});
+
+// ── 管理画面：予約一覧（スタッフ用） ──
+// ⚠️ パスは必ず /api/ 配下に置くこと。ハーネスのauthMiddlewareは
+// 「/api/ で始まらないパスは静的アセット扱いで認証スキップ」するため、
+// /admin/reservations のような非APIパスに置くと会員の個人情報が認証なしで公開される。
+// /api/admin/ 配下なら authMiddleware が自動適用され、スタッフのBearerキー
+// またはログインセッションcookie（lh_admin_session）が必須になる。
+// （/api/liff/ だけは公開許可リストなので、そこにも置かないこと）
+// ブラウザで開くときは先に /api/auth/login でログインしてから。
+reservationRoutes.get('/api/admin/reservations', async (c) => {
+  const nowJst = new Date(Date.now() + 9 * 3600 * 1000);
+  const todayJst = nowJst.toISOString().split('T')[0];
+  // 過去30日ぶんまで表示（それより古い履歴はD1に残っているが画面には出さない）
+  const fromDate = new Date(nowJst.getTime() - 30 * 86400000).toISOString().split('T')[0];
+
+  const { results: sessions } = await c.env.DB.prepare(`
+    SELECT s.*,
+      COUNT(CASE WHEN r.status = 'confirmed' THEN 1 END) AS booked,
+      COUNT(CASE WHEN r.status = 'cancelled' THEN 1 END) AS cancelled
+    FROM sessions s
+    LEFT JOIN reservations r ON r.session_id = s.id
+    WHERE s.date >= ? AND s.capacity > 0
+    GROUP BY s.id
+    ORDER BY s.date
+  `).bind(fromDate).all();
+
+  const { results: people } = await c.env.DB.prepare(`
+    SELECT r.session_id, r.display_name, r.category, r.trainer, r.morning_run,
+           r.message, r.created_at
+    FROM reservations r JOIN sessions s ON s.id = r.session_id
+    WHERE s.date >= ? AND r.status = 'confirmed'
+    ORDER BY s.date, r.created_at
+  `).bind(fromDate).all();
+
+  const { results: trials } = await c.env.DB.prepare(`
+    SELECT display_name, trainer, preferred_date, preferred_time, alt_note, created_at
+    FROM trial_requests WHERE status = 'pending' ORDER BY created_at
+  `).all().catch(() => ({ results: [] })); // trial_requests未作成のDBでも落ちない
+
+  const byId = new Map(sessions.map(s => [s.id, { ...s, extra_slots: EXTRA_SLOTS, reservations: [] }]));
+  for (const p of people) byId.get(p.session_id)?.reservations.push(p);
+
+  c.header('Cache-Control', 'no-store, must-revalidate');
+  return c.html(renderAdminReservations({
+    todayJst,
+    sessions: [...byId.values()],
+    trials,
+  }));
 });
 
 // ── GET /api/sessions ── 開催予定＋残枠 ──
