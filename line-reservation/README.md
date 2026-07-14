@@ -228,3 +228,15 @@ wrangler kv key put --binding=STATIC_KV "liff/reserve.html" --path=line-reservat
 
 - schema.sql 単発での新規構築、旧スキーマ＋マイグレーション4本の順次適用、の両経路が成功
 - 満席ガード：定員1＋追加枠3のセッションに6件連続INSERTで、4件目まで成立・5件目以降が拒否される
+
+## 予約管理画面（スタッフ用・認証必須）
+
+予約一覧・体験リクエストの確定待ちをブラウザで見られるスタッフ専用画面。
+会員のLINE表示名・メッセージを含むため**必ず認証付きのパスで運用する**。
+
+- URL: `https://line-harness.hacos.workers.dev/api/admin/reservations`
+- 開き方: 先に `/api/auth/login` でログイン（セッションcookieが発行される）→ 上のURLを開く
+- **パスを `/admin/...` のような非APIパスに変えてはいけない**。ハーネスの認証は
+  「/api/ で始まらないパスは静的アセット扱いで素通し」のため、非APIパスに置くと
+  個人情報が認証なしで公開される。`tests/admin-page.test.mjs` にこのパス規約を守る
+  ガードテストがあり、旧パスに戻すとテストが落ちる

@@ -36,9 +36,14 @@ reservationRoutes.get('/liff/reserve', async (c) => {
 });
 
 // ── 管理画面：予約一覧（スタッフ用） ──
-// /api/liff/ 配下ではないため、ハーネス本体の authMiddleware（管理者ログイン）で自動的に保護される。
-// LIFF（一般ユーザー）からは開けない。
-reservationRoutes.get('/admin/reservations', async (c) => {
+// ⚠️ パスは必ず /api/ 配下に置くこと。ハーネスのauthMiddlewareは
+// 「/api/ で始まらないパスは静的アセット扱いで認証スキップ」するため、
+// /admin/reservations のような非APIパスに置くと会員の個人情報が認証なしで公開される。
+// /api/admin/ 配下なら authMiddleware が自動適用され、スタッフのBearerキー
+// またはログインセッションcookie（lh_admin_session）が必須になる。
+// （/api/liff/ だけは公開許可リストなので、そこにも置かないこと）
+// ブラウザで開くときは先に /api/auth/login でログインしてから。
+reservationRoutes.get('/api/admin/reservations', async (c) => {
   const nowJst = new Date(Date.now() + 9 * 3600 * 1000);
   const todayJst = nowJst.toISOString().split('T')[0];
   // 過去30日ぶんまで表示（それより古い履歴はD1に残っているが画面には出さない）
