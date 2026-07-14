@@ -1,7 +1,7 @@
-// 管理画面（/admin/reservations）のHTML生成テスト
+// 管理画面（/api/admin/reservations）のHTML生成テスト
 // renderAdminReservations にモックデータを渡し、表示内容と安全性を検証する
 import { renderAdminReservations } from '../src/admin-page.js';
-import { writeFileSync } from 'fs';
+import { writeFileSync, readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import { createRequire } from 'module';
@@ -59,6 +59,18 @@ check('キャンセル件数が表示される', html.includes('キャンセル 
 check('XSS対策: 表示名のscriptタグが無害化される',
   !html.includes('<script>alert(1)</script>') && html.includes('&lt;script&gt;alert(1)&lt;/script&gt;'));
 check('検索エンジン除外（noindex）が入っている', html.includes('name="robots" content="noindex"'));
+
+// ── 認証ガード: 管理画面ルートのパス検証 ──
+// ハーネスのauthMiddlewareは「/api/ で始まらないパスは認証スキップ」のため、
+// 管理画面を /admin/... のような非APIパスに配線すると個人情報が認証なしで公開される。
+// 誰かがうっかり旧パスに戻すのをテストで止める。
+const routesSrc = readFileSync(path.join(__dirname, '../src/reservation-routes.js'), 'utf8');
+check('管理画面ルートが /api/admin/reservations（認証必須パス）にある',
+  /\.get\(\s*'\/api\/admin\/reservations'/.test(routesSrc));
+check('非APIの旧パス /admin/reservations にルートが存在しない（認証素通し防止）',
+  !/\.(get|post|all)\(\s*'\/admin\//.test(routesSrc));
+check('管理画面ルートが公開許可リストの /api/liff/ 配下に置かれていない',
+  !/\.get\(\s*'\/api\/liff\/[^']*admin/.test(routesSrc));
 
 // ── 見た目のスクリーンショット ──
 const htmlPath = path.join(__dirname, 'admin-preview.html');

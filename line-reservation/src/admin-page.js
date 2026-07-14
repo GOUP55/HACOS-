@@ -1,5 +1,6 @@
 // HACOS × HMC 予約管理画面のHTML生成（スタッフ用・純粋関数）
-// reservation-routes.js の GET /admin/reservations から呼ばれる。
+// reservation-routes.js の GET /api/admin/reservations から呼ばれる
+// （認証必須。非APIパスに配線しないこと。理由はreservation-routes.js側のコメント参照）。
 // 依存なし（テストしやすいようDB・Honoに触らない）。
 
 // LINEの表示名・メッセージ等ユーザー入力は必ずこれを通す（XSS対策）

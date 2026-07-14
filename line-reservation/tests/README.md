@@ -33,7 +33,8 @@ npm test
 
 ## 管理画面のテスト（admin-page.test.mjs）
 
-`/admin/reservations`（スタッフ用の予約管理画面）のHTML生成を検証する（10項目）。
+`/api/admin/reservations`（スタッフ用の予約管理画面・認証必須）のHTML生成と、
+管理画面ルートが認証素通しの非APIパスに配線されていないことを検証する（13項目）。
 表示内容・満席の赤表示・XSS対策（表示名のタグ無害化）・noindex を確認し、
 `admin-ui.png` にプレビューのスクリーンショットを出力する。
 `npm test` でフォームのテストと合わせて実行される。
