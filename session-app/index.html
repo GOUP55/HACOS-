@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#3D5A3E">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>HACOS セッション管理</title>
+  <link rel="stylesheet" href="app.css">
+
+  <!-- Firebase compat SDK (CDN) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- ヘッダー -->
+  <header class="app-header">
+    <div class="header-inner">
+      <a href="#/" class="logo">HACOS</a>
+      <span class="header-sub">セッション管理</span>
+    </div>
+  </header>
+
+  <!-- ビュー描画エリア -->
+  <main id="view-root">
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>読み込み中...</p>
+    </div>
+  </main>
+
+  <!-- Firebase設定（★ここを書き換えてください） -->
+  <script src="firebase-config.js"></script>
+
+  <!-- アプリ本体 -->
+  <script src="app.js"></script>
+
+</body>
+</html>
