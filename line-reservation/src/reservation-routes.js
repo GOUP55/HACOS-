@@ -13,6 +13,7 @@
 import { Hono } from 'hono';
 import { verifyIdToken, pushToUser } from './line-utils.js';
 import { renderAdminReservations } from './admin-page.js';
+import { renderAdminLogin } from './admin-login-page.js';
 
 const reservationRoutes = new Hono();
 
@@ -33,6 +34,16 @@ reservationRoutes.get('/liff/reserve', async (c) => {
   // （KV更新後にデプロイしても画面が切り替わらない不具合の対策）
   c.header('Cache-Control', 'no-store, must-revalidate');
   return c.html(html.replace("'__LIFF_ID__'", `'${liffId}'`));
+});
+
+// ── スタッフ用ログインページ ──
+// 意図的に非/api/パス（＝認証なしで表示）。APIキー入力欄だけの画面で個人情報を含まない。
+// 管理SPA(pages.dev)とWorkerはクロスサイトでcookieが直打ちアクセスに乗らないため、
+// Worker同一オリジンのここでログインしてcookieをファーストパーティ化する入口
+// （詳細は admin-login-page.js 冒頭のコメント参照）。
+reservationRoutes.get('/admin-login', (c) => {
+  c.header('Cache-Control', 'no-store, must-revalidate');
+  return c.html(renderAdminLogin());
 });
 
 // ── 管理画面：予約一覧（スタッフ用） ──

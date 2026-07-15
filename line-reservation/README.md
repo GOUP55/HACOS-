@@ -235,7 +235,13 @@ wrangler kv key put --binding=STATIC_KV "liff/reserve.html" --path=line-reservat
 会員のLINE表示名・メッセージを含むため**必ず認証付きのパスで運用する**。
 
 - URL: `https://line-harness.hacos.workers.dev/api/admin/reservations`
-- 開き方: 先に `/api/auth/login` でログイン（セッションcookieが発行される）→ 上のURLを開く
+- **開き方（2026-07-15更新）**: `https://line-harness.hacos.workers.dev/admin-login` を開き、
+  スタッフ用APIキーでログイン → 自動で予約管理画面に移動する。ログインは7日間有効。
+  スタッフにはこの `/admin-login` のURLをブックマークしてもらう
+- なぜ専用ログインページが要るか: 管理SPA（pages.dev）とWorker（workers.dev）は
+  ドメインが別のため、SPAでログインしたcookieはChromeの保護により管理画面URLの
+  直打ちには使われない。Worker同一ドメインの `/admin-login` でログインすれば
+  cookieがファーストパーティ扱いになり、直打ちで開けるようになる
 - **パスを `/admin/...` のような非APIパスに変えてはいけない**。ハーネスの認証は
   「/api/ で始まらないパスは静的アセット扱いで素通し」のため、非APIパスに置くと
   個人情報が認証なしで公開される。`tests/admin-page.test.mjs` にこのパス規約を守る
