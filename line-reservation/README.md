@@ -176,9 +176,11 @@ wrangler d1 execute line-harness --file=line-reservation/migrations/2026-07-04-t
 ## マイグレーション一覧（本番D1に各1回だけ実行・上から順に）
 
 適用済みかどうかが不明な場合も、いずれも再実行で壊れない書き方
-（IF NOT EXISTS / INSERT OR IGNORE / UPDATE）だが、**ALTER TABLEを含む2本
-（07-04と07-06-time-label）は2回目の実行で「duplicate column」エラーになる**。
-エラーが出たら適用済みということなので無視してよい。
+（IF NOT EXISTS / INSERT OR IGNORE / UPDATE）だが、**ALTER TABLEを含む3本
+（07-04・07-06-time-label・mig-2026-07-15-cancelled-at）は2回目の実行で
+「duplicate column」エラーになる**。エラーが出たら適用済みということなので無視してよい。
+※`mig-` プレフィックスはデプロイの手の運用規約（mig-*.sqlで受け渡し）によるもの。
+実行順はファイル名のソート順ではなく、この表の上から順が正。
 
 | ファイル | 内容 |
 |---|---|

@@ -52,7 +52,10 @@ function aggLine(s) {
       const e = entry.trim();
       if (!e) continue; // NULL・空文字＝お弁当なし
       const i = e.indexOf(':');
-      // 想定外の形式は握りつぶさず、そのままラベルにして見えるようにする
+      // 想定外の形式は握りつぶさず、そのままラベルにして見えるようにする。
+      // 既知の限界: コロンなしのエントリはどの日程か特定できないため、複数日程
+      // 同時予約の場合は各日程のカードに重複計上される（通常のLIFF経由では発生しない。
+      // ラベルで「形式不明」と出るので、見つけたらDBのbento列を直接確認すること）
       const [sid, name] = i === -1 ? [s.id, `形式不明(${e})`] : [e.slice(0, i), e.slice(i + 1)];
       if (sid !== s.id) continue;
       bentoCount.set(name, (bentoCount.get(name) || 0) + 1);
