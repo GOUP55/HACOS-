@@ -22,16 +22,29 @@ const html = renderAdminReservations({
   sessions: [
     { id: '2026-07-05', date: '2026-07-05', display_date: '7/5（日）', title: 'セルフマッサージ', time_label: null,
       capacity: 10, extra_slots: 3, booked: 2, cancelled: 1,
+      // bentoは「セッションID:メニュー名」のカンマ結合。複数日程の同時予約を再現
+      // （2026-07-12のぶんはこのカードでは数えられないことを検証する）
       reservations: [
-        { display_name: '過去の参加者', category: '会員', trainer: null, morning_run: '参加したい', message: null, created_at: '2026-07-01T03:00:00Z' },
-        { display_name: 'ふたりめ', category: 'ビジター', trainer: null, morning_run: null, message: null, created_at: '2026-07-02T03:00:00Z' },
+        { display_name: '過去の参加者', category: '会員', trainer: null, morning_run: '参加したい',
+          bento: '2026-07-05:サラダビビンそば,2026-07-12:カオマンガイ', tacos: null, message: null, created_at: '2026-07-01T03:00:00Z' },
+        { display_name: 'ふたりめ', category: 'ビジター', trainer: null, morning_run: null,
+          bento: null, tacos: null, message: null, created_at: '2026-07-02T03:00:00Z' },
+      ],
+      cancelled_people: [
+        { display_name: 'やめた花子', cancelled_at: null }, // 旧データ（migration前）→ 日時不明
       ] },
     { id: '2026-07-12', date: '2026-07-12', display_date: '7/12（日）', title: 'LEAN BODY TRAINING', time_label: null,
-      capacity: 10, extra_slots: 3, booked: 3, cancelled: 0,
+      capacity: 10, extra_slots: 3, booked: 3, cancelled: 1,
       reservations: [
-        { display_name: 'テスト太郎', category: '回数券', trainer: null, morning_run: '参加したい', message: '初参加です', created_at: '2026-07-06T12:34:00Z' },
-        { display_name: '<script>alert(1)</script>', category: '会員', trainer: null, morning_run: null, message: null, created_at: '2026-07-06T13:00:00Z' },
-        { display_name: '花子', category: 'TACOS', trainer: null, morning_run: null, message: null, created_at: '2026-07-06T14:00:00Z' },
+        { display_name: 'テスト太郎', category: '回数券', trainer: null, morning_run: 'join',
+          bento: '2026-07-12:カオマンガイ', tacos: null, message: '初参加です', created_at: '2026-07-06T12:34:00Z' },
+        { display_name: '<script>alert(1)</script>', category: '会員', trainer: null, morning_run: 'decide',
+          bento: '2026-07-12:カオマンガイ', tacos: null, message: null, created_at: '2026-07-06T13:00:00Z' },
+        { display_name: '花子', category: 'TACOS', trainer: null, morning_run: null,
+          bento: null, tacos: null, message: null, created_at: '2026-07-06T14:00:00Z' },
+      ],
+      cancelled_people: [
+        { display_name: 'とりけし次郎', cancelled_at: '2026-07-06T12:03:00Z' }, // JST 7/6 21:03
       ] },
     { id: '2026-07-19-tacos', date: '2026-07-19', display_date: '7/19（日）午後', title: 'TACOS Party（午後の部）', time_label: '12:00〜21:00',
       capacity: 10, extra_slots: 3, booked: 13, cancelled: 0,
@@ -56,7 +69,19 @@ check('体験パーソナルの確定待ちが表示される',
   html.includes('体験希望さん') && html.includes('第1希望 2026-07-15（午前）') && html.includes('夕方でも可'));
 check('過去の開催は「過去30日」に折りたたまれる',
   html.includes('過去30日の開催（1件）') && html.includes('過去の参加者'));
-check('キャンセル件数が表示される', html.includes('キャンセル 1件'));
+
+// ── 第1弾: キャンセル可視化＋集計行 ──
+check('キャンセル者が名前（取り消し線）＋日時つきで表示される',
+  html.includes('キャンセル 1名') && html.includes('<s>とりけし次郎</s>（7/6 21:03）'));
+check('cancelled_atがNULLの旧データは「日時不明」と表示される',
+  html.includes('<s>やめた花子</s>（日時不明）'));
+check('お弁当の集計が日程ごとに出る（他日程ぶんは混ざらない）',
+  html.includes('🍱 サラダビビンそば×1') && html.includes('🍱 カオマンガイ×2') && !html.includes('カオマンガイ×3'));
+check('朝RUNの集計（join＋当日決め）が出る',
+  html.includes('🏃 朝RUN 1名（＋当日決め1）'));
+check('TACOSの人数集計が出る', html.includes('🌮 TACOS 13名'));
+check('朝RUNバッジがjoin値で表示される（従来は日本語比較で常に非表示のバグ）',
+  html.includes('🏃朝RUN'));
 check('XSS対策: 表示名のscriptタグが無害化される',
   !html.includes('<script>alert(1)</script>') && html.includes('&lt;script&gt;alert(1)&lt;/script&gt;'));
 check('検索エンジン除外（noindex）が入っている', html.includes('name="robots" content="noindex"'));
