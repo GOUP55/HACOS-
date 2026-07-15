@@ -186,6 +186,7 @@ wrangler d1 execute line-harness --file=line-reservation/migrations/2026-07-04-t
 | `2026-07-06-trial-requests.sql` | trial_requestsテーブル追加（**未適用だと体験パーソナル申込が500になる**） |
 | `2026-07-06-tacos-note-and-fixes.sql` | TACOS Partyの案内文更新 |
 | `2026-07-06-time-label.sql` | sessions.time_label列追加（開催時間のセッション個別表示） |
+| `mig-2026-07-15-cancelled-at.sql` | reservations.cancelled_at列追加（キャンセル日時の記録。**Workerデプロイ前に適用**） |
 
 ```bash
 wrangler d1 execute line-harness --file=line-reservation/migrations/<ファイル名> --remote
@@ -246,3 +247,17 @@ wrangler kv key put --binding=STATIC_KV "liff/reserve.html" --path=line-reservat
   「/api/ で始まらないパスは静的アセット扱いで素通し」のため、非APIパスに置くと
   個人情報が認証なしで公開される。`tests/admin-page.test.mjs` にこのパス規約を守る
   ガードテストがあり、旧パスに戻すとテストが落ちる
+
+## 2026-07-15 の変更（改善第1弾: キャンセル可視化＋KITCHEN向け集計）
+
+**`migrations/mig-2026-07-15-cancelled-at.sql` を本番D1に1回だけ実行してから、Workerをデプロイすること。**
+（コード側はmigration未適用でもキャンセル処理が落ちないフォールバック付きだが、その間の日時は記録されない）
+LIFF（reserve.html）は無変更のため**KV更新は不要**。
+
+- **キャンセル者の表示**: 各日程カードに「キャンセル N名: 名前（7/14 21:03）」を取り消し線付きで表示。
+  キャンセル時に `cancelled_at` を記録し、再予約時はクリア。既存データ（列追加前）は「日時不明」表示
+- **お弁当・朝RUN・TACOSの集計行**（KITCHEN向け）: 日程ごとに
+  「🍱 メニュー×個数 ／ 🏃 朝RUN N名（＋当日決めM） ／ 🌮 TACOS N名」を表示。
+  お弁当は複数日程の同時予約でも該当日程ぶんだけを数える。想定外の形式は「形式不明(...)」として可視化
+- **既存バグ修正**: 予約者行の🏃朝RUNバッジが日本語値（'参加したい'）と比較していて、
+  LIFFの実保存値（'join'）では一度も表示されていなかった。join/decide両対応に修正

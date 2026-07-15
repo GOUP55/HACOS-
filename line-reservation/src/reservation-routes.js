@@ -73,9 +73,17 @@ reservationRoutes.get('/api/admin/reservations', async (c) => {
 
   const { results: people } = await c.env.DB.prepare(`
     SELECT r.session_id, r.display_name, r.category, r.trainer, r.morning_run,
-           r.message, r.created_at
+           r.bento, r.tacos, r.message, r.created_at
     FROM reservations r JOIN sessions s ON s.id = r.session_id
     WHERE s.date >= ? AND r.status = 'confirmed'
+    ORDER BY s.date, r.created_at
+  `).bind(fromDate).all();
+
+  // キャンセル者一覧（r.* で取得することで cancelled_at 列のmigration未適用でも落ちない）
+  const { results: cancelledPeople } = await c.env.DB.prepare(`
+    SELECT r.*
+    FROM reservations r JOIN sessions s ON s.id = r.session_id
+    WHERE s.date >= ? AND r.status = 'cancelled'
     ORDER BY s.date, r.created_at
   `).bind(fromDate).all();
 
@@ -84,8 +92,9 @@ reservationRoutes.get('/api/admin/reservations', async (c) => {
     FROM trial_requests WHERE status = 'pending' ORDER BY created_at
   `).all().catch(() => ({ results: [] })); // trial_requests未作成のDBでも落ちない
 
-  const byId = new Map(sessions.map(s => [s.id, { ...s, extra_slots: EXTRA_SLOTS, reservations: [] }]));
+  const byId = new Map(sessions.map(s => [s.id, { ...s, extra_slots: EXTRA_SLOTS, reservations: [], cancelled_people: [] }]));
   for (const p of people) byId.get(p.session_id)?.reservations.push(p);
+  for (const p of cancelledPeople) byId.get(p.session_id)?.cancelled_people.push(p);
 
   c.header('Cache-Control', 'no-store, must-revalidate');
   return c.html(renderAdminReservations({
@@ -260,20 +269,30 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
 
       // cancelledだった予約を再有効化。status='cancelled'かつ残枠ありの間だけ
       // 更新が通るガードで、同時リクエストによる二重再有効化・定員オーバーを防ぐ。
-      const reactivated = await c.env.DB.prepare(`
+      // cancelled_at はクリアする（migration未適用のDBでは列なし版にフォールバック）
+      const reactivateSql = (withCancelledAt) => `
         UPDATE reservations
-        SET status = 'confirmed', display_name = ?, category = ?, morning_run = ?,
+        SET status = 'confirmed', ${withCancelledAt ? 'cancelled_at = NULL,' : ''}
+            display_name = ?, category = ?, morning_run = ?,
             bento = ?, trainer = ?, message = ?, ref = ?, created_at = ?
         WHERE id = ? AND status = 'cancelled'
           AND (SELECT COUNT(*) FROM reservations r2
                WHERE r2.session_id = ? AND r2.status = 'confirmed') <
               (SELECT capacity + ${EXTRA_SLOTS} FROM sessions WHERE id = ?)
-      `).bind(
+      `;
+      const reactivateBinds = [
         displayName, category, morning_run || null,
         Array.isArray(bento) && bento.length ? bento.join(',') : null,
         trainer || null, message || null, ref || null, createdAt,
-        existing.id, sessionId, sessionId
-      ).run();
+        existing.id, sessionId, sessionId,
+      ];
+      let reactivated;
+      try {
+        reactivated = await c.env.DB.prepare(reactivateSql(true)).bind(...reactivateBinds).run();
+      } catch (e) {
+        if (!e.message?.includes('no such column')) throw e;
+        reactivated = await c.env.DB.prepare(reactivateSql(false)).bind(...reactivateBinds).run();
+      }
 
       if (!reactivated.meta || reactivated.meta.changes === 0) {
         // 別リクエストが先に再有効化済み、またはその間に満席になった
@@ -450,9 +469,18 @@ reservationRoutes.post('/api/liff/reservations/:id/cancel', async (c) => {
 
   if (!reservation) return c.json({ error: 'not_found' }, 404);
 
-  await c.env.DB.prepare(
-    `UPDATE reservations SET status = 'cancelled' WHERE id = ?`
-  ).bind(reservationId).run();
+  // キャンセル日時も記録する（管理画面の「名前（7/14 21:03）」表示用）。
+  // cancelled_at列のmigration未適用でもキャンセル自体は成立させる
+  try {
+    await c.env.DB.prepare(
+      `UPDATE reservations SET status = 'cancelled', cancelled_at = ? WHERE id = ?`
+    ).bind(new Date().toISOString(), reservationId).run();
+  } catch (e) {
+    if (!e.message?.includes('no such column')) throw e;
+    await c.env.DB.prepare(
+      `UPDATE reservations SET status = 'cancelled' WHERE id = ?`
+    ).bind(reservationId).run();
+  }
 
   // 本人への確認＋スタッフ通知（失敗してもキャンセル自体は成立させる）
   c.executionCtx.waitUntil(

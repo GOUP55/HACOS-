@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS reservations (
   ref           TEXT,
   status        TEXT NOT NULL DEFAULT 'confirmed',
   created_at    TEXT NOT NULL,
+  cancelled_at  TEXT,              -- キャンセル日時（confirmed中はNULL。再予約で再びNULLに戻る）
   UNIQUE(session_id, line_user_id)
 );
 
