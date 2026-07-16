@@ -32,6 +32,55 @@ function categoryBadge(category) {
   return `<span class="cat" style="color:${color};border-color:${color}44;">${icon} ${esc(category)}</span>`;
 }
 
+// 朝RUNの回答値。LIFFは 'join'/'skip'/'decide' を保存する
+// （旧データに日本語表記が残っている可能性があるため両方を受ける）
+const RUN_JOIN = ['join', '参加したい'];
+const RUN_DECIDE = ['decide', '当日決める'];
+
+// 日程ごとの集計行（KITCHEN向け）: お弁当×個数・朝RUN人数・TACOS人数
+function aggLine(s) {
+  const bentoCount = new Map();
+  let run = 0, runDecide = 0, tacos = 0;
+  for (const r of s.reservations) {
+    if (RUN_JOIN.includes(r.morning_run)) run++;
+    else if (RUN_DECIDE.includes(r.morning_run)) runDecide++;
+    // TACOS: 現行は category='TACOS'。旧データのtacos列（回答文字列）も拾う
+    if (r.category === 'TACOS' || (r.tacos && r.tacos !== '参加しない')) tacos++;
+    // bento列は「セッションID:メニュー名」のカンマ結合。複数日程の同時予約では
+    // 全予約行に同じ文字列が入るため、この日程ぶんだけを数える
+    for (const entry of String(r.bento || '').split(',')) {
+      const e = entry.trim();
+      if (!e) continue; // NULL・空文字＝お弁当なし
+      const i = e.indexOf(':');
+      // 想定外の形式は握りつぶさず、そのままラベルにして見えるようにする。
+      // 既知の限界: コロンなしのエントリはどの日程か特定できないため、複数日程
+      // 同時予約の場合は各日程のカードに重複計上される（通常のLIFF経由では発生しない。
+      // ラベルで「形式不明」と出るので、見つけたらDBのbento列を直接確認すること）
+      const [sid, name] = i === -1 ? [s.id, `形式不明(${e})`] : [e.slice(0, i), e.slice(i + 1)];
+      if (sid !== s.id) continue;
+      bentoCount.set(name, (bentoCount.get(name) || 0) + 1);
+    }
+  }
+  const parts = [];
+  if (bentoCount.size) parts.push([...bentoCount].map(([n, c]) => `🍱 ${esc(n)}×${c}`).join('、'));
+  if (run || runDecide) parts.push(`🏃 朝RUN ${run}名${runDecide ? `（＋当日決め${runDecide}）` : ''}`);
+  if (tacos) parts.push(`🌮 TACOS ${tacos}名`);
+  return parts.length ? `<div class="agg">${parts.join(' ／ ')}</div>` : '';
+}
+
+// キャンセル者の行: 名前（取り消し線）＋キャンセル日時。旧データはcancelled_atがNULL→「日時不明」
+function cancelledLine(s) {
+  const people = s.cancelled_people || [];
+  if (!people.length) {
+    // 後方互換: 件数しか渡ってこない場合は従来表示
+    return s.cancelled ? `<div class="cancelled-note">キャンセル ${s.cancelled}件</div>` : '';
+  }
+  const items = people.map(p =>
+    `<s>${esc(p.display_name || '(名前なし)')}</s>（${p.cancelled_at ? esc(fmtJst(p.cancelled_at)) : '日時不明'}）`
+  ).join('、');
+  return `<div class="cancelled-note">キャンセル ${people.length}名: ${items}</div>`;
+}
+
 function sessionCard(s) {
   const total = s.capacity + (s.extra_slots ?? 0);
   const isFull = s.booked >= total;
@@ -42,7 +91,8 @@ function sessionCard(s) {
         <span class="name">${esc(r.display_name || '(名前なし)')}</span>
         ${categoryBadge(r.category)}
         ${r.trainer ? `<span class="meta">担当: ${esc(r.trainer)}</span>` : ''}
-        ${r.morning_run === '参加したい' ? '<span class="meta">🏃朝RUN</span>' : ''}
+        ${RUN_JOIN.includes(r.morning_run) ? '<span class="meta">🏃朝RUN</span>' : ''}
+        ${RUN_DECIDE.includes(r.morning_run) ? '<span class="meta">🏃朝RUN(当日決め)</span>' : ''}
       </div>
       ${r.message ? `<div class="msg">💬 ${esc(r.message)}</div>` : ''}
       <div class="ts">${esc(fmtJst(r.created_at))} 予約</div>
@@ -57,7 +107,8 @@ function sessionCard(s) {
       </div>
       <div class="count ${badgeClass}">${s.booked}<span class="cap">/${s.capacity}${s.extra_slots ? `+${s.extra_slots}` : ''}</span></div>
     </div>
-    ${s.cancelled ? `<div class="cancelled-note">キャンセル ${s.cancelled}件</div>` : ''}
+    ${aggLine(s)}
+    ${cancelledLine(s)}
     ${rows ? `<ul class="people">${rows}</ul>` : '<p class="empty">予約はまだありません</p>'}
   </div>`;
 }
@@ -102,7 +153,9 @@ body { font-family: -apple-system, 'Hiragino Sans', 'Yu Gothic', sans-serif; bac
 .count.ok { color: #2e7d32; }
 .count.extra { color: #f57c00; }
 .count.full { color: #e53935; }
-.cancelled-note { font-size: 11px; color: #b85c38; margin-top: 4px; }
+.cancelled-note { font-size: 11px; color: #b85c38; margin-top: 6px; line-height: 1.7; }
+.cancelled-note s { opacity: .75; }
+.agg { font-size: 12px; font-weight: 600; color: #3D5A3E; background: #f0f4f0; border-radius: 8px; padding: 7px 10px; margin-top: 8px; line-height: 1.8; }
 .people { list-style: none; margin-top: 10px; border-top: 1px solid #eee; }
 .person { padding: 9px 2px; border-bottom: 1px solid #eee; }
 .person-main { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
