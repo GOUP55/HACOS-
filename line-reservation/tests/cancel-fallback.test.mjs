@@ -19,8 +19,8 @@ function check(name, ok, detail = '') {
 // ── 1. ルート実装が期待どおりのフォールバック条件を持っているか ──
 const routesSrc = read('../src/reservation-routes.js');
 const fallbackCount = (routesSrc.match(/no such column/g) || []).length;
-check('ルート実装に no such column フォールバックが2箇所ある（キャンセル・再予約）',
-  fallbackCount >= 2, `検出: ${fallbackCount}箇所`);
+check('ルート実装に no such column フォールバックが3箇所ある（キャンセル・再予約・体験判定）',
+  fallbackCount >= 3, `検出: ${fallbackCount}箇所`);
 
 // ── 2. migration未適用DB（cancelled_at列なし）での挙動 ──
 const old = new DatabaseSync(':memory:');
@@ -72,6 +72,47 @@ nu.exec(`UPDATE reservations SET status='confirmed', cancelled_at=NULL, display_
 const afterReact = nu.prepare(`SELECT status, cancelled_at FROM reservations WHERE id='r1'`).get();
 check('適用済みDB: 再予約で cancelled_at がクリアされる',
   afterReact.status === 'confirmed' && afterReact.cancelled_at === null);
+
+// ── 4. 体験リクエストの確定/不成立（第2弾） ──
+// 4-1. decided_at/decided_by列のないDBでは 'no such column' → フォールバックで判定は成立
+const trialOld = new DatabaseSync(':memory:');
+trialOld.exec(`CREATE TABLE trial_requests (
+  id TEXT PRIMARY KEY, line_user_id TEXT, display_name TEXT, trainer TEXT,
+  preferred_date TEXT, preferred_time TEXT, alt_note TEXT, ref TEXT,
+  status TEXT NOT NULL DEFAULT 'pending', created_at TEXT NOT NULL);`);
+trialOld.exec(`INSERT INTO trial_requests (id, status, created_at) VALUES ('t1','pending','x');`);
+let trialErr = '';
+try {
+  trialOld.exec(`UPDATE trial_requests SET status='confirmed', decided_at='z', decided_by='env-owner'
+                 WHERE id='t1' AND status='pending'`);
+} catch (e) { trialErr = e.message; }
+check('未適用DB: decided_at付きUPDATEが失敗し、エラーに no such column を含む',
+  trialErr.includes('no such column'), trialErr);
+trialOld.exec(`UPDATE trial_requests SET status='confirmed' WHERE id='t1' AND status='pending'`);
+check('未適用DB: フォールバックSQLで体験の確定が成立する',
+  trialOld.prepare(`SELECT status FROM trial_requests WHERE id='t1'`).get().status === 'confirmed');
+
+// 4-2. pendingガード: 処理済みIDへの再操作は変化0行（＝API側で409になる）
+const guard = trialOld.prepare(`UPDATE trial_requests SET status='declined' WHERE id='t1' AND status='pending'`).run();
+check('pendingガード: 処理済みIDへの再UPDATEは変化0行', guard.changes === 0);
+check('pendingガード: 先の判定（confirmed）が上書きされない',
+  trialOld.prepare(`SELECT status FROM trial_requests WHERE id='t1'`).get().status === 'confirmed');
+
+// 4-3. 適用済みDB（schema.sql）では操作ログが記録される
+const trialNew = new DatabaseSync(':memory:');
+trialNew.exec(read('../schema.sql'));
+trialNew.exec(`INSERT INTO trial_requests (id, line_user_id, status, created_at) VALUES ('t1','u1','pending','x');`);
+trialNew.exec(`UPDATE trial_requests SET status='declined', decided_at='2026-07-16T09:00:00Z', decided_by='env-owner'
+               WHERE id='t1' AND status='pending'`);
+const decided = trialNew.prepare(`SELECT status, decided_at, decided_by FROM trial_requests WHERE id='t1'`).get();
+check('適用済みDB: 判定と操作ログ（decided_at/decided_by）が記録される',
+  decided.status === 'declined' && decided.decided_at === '2026-07-16T09:00:00Z' && decided.decided_by === 'env-owner');
+
+// 4-4. migrationファイルが旧スキーマに適用できる
+trialOld.exec(read('../migrations/mig-2026-07-16-trial-decision.sql'));
+const trialCols = trialOld.prepare(`SELECT name FROM pragma_table_info('trial_requests')`).all().map(r => r.name);
+check('trial-decision migrationで decided_at/decided_by 列が追加される',
+  trialCols.includes('decided_at') && trialCols.includes('decided_by'));
 
 // 3-1. migrationファイル自体が旧スキーマに適用できる
 const mig = new DatabaseSync(':memory:');

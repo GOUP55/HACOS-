@@ -176,9 +176,9 @@ wrangler d1 execute line-harness --file=line-reservation/migrations/2026-07-04-t
 ## マイグレーション一覧（本番D1に各1回だけ実行・上から順に）
 
 適用済みかどうかが不明な場合も、いずれも再実行で壊れない書き方
-（IF NOT EXISTS / INSERT OR IGNORE / UPDATE）だが、**ALTER TABLEを含む3本
-（07-04・07-06-time-label・mig-2026-07-15-cancelled-at）は2回目の実行で
-「duplicate column」エラーになる**。エラーが出たら適用済みということなので無視してよい。
+（IF NOT EXISTS / INSERT OR IGNORE / UPDATE）だが、**ALTER TABLEを含む4本
+（07-04・07-06-time-label・mig-2026-07-15-cancelled-at・mig-2026-07-16-trial-decision）は
+2回目の実行で「duplicate column」エラーになる**。エラーが出たら適用済みということなので無視してよい。
 ※`mig-` プレフィックスはデプロイの手の運用規約（mig-*.sqlで受け渡し）によるもの。
 実行順はファイル名のソート順ではなく、この表の上から順が正。
 
@@ -189,6 +189,7 @@ wrangler d1 execute line-harness --file=line-reservation/migrations/2026-07-04-t
 | `2026-07-06-tacos-note-and-fixes.sql` | TACOS Partyの案内文更新 |
 | `2026-07-06-time-label.sql` | sessions.time_label列追加（開催時間のセッション個別表示） |
 | `mig-2026-07-15-cancelled-at.sql` | reservations.cancelled_at列追加（キャンセル日時の記録。**Workerデプロイ前に適用**） |
+| `mig-2026-07-16-trial-decision.sql` | trial_requests.decided_at/decided_by列追加（体験判定の操作ログ。**Workerデプロイ前に適用**） |
 
 ```bash
 wrangler d1 execute line-harness --file=line-reservation/migrations/<ファイル名> --remote
@@ -263,3 +264,16 @@ LIFF（reserve.html）は無変更のため**KV更新は不要**。
   お弁当は複数日程の同時予約でも該当日程ぶんだけを数える。想定外の形式は「形式不明(...)」として可視化
 - **既存バグ修正**: 予約者行の🏃朝RUNバッジが日本語値（'参加したい'）と比較していて、
   LIFFの実保存値（'join'）では一度も表示されていなかった。join/decide両対応に修正
+
+## 2026-07-16 の変更（改善第2弾: 体験リクエストの確定/不成立ボタン）
+
+**`migrations/mig-2026-07-16-trial-decision.sql` を本番D1に1回だけ実行してから、Workerをデプロイすること。**
+LIFF（reserve.html）は無変更のため**KV更新は不要**。顧客への自動送信はなし（連絡はスタッフ手動のまま）。
+
+- 管理画面の体験リクエスト欄に「✅ 確定にする／✖ 不成立にする」ボタンを追加
+- `POST /api/admin/trials/:id/confirm` ／ `POST /api/admin/trials/:id/decline`（認証必須・
+  cookie認証のPOSTはハーネスのミドルウェアがX-CSRF-Tokenを自動検証）
+- 状態遷移は d1_trials.cjs と同じ: pending → confirmed（確定）／ declined（不成立）。
+  UPDATE自体に `AND status='pending'` を入れてあり、二重押下・処理済みIDへの再操作は409
+- 操作ログ: `decided_at`（日時）と `decided_by`（スタッフID）を記録。共有キー運用中は
+  'env-owner' が入り、スタッフ個別キー発行後は個人が特定できるログになる

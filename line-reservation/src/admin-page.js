@@ -126,6 +126,11 @@ function renderAdminReservations({ todayJst, sessions, trials }) {
       </div>
       <div class="msg">第1希望 ${esc(t.preferred_date)}（${esc(t.preferred_time)}）${t.alt_note ? ` ／ 第2希望・要望: ${esc(t.alt_note)}` : ''}</div>
       <div class="ts">${esc(fmtJst(t.created_at))} 受付</div>
+      ${t.id ? `
+      <div class="trial-actions">
+        <button type="button" class="btn-trial confirm" data-trial-id="${esc(t.id)}" data-trial-action="confirm" data-trial-name="${esc(t.display_name || '(名前なし)')}">✅ 確定にする</button>
+        <button type="button" class="btn-trial decline" data-trial-id="${esc(t.id)}" data-trial-action="decline" data-trial-name="${esc(t.display_name || '(名前なし)')}">✖ 不成立にする</button>
+      </div>` : ''}
     </li>`).join('');
 
   return `<!DOCTYPE html>
@@ -169,6 +174,11 @@ details { background: #fff; border-radius: 12px; padding: 12px 14px; }
 summary { font-size: 13px; font-weight: 700; color: #666; cursor: pointer; }
 details .card { padding: 12px 0 0; }
 .total { font-size: 12px; color: #666; margin: 0 2px; }
+.trial-actions { display: flex; gap: 8px; margin-top: 8px; }
+.btn-trial { flex: 1; border-radius: 8px; padding: 9px 10px; font-size: 12px; font-weight: 700; cursor: pointer; border: 1.5px solid; background: #fff; }
+.btn-trial.confirm { color: #2e7d32; border-color: #2e7d32; }
+.btn-trial.decline { color: #b85c38; border-color: #b85c38; }
+.btn-trial:disabled { opacity: .5; cursor: default; }
 </style>
 </head>
 <body>
@@ -185,6 +195,54 @@ details .card { padding: 12px 0 0; }
 
   ${past.length ? `<details><summary>🗂 過去30日の開催（${past.length}件）</summary>${past.map(sessionCard).join('')}</details>` : ''}
 </div>
+<script>
+// 体験リクエストの確定/不成立。cookie認証のPOSTはハーネスのミドルウェアが
+// X-CSRF-Token ヘッダと lh_csrf cookie の一致を検証するため、ヘッダを必ず付ける。
+function readCookie(name) {
+  const row = document.cookie.split('; ').find(r => r.startsWith(name + '='));
+  return row ? row.slice(name.length + 1) : '';
+}
+async function getCsrfToken() {
+  let token = readCookie('lh_csrf');
+  if (!token) {
+    // cookieに無い場合は /api/auth/session がcsrfTokenを返し、cookieも再発行される
+    try {
+      const res = await fetch('/api/auth/session');
+      if (res.ok) token = (await res.json()).csrfToken || '';
+    } catch {}
+  }
+  return token;
+}
+document.querySelectorAll('[data-trial-action]').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const { trialId, trialAction, trialName } = btn.dataset;
+    const label = trialAction === 'confirm' ? '確定' : '不成立';
+    if (!confirm(trialName + ' さんの体験リクエストを「' + label + '」にしますか？\\n（お客様への連絡は自動送信されません。別途スタッフからお願いします）')) return;
+
+    const row = btn.closest('.trial-actions');
+    row.querySelectorAll('button').forEach(b => { b.disabled = true; });
+    btn.textContent = '処理中...';
+
+    try {
+      const res = await fetch('/api/admin/trials/' + encodeURIComponent(trialId) + '/' + trialAction, {
+        method: 'POST',
+        headers: { 'X-CSRF-Token': await getCsrfToken() },
+      });
+      if (res.ok) { location.reload(); return; }
+      if (res.status === 409) { alert('このリクエストはすでに処理済みです。最新の状態に更新します。'); location.reload(); return; }
+      if (res.status === 401 || res.status === 403) {
+        alert('ログインの有効期限が切れている可能性があります。/admin-login からログインし直してください。');
+      } else {
+        alert('処理に失敗しました。時間をおいてもう一度お試しください。');
+      }
+    } catch {
+      alert('通信エラーが発生しました。もう一度お試しください。');
+    }
+    row.querySelectorAll('button').forEach(b => { b.disabled = false; });
+    btn.textContent = trialAction === 'confirm' ? '✅ 確定にする' : '✖ 不成立にする';
+  });
+});
+</script>
 </body>
 </html>`;
 }
