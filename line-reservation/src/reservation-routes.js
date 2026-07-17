@@ -88,7 +88,7 @@ reservationRoutes.get('/api/admin/reservations', async (c) => {
   `).bind(fromDate).all();
 
   const { results: trials } = await c.env.DB.prepare(`
-    SELECT display_name, trainer, preferred_date, preferred_time, alt_note, created_at
+    SELECT id, display_name, trainer, preferred_date, preferred_time, alt_note, created_at
     FROM trial_requests WHERE status = 'pending' ORDER BY created_at
   `).all().catch(() => ({ results: [] })); // trial_requests未作成のDBでも落ちない
 
@@ -103,6 +103,49 @@ reservationRoutes.get('/api/admin/reservations', async (c) => {
     trials,
   }));
 });
+
+// ── 管理: 体験リクエストの確定/不成立（スタッフ用・認証必須） ──
+// /api/admin/ 配下なのでauthMiddlewareが自動適用される。cookie認証のPOSTは
+// ミドルウェアが X-CSRF-Token と lh_csrf cookie の一致を検証する（ルート側の実装は不要）。
+// DB記録のみで、顧客への自動送信はしない（連絡はスタッフ手動のまま）。
+async function decideTrial(c, newStatus) {
+  // authMiddlewareが c.set('staff', {id, name, role}) 済み。
+  // 共有キー（環境変数API_KEY）運用中は id='env-owner' が入る（個別キー発行後に個人特定可能になる）
+  const staff = c.get('staff');
+  const trialId = c.req.param('id');
+  const decidedAt = new Date().toISOString();
+  const decidedBy = staff?.id || null;
+
+  // d1_trials.cjs（ハーネス側リポジトリのopsスクリプト。本リポジトリには無い）と
+  // 同じく AND status='pending' をUPDATE自体に入れて、
+  // 二重押下・処理済みIDへの再操作をDBレベルで防ぐ（変化0行なら409）。
+  // decided_at/decided_by 列のmigration未適用DBでは列なし版にフォールバック
+  let res;
+  try {
+    res = await c.env.DB.prepare(`
+      UPDATE trial_requests SET status = ?, decided_at = ?, decided_by = ?
+      WHERE id = ? AND status = 'pending'
+    `).bind(newStatus, decidedAt, decidedBy, trialId).run();
+  } catch (e) {
+    if (!e.message?.includes('no such column')) throw e;
+    res = await c.env.DB.prepare(`
+      UPDATE trial_requests SET status = ? WHERE id = ? AND status = 'pending'
+    `).bind(newStatus, trialId).run();
+  }
+
+  if (!res.meta || res.meta.changes === 0) {
+    const existing = await c.env.DB.prepare(
+      `SELECT status FROM trial_requests WHERE id = ?`
+    ).bind(trialId).first();
+    if (!existing) return c.json({ error: 'not_found' }, 404);
+    return c.json({ error: 'already_decided', status: existing.status }, 409);
+  }
+
+  return c.json({ ok: true, id: trialId, status: newStatus });
+}
+
+reservationRoutes.post('/api/admin/trials/:id/confirm', (c) => decideTrial(c, 'confirmed'));
+reservationRoutes.post('/api/admin/trials/:id/decline', (c) => decideTrial(c, 'declined'));
 
 // ── GET /api/sessions ── 開催予定＋残枠 ──
 reservationRoutes.get('/api/liff/sessions', async (c) => {
@@ -436,9 +479,15 @@ reservationRoutes.post('/api/liff/trial-request/:id/cancel', async (c) => {
 
   if (!tr) return c.json({ error: 'not_found' }, 404);
 
-  await c.env.DB.prepare(
-    `UPDATE trial_requests SET status = 'cancelled' WHERE id = ?`
+  // UPDATE自体にも status='pending' ガードを入れる。SELECTの直後にスタッフが
+  // 確定/不成立にした場合、無条件UPDATEだとその判定を黙って cancelled で上書きしてしまう
+  const updated = await c.env.DB.prepare(
+    `UPDATE trial_requests SET status = 'cancelled' WHERE id = ? AND status = 'pending'`
   ).bind(reqId).run();
+  if (!updated.meta || updated.meta.changes === 0) {
+    // その一瞬でスタッフが確定/不成立にした（顧客画面からは既に消えているはずの稀ケース）
+    return c.json({ error: 'already_decided' }, 409);
+  }
 
   c.executionCtx.waitUntil(
     sendTrialCancelNotifications(userId, displayName, tr, c.env)
@@ -470,16 +519,27 @@ reservationRoutes.post('/api/liff/reservations/:id/cancel', async (c) => {
   if (!reservation) return c.json({ error: 'not_found' }, 404);
 
   // キャンセル日時も記録する（管理画面の「名前（7/14 21:03）」表示用）。
-  // cancelled_at列のmigration未適用でもキャンセル自体は成立させる
+  // cancelled_at列のmigration未適用でもキャンセル自体は成立させる。
+  // UPDATEに status='confirmed' ガードを入れ、SELECT後に状態が変わっていた場合
+  // （二重タップ・再予約との競合）に古いリクエストが状態を上書きするのを防ぐ
+  let cancelUpdated;
   try {
-    await c.env.DB.prepare(
-      `UPDATE reservations SET status = 'cancelled', cancelled_at = ? WHERE id = ?`
+    cancelUpdated = await c.env.DB.prepare(
+      `UPDATE reservations SET status = 'cancelled', cancelled_at = ? WHERE id = ? AND status = 'confirmed'`
     ).bind(new Date().toISOString(), reservationId).run();
   } catch (e) {
     if (!e.message?.includes('no such column')) throw e;
-    await c.env.DB.prepare(
-      `UPDATE reservations SET status = 'cancelled' WHERE id = ?`
+    cancelUpdated = await c.env.DB.prepare(
+      `UPDATE reservations SET status = 'cancelled' WHERE id = ? AND status = 'confirmed'`
     ).bind(reservationId).run();
+  }
+  if (!cancelUpdated.meta || cancelUpdated.meta.changes === 0) {
+    // 二重タップ等で既にcancelled済みなら冪等に成功扱い（通知は重複させない）
+    const now = await c.env.DB.prepare(
+      `SELECT status FROM reservations WHERE id = ?`
+    ).bind(reservationId).first();
+    if (now?.status === 'cancelled') return c.json({ ok: true });
+    return c.json({ error: 'conflict' }, 409);
   }
 
   // 本人への確認＋スタッフ通知（失敗してもキャンセル自体は成立させる）
