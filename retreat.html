@@ -110,7 +110,10 @@ img { max-width:100%; display:block; }
   position:fixed; bottom:0; left:0; right:0; z-index:999;
   background:var(--forest); padding:10px 16px 12px;
   box-shadow:0 -2px 20px rgba(0,0,0,.25);
+  transform:translateY(110%); transition:transform .35s ease;
 }
+.sticky-cta.show { transform:translateY(0); }
+@media (prefers-reduced-motion: reduce){ .sticky-cta { transition:none; } }
 .sticky-cta .sticky-text { color:var(--cream); font-size:12px; line-height:1.4; margin-bottom:8px; text-align:center; }
 .sticky-cta .sticky-text strong { font-size:14px; }
 .sticky-cta .sticky-days { color:var(--amber-light); font-weight:600; }
@@ -678,6 +681,17 @@ function journeyDaysLeft(){
   });
   var stickyEl = document.getElementById('deadlineDaysSticky');
   if(stickyEl) stickyEl.textContent = days >= 1 ? '（' + (days === 1 ? '本日締切' : '残り' + days + '日') + '）' : '（締切済）';
+})();
+
+// ── スティッキーCTAはヒーローを過ぎてから表示（ファーストビューのCTAを隠さない）──
+(function(){
+  var sticky = document.querySelector('.sticky-cta');
+  var hero = document.querySelector('.hero');
+  if(!sticky) return;
+  if(!hero || !('IntersectionObserver' in window)){ sticky.classList.add('show'); return; }
+  new IntersectionObserver(function(entries){
+    sticky.classList.toggle('show', !entries[0].isIntersecting);
+  }, {threshold:0.05}).observe(hero);
 })();
 
 // ── GA4 計測（data-ga-event属性のCTAをクリック時に計測）──
