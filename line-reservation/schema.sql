@@ -55,6 +55,18 @@ CREATE TABLE IF NOT EXISTS trial_requests (
 
 CREATE INDEX IF NOT EXISTS idx_trial_user ON trial_requests(line_user_id, status);
 
+-- 管理操作ログ（開催日の作成・編集・削除などを「誰が・いつ・何を」で記録）
+CREATE TABLE IF NOT EXISTS admin_ops_log (
+  id          TEXT PRIMARY KEY,
+  staff_id    TEXT,
+  action      TEXT NOT NULL,
+  target_id   TEXT,
+  detail      TEXT,
+  created_at  TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_ops_log_created ON admin_ops_log(created_at);
+
 -- 7月シードデータ
 INSERT OR IGNORE INTO sessions VALUES
   ('2026-07-05','2026-07-05','7/5（日）','セルフマッサージ＆ストレッチ',

@@ -34,6 +34,7 @@ const html = renderAdminReservations({
         { display_name: 'やめた花子', cancelled_at: null }, // 旧データ（migration前）→ 日時不明
       ] },
     { id: '2026-07-12', date: '2026-07-12', display_date: '7/12（日）', title: 'LEAN BODY TRAINING', time_label: null,
+      is_open: 0, note: '<b>タグ入り備考</b>',
       capacity: 10, extra_slots: 3, booked: 3, cancelled: 1,
       reservations: [
         { display_name: 'テスト太郎', category: '回数券', trainer: null, morning_run: 'join',
@@ -110,6 +111,35 @@ check('confirm/declineルートが /api/admin/ 配下（認証必須）にある
   /\.post\(\s*'\/api\/admin\/trials\/:id\/decline'/.test(routesSrc));
 check('二重処理防止: UPDATEに AND status = \'pending\' ガードがある',
   /UPDATE trial_requests SET[\s\S]*?WHERE id = \? AND status = 'pending'/.test(routesSrc));
+
+// ── 第3弾: 開催日の登録・編集 ──
+check('開催日管理フォームが出る（日付・クラス名・定員・お弁当）',
+  html.includes('id="session-form"') && html.includes('id="sf-date"') &&
+  html.includes('id="sf-capacity"') && html.includes('id="sf-bento"'));
+check('今後の開催カードにだけ編集/締切/削除ボタンが出る（過去カードには出ない）',
+  (html.match(/data-session-edit="/g) || []).length === 2 &&
+  html.includes('data-session-edit="2026-07-12"'));
+check('受付停止中の日程にバッジと「受付再開」が出る',
+  html.includes('受付停止中') && html.includes('▶️ 受付再開'));
+check('編集用データがscript安全にJSON埋め込みされる（<が\\u003cにエスケープ）',
+  html.includes('const ADMIN_SESSIONS') && html.includes('\\u003cb>タグ入り備考'));
+check('sessionsルートが /api/admin/ 配下（認証必須）にある',
+  /\.post\(\s*'\/api\/admin\/sessions'/.test(routesSrc) &&
+  /\.post\(\s*'\/api\/admin\/sessions\/:id'/.test(routesSrc) &&
+  /\.post\(\s*'\/api\/admin\/sessions\/:id\/delete'/.test(routesSrc));
+check('削除は予約が1件でもあれば拒否（DELETE自体にNOT EXISTSガード）',
+  /DELETE FROM sessions[\s\S]*?NOT EXISTS \(SELECT 1 FROM reservations/.test(routesSrc));
+check('更新はホワイトリスト方式で日付(id)を変更できない',
+  !/sets\.push\('date/.test(routesSrc) && !/sets\.push\('id/.test(routesSrc));
+
+// ── 小改善: 弁当を個人行にも表示（オーナー要望） ──
+const rowOf = (name) => (html.match(new RegExp(name + '[\\s\\S]*?</li>')) || [''])[0];
+check('個人行に本人の弁当が出る（他の日程の弁当は混ざらない）',
+  rowOf('過去の参加者').includes('🍱 サラダビビンそば') && !rowOf('過去の参加者').includes('カオマンガイ'));
+check('個人行の弁当の合計が集計行（🍱×N）と一致する',
+  (html.match(/🍱 カオマンガイ<\/span>/g) || []).length === 2 && html.includes('🍱 カオマンガイ×2'));
+check('弁当なしの人の行に🍱が出ない',
+  !rowOf('ふたりめ').includes('🍱'));
 
 // ── ログインページ（/admin-login）の検証 ──
 // このページは意図的に無認証（APIキー入力欄のみ・個人情報なし）。
