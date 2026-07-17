@@ -147,6 +147,153 @@ async function decideTrial(c, newStatus) {
 reservationRoutes.post('/api/admin/trials/:id/confirm', (c) => decideTrial(c, 'confirmed'));
 reservationRoutes.post('/api/admin/trials/:id/decline', (c) => decideTrial(c, 'declined'));
 
+// ── 管理: 開催日の登録・編集・削除（スタッフ用・認証必須） ──
+// 月末の来月分登録をスマホで完結させるための機能。d1_sessions.cjs（ハーネス側の
+// opsスクリプト）の add/set/remove と同じ規則。CSRFはミドルウェアが自動検証。
+
+// 管理操作ログ。テーブル未作成でも操作自体は成立させる（ログだけスキップ）
+async function logAdminOp(c, action, targetId, detail) {
+  try {
+    await c.env.DB.prepare(`
+      INSERT INTO admin_ops_log (id, staff_id, action, target_id, detail, created_at)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).bind(
+      crypto.randomUUID(), c.get('staff')?.id || null, action, targetId,
+      JSON.stringify(detail).slice(0, 500), new Date().toISOString()
+    ).run();
+  } catch (e) {
+    console.error('admin_ops_log insert failed:', e.message);
+  }
+}
+
+// 'YYYY-MM-DD' → '8/2（日）'。不正な日付はnull
+function toDisplayDate(dateStr) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return null;
+  const d = new Date(dateStr + 'T00:00:00Z');
+  if (Number.isNaN(d.getTime()) || d.toISOString().slice(0, 10) !== dateStr) return null;
+  const youbi = '日月火水木金土'[d.getUTCDay()];
+  return `${d.getUTCMonth() + 1}/${d.getUTCDate()}（${youbi}）`;
+}
+
+// bento: [{name, price}] の形だけを受け付けて bento_json 文字列にする。不正はnull（エラー）
+function toBentoJson(bento) {
+  if (bento == null || (Array.isArray(bento) && bento.length === 0)) return { ok: true, json: null };
+  if (!Array.isArray(bento) || bento.length > 10) return { ok: false };
+  const items = [];
+  for (const b of bento) {
+    const name = String(b?.name || '').trim().slice(0, 50);
+    if (!name) return { ok: false };
+    const price = b.price == null || b.price === '' ? null : Number(b.price);
+    if (price !== null && (!Number.isFinite(price) || price < 0 || price > 100000)) return { ok: false };
+    items.push({ name, price });
+  }
+  return { ok: true, json: JSON.stringify(items) };
+}
+
+// 新規登録。idは日付と同じ（朝クラス用。TACOS等の特別枠はSQLで運用）
+reservationRoutes.post('/api/admin/sessions', async (c) => {
+  let body;
+  try { body = await c.req.json(); } catch { return c.json({ error: 'invalid_body' }, 400); }
+
+  const date = String(body.date || '');
+  const displayDate = toDisplayDate(date);
+  const title = String(body.title || '').trim().slice(0, 100);
+  if (!displayDate) return c.json({ error: 'invalid_date' }, 400);
+  if (!title) return c.json({ error: 'title_required' }, 400);
+
+  const capacity = body.capacity == null ? 10 : Number(body.capacity);
+  if (!Number.isInteger(capacity) || capacity < 0 || capacity > 99) {
+    return c.json({ error: 'invalid_capacity' }, 400);
+  }
+  const bento = toBentoJson(body.bento);
+  if (!bento.ok) return c.json({ error: 'invalid_bento' }, 400);
+
+  // INSERT OR IGNORE + 変化0行判定で、同時登録でも二重作成しない
+  const inserted = await c.env.DB.prepare(`
+    INSERT OR IGNORE INTO sessions
+      (id, date, display_date, title, food, trainers, morning_run, capacity, is_open, bento_json, has_tacos, note)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, 0, ?)
+  `).bind(
+    date, date, displayDate, title,
+    String(body.food || '').trim().slice(0, 200) || null,
+    String(body.trainers || '').trim().slice(0, 100) || null,
+    body.morning_run ? 1 : 0,
+    capacity, bento.json,
+    String(body.note || '').trim().slice(0, 300) || null
+  ).run();
+
+  if (!inserted.meta || inserted.meta.changes === 0) {
+    return c.json({ error: 'session_exists', session_id: date }, 409);
+  }
+
+  await logAdminOp(c, 'session_create', date, { title, capacity, morning_run: !!body.morning_run });
+  return c.json({ ok: true, id: date });
+});
+
+// 更新（締切/再開を含む）。日付＝IDは変更不可（変えたい場合は削除→新規登録）
+reservationRoutes.post('/api/admin/sessions/:id', async (c) => {
+  let body;
+  try { body = await c.req.json(); } catch { return c.json({ error: 'invalid_body' }, 400); }
+  const sessionId = c.req.param('id');
+
+  // 許可フィールドだけをSETに積む（ホワイトリスト方式）
+  const sets = [];
+  const binds = [];
+  if (body.title !== undefined) {
+    const title = String(body.title || '').trim().slice(0, 100);
+    if (!title) return c.json({ error: 'title_required' }, 400);
+    sets.push('title = ?'); binds.push(title);
+  }
+  if (body.trainers !== undefined) { sets.push('trainers = ?'); binds.push(String(body.trainers || '').trim().slice(0, 100) || null); }
+  if (body.food !== undefined) { sets.push('food = ?'); binds.push(String(body.food || '').trim().slice(0, 200) || null); }
+  if (body.note !== undefined) { sets.push('note = ?'); binds.push(String(body.note || '').trim().slice(0, 300) || null); }
+  if (body.morning_run !== undefined) { sets.push('morning_run = ?'); binds.push(body.morning_run ? 1 : 0); }
+  if (body.closed !== undefined) { sets.push('is_open = ?'); binds.push(body.closed ? 0 : 1); }
+  if (body.capacity !== undefined) {
+    const capacity = Number(body.capacity);
+    if (!Number.isInteger(capacity) || capacity < 0 || capacity > 99) return c.json({ error: 'invalid_capacity' }, 400);
+    sets.push('capacity = ?'); binds.push(capacity);
+  }
+  if (body.bento !== undefined) {
+    const bento = toBentoJson(body.bento);
+    if (!bento.ok) return c.json({ error: 'invalid_bento' }, 400);
+    sets.push('bento_json = ?'); binds.push(bento.json);
+  }
+  if (!sets.length) return c.json({ error: 'no_fields' }, 400);
+
+  const updated = await c.env.DB.prepare(
+    `UPDATE sessions SET ${sets.join(', ')} WHERE id = ?`
+  ).bind(...binds, sessionId).run();
+
+  if (!updated.meta || updated.meta.changes === 0) {
+    return c.json({ error: 'session_not_found' }, 404);
+  }
+
+  await logAdminOp(c, 'session_update', sessionId, body);
+  return c.json({ ok: true, id: sessionId });
+});
+
+// 削除。予約（キャンセル済み含む履歴）が1件でもあれば拒否（d1_sessions.cjs removeと同じ規則）
+reservationRoutes.post('/api/admin/sessions/:id/delete', async (c) => {
+  const sessionId = c.req.param('id');
+
+  // DELETE自体に「予約が0件のときだけ」の条件を入れ、確認と削除の間の割り込み予約でも安全にする
+  const deleted = await c.env.DB.prepare(`
+    DELETE FROM sessions
+    WHERE id = ?
+      AND NOT EXISTS (SELECT 1 FROM reservations r WHERE r.session_id = sessions.id)
+  `).bind(sessionId).run();
+
+  if (!deleted.meta || deleted.meta.changes === 0) {
+    const exists = await c.env.DB.prepare(`SELECT id FROM sessions WHERE id = ?`).bind(sessionId).first();
+    if (!exists) return c.json({ error: 'session_not_found' }, 404);
+    return c.json({ error: 'has_reservations' }, 409);
+  }
+
+  await logAdminOp(c, 'session_delete', sessionId, {});
+  return c.json({ ok: true, id: sessionId });
+});
+
 // ── GET /api/sessions ── 開催予定＋残枠 ──
 reservationRoutes.get('/api/liff/sessions', async (c) => {
   // Workerの内部時刻はUTC。ビジネスはJST(UTC+9)基準のため、日付はJSTで計算する。

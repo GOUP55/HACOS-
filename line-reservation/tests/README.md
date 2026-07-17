@@ -35,9 +35,11 @@ npm test
 
 `/api/admin/reservations`（スタッフ用の予約管理画面・認証必須）のHTML生成と、
 管理画面ルートが認証素通しの非APIパスに配線されていないこと、キャンセル可視化・
-KITCHEN向け集計行を検証する（24項目）。
-また `cancel-fallback.test.mjs` が、cancelled_at列のmigration未適用DBでも
-キャンセル/再予約が落ちないフォールバックを実SQLite（D1と同エンジン）で検証する（7項目）。
+KITCHEN向け集計行・個人行の弁当表示・体験の確定/不成立ボタン・開催日管理を検証する（39項目）。
+`cancel-fallback.test.mjs` はmigration未適用DBでのフォールバックと取消系の競合ガードを
+実SQLite（D1と同エンジン）で検証する（14項目）。
+`sessions-admin.test.mjs` は開催日の登録・編集・削除のSQL挙動
+（二重登録防止・締切の反映・予約ありの削除拒否・操作ログ）を検証する（11項目）。
 表示内容・満席の赤表示・XSS対策（表示名のタグ無害化）・noindex を確認し、
 `admin-ui.png` にプレビューのスクリーンショットを出力する。
 `npm test` でフォームのテストと合わせて実行される。
