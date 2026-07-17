@@ -60,13 +60,16 @@ reservationRoutes.get('/api/admin/reservations', async (c) => {
   // 過去30日ぶんまで表示（それより古い履歴はD1に残っているが画面には出さない）
   const fromDate = new Date(nowJst.getTime() - 30 * 86400000).toISOString().split('T')[0];
 
+  // capacity > 0 のフィルタは置かない。定員0の行（SQL運用の「お休み」等）が
+  // 管理画面から完全に見えなくなり、UIから復旧・確認できなくなるため。
+  // お客様向けフォームは is_open=1 で絞っているのでここで全件見えても影響しない
   const { results: sessions } = await c.env.DB.prepare(`
     SELECT s.*,
       COUNT(CASE WHEN r.status = 'confirmed' THEN 1 END) AS booked,
       COUNT(CASE WHEN r.status = 'cancelled' THEN 1 END) AS cancelled
     FROM sessions s
     LEFT JOIN reservations r ON r.session_id = s.id
-    WHERE s.date >= ? AND s.capacity > 0
+    WHERE s.date >= ?
     GROUP BY s.id
     ORDER BY s.date
   `).bind(fromDate).all();
@@ -148,8 +151,8 @@ reservationRoutes.post('/api/admin/trials/:id/confirm', (c) => decideTrial(c, 'c
 reservationRoutes.post('/api/admin/trials/:id/decline', (c) => decideTrial(c, 'declined'));
 
 // ── 管理: 開催日の登録・編集・削除（スタッフ用・認証必須） ──
-// 月末の来月分登録をスマホで完結させるための機能。d1_sessions.cjs（ハーネス側の
-// opsスクリプト）の add/set/remove と同じ規則。CSRFはミドルウェアが自動検証。
+// 月末の来月分登録をスマホで完結させるための機能。d1_sessions.cjs（ハーネス側リポジトリの
+// opsスクリプト。本リポジトリには無い）の add/set/remove の規則に合わせた実装。CSRFはミドルウェアが自動検証。
 
 // 管理操作ログ。テーブル未作成でも操作自体は成立させる（ログだけスキップ）
 async function logAdminOp(c, action, targetId, detail) {
@@ -202,7 +205,8 @@ reservationRoutes.post('/api/admin/sessions', async (c) => {
   if (!title) return c.json({ error: 'title_required' }, 400);
 
   const capacity = body.capacity == null ? 10 : Number(body.capacity);
-  if (!Number.isInteger(capacity) || capacity < 0 || capacity > 99) {
+  // 定員は1以上。0はis_open(受付締切)と役割が重複し、誤入力すると扱いに困るため拒否
+  if (!Number.isInteger(capacity) || capacity < 1 || capacity > 99) {
     return c.json({ error: 'invalid_capacity' }, 400);
   }
   const bento = toBentoJson(body.bento);
@@ -251,7 +255,7 @@ reservationRoutes.post('/api/admin/sessions/:id', async (c) => {
   if (body.closed !== undefined) { sets.push('is_open = ?'); binds.push(body.closed ? 0 : 1); }
   if (body.capacity !== undefined) {
     const capacity = Number(body.capacity);
-    if (!Number.isInteger(capacity) || capacity < 0 || capacity > 99) return c.json({ error: 'invalid_capacity' }, 400);
+    if (!Number.isInteger(capacity) || capacity < 1 || capacity > 99) return c.json({ error: 'invalid_capacity' }, 400);
     sets.push('capacity = ?'); binds.push(capacity);
   }
   if (body.bento !== undefined) {

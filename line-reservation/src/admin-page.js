@@ -255,8 +255,8 @@ details .card { padding: 12px 0 0; }
       <label>お弁当の選択肢 <span class="hint">1行に1つ「メニュー名:価格」。価格未定は価格なしで（例: カオマンガイ:1300）</span>
         <textarea id="sf-bento" rows="2" placeholder="カオマンガイ:1300"></textarea></label>
       <label><input type="checkbox" id="sf-run" style="width:auto;margin-right:6px;">朝RUNあり（6:30〜）</label>
-      <label>定員
-        <input type="number" id="sf-capacity" min="0" max="99" value="10"></label>
+      <label>定員 <span class="hint">1〜99。お休みにしたい日は定員ではなく「受付締切」を使う</span>
+        <input type="number" id="sf-capacity" min="1" max="99" value="10"></label>
       <label>備考（日程カードに表示）
         <input type="text" id="sf-note" maxlength="300" placeholder="例: 朝RUN 6:30〜あり"></label>
       <div class="form-actions">
@@ -350,20 +350,34 @@ function parseBentoLines(text) {
       if (p !== '' && !Number.isNaN(Number(p))) { name = line.slice(0, i).trim(); price = Number(p); }
     }
     if (!name) return null;
+    if (name.length > 50) return null; // サーバー側で黙って切り詰めず、入力時点で知らせる
     items.push({ name, price });
   }
   return items;
 }
 
 const sf = (id) => document.getElementById(id);
+const DATE_HINT_DEFAULT = '新規追加のみ。既存日程の日付は変更できません（削除→新規で対応）';
 function resetSessionForm() {
   sf('sf-edit-id').value = '';
   sf('session-form').reset();
   sf('sf-capacity').value = '10';
   sf('sf-date').disabled = false;
+  sf('sf-date-hint').textContent = DATE_HINT_DEFAULT;
   sf('sf-submit').textContent = 'この日程を追加する';
 }
 sf('sf-reset').addEventListener('click', resetSessionForm);
+
+// リロード後も「開催日の管理」パネルを開いたままにする（複数日程の連続登録用）
+if (location.hash === '#session-manage') {
+  const manage = document.getElementById('session-manage');
+  manage.open = true;
+  manage.scrollIntoView();
+}
+function reloadKeepingPanel() {
+  location.hash = 'session-manage';
+  location.reload();
+}
 
 document.querySelectorAll('[data-session-edit]').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -372,6 +386,8 @@ document.querySelectorAll('[data-session-edit]').forEach(btn => {
     sf('sf-edit-id').value = s.id;
     sf('sf-date').value = s.date;
     sf('sf-date').disabled = true; // 日付＝IDは変更不可
+    // 編集中であることを明示（クリアを押し忘れて別日程のつもりで上書きする事故の防止）
+    sf('sf-date-hint').textContent = '✏️ 編集中: この内容で ' + s.date + ' の日程を更新します。新規追加は先に「クリア」を押してください';
     sf('sf-title').value = s.title || '';
     sf('sf-trainers').value = s.trainers || '';
     sf('sf-food').value = s.food || '';
@@ -394,7 +410,7 @@ document.querySelectorAll('[data-session-edit]').forEach(btn => {
 sf('session-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const bento = parseBentoLines(sf('sf-bento').value);
-  if (bento === null) { alert('お弁当の入力形式を確認してください（1行に1つ「メニュー名:価格」）'); return; }
+  if (bento === null) { alert('お弁当の入力形式を確認してください（1行に1つ「メニュー名:価格」・メニュー名は50文字まで）'); return; }
   const payload = {
     title: sf('sf-title').value.trim(),
     trainers: sf('sf-trainers').value.trim(),
@@ -415,7 +431,7 @@ sf('session-form').addEventListener('submit', async (e) => {
       payload.date = sf('sf-date').value;
       res = await postAdmin('/api/admin/sessions', payload);
     }
-    if (res.ok) { location.reload(); return; }
+    if (res.ok) { reloadKeepingPanel(); return; }
     const err = (await res.json().catch(() => ({}))).error;
     if (err === 'session_exists') alert('この日付の日程はすでに登録されています。編集ボタンから変更してください。');
     else if (err === 'invalid_date') alert('開催日を選択してください。');
