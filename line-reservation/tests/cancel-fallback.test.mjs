@@ -98,6 +98,12 @@ check('pendingガード: 処理済みIDへの再UPDATEは変化0行', guard.chan
 check('pendingガード: 先の判定（confirmed）が上書きされない',
   trialOld.prepare(`SELECT status FROM trial_requests WHERE id='t1'`).get().status === 'confirmed');
 
+// 4-2b. 顧客の取消も同じガード: スタッフ確定後に着弾した取消は0行（確定を上書きしない）
+const custCancel = trialOld.prepare(`UPDATE trial_requests SET status='cancelled' WHERE id='t1' AND status='pending'`).run();
+check('顧客取消ガード: スタッフ確定後の取消は変化0行（確定が上書きされない）',
+  custCancel.changes === 0 &&
+  trialOld.prepare(`SELECT status FROM trial_requests WHERE id='t1'`).get().status === 'confirmed');
+
 // 4-3. 適用済みDB（schema.sql）では操作ログが記録される
 const trialNew = new DatabaseSync(':memory:');
 trialNew.exec(read('../schema.sql'));
