@@ -136,6 +136,8 @@ async function friendIdMap(env, lineUserIds) {
   const ids = [...new Set(lineUserIds)].filter(Boolean);
   if (!ids.length) return {};
   try {
+    // friends.line_user_id はハーネス側で1ユーザー1行の前提（万一重複していても
+    // どれかの会話リンクにはなるので実害は小さい）
     const placeholders = ids.map(() => '?').join(',');
     const { results } = await env.DB.prepare(
       `SELECT id, line_user_id FROM friends WHERE line_user_id IN (${placeholders})`
@@ -149,7 +151,10 @@ async function friendIdMap(env, lineUserIds) {
 
 function chatLink(env, friendId) {
   if (!env.ADMIN_PUBLIC_URL || !friendId) return null;
-  return `${env.ADMIN_PUBLIC_URL}/chats?friend=${friendId}`;
+  // 末尾スラッシュ付きで設定されても二重スラッシュにならないよう正規化。
+  // friendIdはUUID想定だが、形式が変わっても壊れないようエンコードして埋める
+  const base = String(env.ADMIN_PUBLIC_URL).replace(/\/+$/, '');
+  return `${base}/chats?friend=${encodeURIComponent(friendId)}`;
 }
 
 // リンクを1つでも含むメッセージの末尾に付ける注記（SPAは未ログイン時に
@@ -223,7 +228,6 @@ export async function sendWeeklyHabitDigest(env) {
     ...results.map(r => r.line_user_id),
     ...lapsed.map(l => l.line_user_id),
   ]);
-  let hasLink = false;
 
   const fmt = (d) => `${Number(d.slice(5, 7))}/${Number(d.slice(8, 10))}`;
   const lines = [
@@ -237,28 +241,25 @@ export async function sendWeeklyHabitDigest(env) {
       const notes = (notesByUser[r.line_user_id] || []).join(' ／ ');
       if (notes) lines.push(`　💬 ${notes.length > 120 ? notes.slice(0, 120) + '…' : notes}`);
       const link = chatLink(env, friends[r.line_user_id]);
-      if (link) { lines.push(`　↩ 返信: ${link}`); hasLink = true; }
+      if (link) lines.push(`　↩ 返信: ${link}`);
     }
   } else {
     lines.push('（先週の記録はありませんでした）');
   }
 
   // 記録が止まった人（声かけ候補）。リンクを添えるため1人1行で
+  // （リンクの表記は本体・離脱アラートと同じ「名前行→次行に　↩ 返信:」に統一）
   if (lapsed.length) {
     lines.push('');
-    lines.push('⚠️ 先週は記録なし（声かけ候補）:');
+    lines.push('⚠️ 先週は記録なし（声かけ候補）：');
     for (const l of lapsed) {
+      lines.push(`・${l.name || '(名前未取得)'}`);
       const link = chatLink(env, friends[l.line_user_id]);
-      lines.push(`・${l.name || '(名前未取得)'}${link ? ` ↩ ${link}` : ''}`);
-      if (link) hasLink = true;
+      if (link) lines.push(`　↩ 返信: ${link}`);
     }
   }
 
-  if (hasLink) {
-    lines.push('');
-    lines.push(LINK_NOTE);
-  }
-
+  // ログイン切れ時の注記はpushToStaff側が「リンクを含む通」ごとに自動付与する
   await pushToStaff(lines.join('\n'), env);
 }
 
@@ -296,15 +297,13 @@ async function sendLapseAlerts(env) {
 
   // 返信直行リンク（friendsで解決できない人はテキストのみ）
   const friends = await friendIdMap(env, targets.map(t => t.uid));
-  let hasLink = false;
   const lines = [];
   for (const t of targets) {
     lines.push(`🌱 ${t.name}さんの記録が2日止まっています。ひとことどうぞ`);
     const link = chatLink(env, friends[t.uid]);
-    if (link) { lines.push(`　↩ 返信: ${link}`); hasLink = true; }
+    if (link) lines.push(`　↩ 返信: ${link}`);
   }
   lines.push('（本人への自動送信はしていません。声かけはスタッフから）');
-  if (hasLink) lines.push(LINK_NOTE);
   await pushToStaff(lines.join('\n'), env);
 }
 
@@ -325,11 +324,17 @@ async function pushToStaff(text, env) {
   }
   if (buf) chunks.push(buf);
 
+  // 返信リンクを含む「通」ごとにログイン切れ時の注記を付ける。
+  // 分割前の全文末尾に1回だけ付けると、複数通に分かれたとき最後の通にしか
+  // 注記が出ないため、分割後にチャンク単位で判定する。
+  // 4500字上限＋注記(約60字)でもLINEの1通上限(約5000字)には収まる
+  const withNotes = chunks.map(t => t.includes('↩') ? `${t}\n\n${LINK_NOTE}` : t);
+
   const staffIds = (env.STAFF_USER_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
   for (const staffId of staffIds) {
     // pushは1回の呼び出しで最大5メッセージまで
     for (let i = 0; i < chunks.length; i += 5) {
-      await pushToUser(staffId, chunks.slice(i, i + 5).map(t => ({ type: 'text', text: t })), env);
+      await pushToUser(staffId, withNotes.slice(i, i + 5).map(t => ({ type: 'text', text: t })), env);
     }
   }
 }
