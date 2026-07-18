@@ -126,6 +126,41 @@ habitRoutes.post('/api/liff/habit/log', async (c) => {
   return c.json({ ok: true });
 });
 
+// ── 返信直行リンク（改善③） ──
+// 管理画面のチャット受信箱で該当ユーザーの会話を開くURLを作る。
+// 形式: {ADMIN_PUBLIC_URL}/chats?friend=<friendId>
+// ⚠️ friendId は friends テーブル（ハーネス本体が管理）の id であり、
+// line_user_id とは別物。必ずここで解決する。見つからない場合や
+// friendsテーブルに触れない場合はリンクなし（テキストのみ）に静かに落とす。
+async function friendIdMap(env, lineUserIds) {
+  const ids = [...new Set(lineUserIds)].filter(Boolean);
+  if (!ids.length) return {};
+  try {
+    // friends.line_user_id はハーネス側で1ユーザー1行の前提（万一重複していても
+    // どれかの会話リンクにはなるので実害は小さい）
+    const placeholders = ids.map(() => '?').join(',');
+    const { results } = await env.DB.prepare(
+      `SELECT id, line_user_id FROM friends WHERE line_user_id IN (${placeholders})`
+    ).bind(...ids).all();
+    return Object.fromEntries(results.map(r => [r.line_user_id, r.id]));
+  } catch (e) {
+    console.error('friends lookup failed (links omitted):', e.message);
+    return {};
+  }
+}
+
+function chatLink(env, friendId) {
+  if (!env.ADMIN_PUBLIC_URL || !friendId) return null;
+  // 末尾スラッシュ付きで設定されても二重スラッシュにならないよう正規化。
+  // friendIdはUUID想定だが、形式が変わっても壊れないようエンコードして埋める
+  const base = String(env.ADMIN_PUBLIC_URL).replace(/\/+$/, '');
+  return `${base}/chats?friend=${encodeURIComponent(friendId)}`;
+}
+
+// リンクを1つでも含むメッセージの末尾に付ける注記（SPAは未ログイン時に
+// 元URLを保持せずログイン画面へ飛ばすため、その場合のやり直し手順を案内）
+const LINK_NOTE = '※リンクでその人との会話が開きます。ログイン画面が出たときは、ログイン後にもう一度リンクを押してください';
+
 // ── Cron: スタッフ向け通知（毎日呼ばれる入口） ──
 // 既存の毎日cron（UTC 9:00 = JST 18:00）から毎日呼ばれる前提。
 // ・毎日: 「記録が2日止まった人」の当日限り通知（下のsendLapseAlerts）
@@ -188,6 +223,12 @@ export async function sendWeeklyHabitDigest(env) {
     (notesByUser[n.line_user_id] ??= []).push(String(n.note).replace(/\s+/g, ' '));
   }
 
+  // 返信直行リンク用に line_user_id → friendId をまとめて解決
+  const friends = await friendIdMap(env, [
+    ...results.map(r => r.line_user_id),
+    ...lapsed.map(l => l.line_user_id),
+  ]);
+
   const fmt = (d) => `${Number(d.slice(5, 7))}/${Number(d.slice(8, 10))}`;
   const lines = [
     `📊 今週の習慣記録（${fmt(since)}〜${fmt(until)}）`,
@@ -199,17 +240,26 @@ export async function sendWeeklyHabitDigest(env) {
       lines.push(`● ${r.name || '(名前未取得)'}：記録${r.log_days}日／🏃${r.moved_days}日・🥗${r.ate_days}日`);
       const notes = (notesByUser[r.line_user_id] || []).join(' ／ ');
       if (notes) lines.push(`　💬 ${notes.length > 120 ? notes.slice(0, 120) + '…' : notes}`);
+      const link = chatLink(env, friends[r.line_user_id]);
+      if (link) lines.push(`　↩ 返信: ${link}`);
     }
   } else {
     lines.push('（先週の記録はありませんでした）');
   }
 
-  // 記録が止まった人（声かけ候補）
+  // 記録が止まった人（声かけ候補）。リンクを添えるため1人1行で
+  // （リンクの表記は本体・離脱アラートと同じ「名前行→次行に　↩ 返信:」に統一）
   if (lapsed.length) {
     lines.push('');
-    lines.push(`⚠️ 先週は記録なし（声かけ候補）：${lapsed.map(l => l.name || '(名前未取得)').join('、')}`);
+    lines.push('⚠️ 先週は記録なし（声かけ候補）：');
+    for (const l of lapsed) {
+      lines.push(`・${l.name || '(名前未取得)'}`);
+      const link = chatLink(env, friends[l.line_user_id]);
+      if (link) lines.push(`　↩ 返信: ${link}`);
+    }
   }
 
+  // ログイン切れ時の注記はpushToStaff側が「リンクを含む通」ごとに自動付与する
   await pushToStaff(lines.join('\n'), env);
 }
 
@@ -236,20 +286,25 @@ async function sendLapseAlerts(env) {
   }
 
   const targets = [];
-  for (const [, u] of Object.entries(byUser)) {
+  for (const [uid, u] of Object.entries(byUser)) {
     const has = (i) => u.dates.has(jstDate(i));
     // 空白: 今日(まだ)・昨日・一昨日 ／ 直前に3日以上の連続: 3・4・5日前
     if (!has(0) && !has(1) && !has(2) && has(3) && has(4) && has(5)) {
-      targets.push(u.name || '(名前未取得)');
+      targets.push({ uid, name: u.name || '(名前未取得)' });
     }
   }
   if (!targets.length) return;
 
-  const text = [
-    ...targets.map(name => `🌱 ${name}さんの記録が2日止まっています。ひとことどうぞ`),
-    '（本人への自動送信はしていません。声かけはスタッフから）',
-  ].join('\n');
-  await pushToStaff(text, env);
+  // 返信直行リンク（friendsで解決できない人はテキストのみ）
+  const friends = await friendIdMap(env, targets.map(t => t.uid));
+  const lines = [];
+  for (const t of targets) {
+    lines.push(`🌱 ${t.name}さんの記録が2日止まっています。ひとことどうぞ`);
+    const link = chatLink(env, friends[t.uid]);
+    if (link) lines.push(`　↩ 返信: ${link}`);
+  }
+  lines.push('（本人への自動送信はしていません。声かけはスタッフから）');
+  await pushToStaff(lines.join('\n'), env);
 }
 
 // スタッフ全員へ送る共通処理。通知先はSTAFF_USER_IDSのみ（会員本人には送らない）。
@@ -269,11 +324,17 @@ async function pushToStaff(text, env) {
   }
   if (buf) chunks.push(buf);
 
+  // 返信リンクを含む「通」ごとにログイン切れ時の注記を付ける。
+  // 分割前の全文末尾に1回だけ付けると、複数通に分かれたとき最後の通にしか
+  // 注記が出ないため、分割後にチャンク単位で判定する。
+  // 4500字上限＋注記(約60字)でもLINEの1通上限(約5000字)には収まる
+  const withNotes = chunks.map(t => t.includes('↩') ? `${t}\n\n${LINK_NOTE}` : t);
+
   const staffIds = (env.STAFF_USER_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
   for (const staffId of staffIds) {
     // pushは1回の呼び出しで最大5メッセージまで
     for (let i = 0; i < chunks.length; i += 5) {
-      await pushToUser(staffId, chunks.slice(i, i + 5).map(t => ({ type: 'text', text: t })), env);
+      await pushToUser(staffId, withNotes.slice(i, i + 5).map(t => ({ type: 'text', text: t })), env);
     }
   }
 }
