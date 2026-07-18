@@ -126,6 +126,36 @@ habitRoutes.post('/api/liff/habit/log', async (c) => {
   return c.json({ ok: true });
 });
 
+// ── 返信直行リンク（改善③） ──
+// 管理画面のチャット受信箱で該当ユーザーの会話を開くURLを作る。
+// 形式: {ADMIN_PUBLIC_URL}/chats?friend=<friendId>
+// ⚠️ friendId は friends テーブル（ハーネス本体が管理）の id であり、
+// line_user_id とは別物。必ずここで解決する。見つからない場合や
+// friendsテーブルに触れない場合はリンクなし（テキストのみ）に静かに落とす。
+async function friendIdMap(env, lineUserIds) {
+  const ids = [...new Set(lineUserIds)].filter(Boolean);
+  if (!ids.length) return {};
+  try {
+    const placeholders = ids.map(() => '?').join(',');
+    const { results } = await env.DB.prepare(
+      `SELECT id, line_user_id FROM friends WHERE line_user_id IN (${placeholders})`
+    ).bind(...ids).all();
+    return Object.fromEntries(results.map(r => [r.line_user_id, r.id]));
+  } catch (e) {
+    console.error('friends lookup failed (links omitted):', e.message);
+    return {};
+  }
+}
+
+function chatLink(env, friendId) {
+  if (!env.ADMIN_PUBLIC_URL || !friendId) return null;
+  return `${env.ADMIN_PUBLIC_URL}/chats?friend=${friendId}`;
+}
+
+// リンクを1つでも含むメッセージの末尾に付ける注記（SPAは未ログイン時に
+// 元URLを保持せずログイン画面へ飛ばすため、その場合のやり直し手順を案内）
+const LINK_NOTE = '※リンクでその人との会話が開きます。ログイン画面が出たときは、ログイン後にもう一度リンクを押してください';
+
 // ── Cron: スタッフ向け通知（毎日呼ばれる入口） ──
 // 既存の毎日cron（UTC 9:00 = JST 18:00）から毎日呼ばれる前提。
 // ・毎日: 「記録が2日止まった人」の当日限り通知（下のsendLapseAlerts）
@@ -188,6 +218,13 @@ export async function sendWeeklyHabitDigest(env) {
     (notesByUser[n.line_user_id] ??= []).push(String(n.note).replace(/\s+/g, ' '));
   }
 
+  // 返信直行リンク用に line_user_id → friendId をまとめて解決
+  const friends = await friendIdMap(env, [
+    ...results.map(r => r.line_user_id),
+    ...lapsed.map(l => l.line_user_id),
+  ]);
+  let hasLink = false;
+
   const fmt = (d) => `${Number(d.slice(5, 7))}/${Number(d.slice(8, 10))}`;
   const lines = [
     `📊 今週の習慣記録（${fmt(since)}〜${fmt(until)}）`,
@@ -199,15 +236,27 @@ export async function sendWeeklyHabitDigest(env) {
       lines.push(`● ${r.name || '(名前未取得)'}：記録${r.log_days}日／🏃${r.moved_days}日・🥗${r.ate_days}日`);
       const notes = (notesByUser[r.line_user_id] || []).join(' ／ ');
       if (notes) lines.push(`　💬 ${notes.length > 120 ? notes.slice(0, 120) + '…' : notes}`);
+      const link = chatLink(env, friends[r.line_user_id]);
+      if (link) { lines.push(`　↩ 返信: ${link}`); hasLink = true; }
     }
   } else {
     lines.push('（先週の記録はありませんでした）');
   }
 
-  // 記録が止まった人（声かけ候補）
+  // 記録が止まった人（声かけ候補）。リンクを添えるため1人1行で
   if (lapsed.length) {
     lines.push('');
-    lines.push(`⚠️ 先週は記録なし（声かけ候補）：${lapsed.map(l => l.name || '(名前未取得)').join('、')}`);
+    lines.push('⚠️ 先週は記録なし（声かけ候補）:');
+    for (const l of lapsed) {
+      const link = chatLink(env, friends[l.line_user_id]);
+      lines.push(`・${l.name || '(名前未取得)'}${link ? ` ↩ ${link}` : ''}`);
+      if (link) hasLink = true;
+    }
+  }
+
+  if (hasLink) {
+    lines.push('');
+    lines.push(LINK_NOTE);
   }
 
   await pushToStaff(lines.join('\n'), env);
@@ -236,20 +285,27 @@ async function sendLapseAlerts(env) {
   }
 
   const targets = [];
-  for (const [, u] of Object.entries(byUser)) {
+  for (const [uid, u] of Object.entries(byUser)) {
     const has = (i) => u.dates.has(jstDate(i));
     // 空白: 今日(まだ)・昨日・一昨日 ／ 直前に3日以上の連続: 3・4・5日前
     if (!has(0) && !has(1) && !has(2) && has(3) && has(4) && has(5)) {
-      targets.push(u.name || '(名前未取得)');
+      targets.push({ uid, name: u.name || '(名前未取得)' });
     }
   }
   if (!targets.length) return;
 
-  const text = [
-    ...targets.map(name => `🌱 ${name}さんの記録が2日止まっています。ひとことどうぞ`),
-    '（本人への自動送信はしていません。声かけはスタッフから）',
-  ].join('\n');
-  await pushToStaff(text, env);
+  // 返信直行リンク（friendsで解決できない人はテキストのみ）
+  const friends = await friendIdMap(env, targets.map(t => t.uid));
+  let hasLink = false;
+  const lines = [];
+  for (const t of targets) {
+    lines.push(`🌱 ${t.name}さんの記録が2日止まっています。ひとことどうぞ`);
+    const link = chatLink(env, friends[t.uid]);
+    if (link) { lines.push(`　↩ 返信: ${link}`); hasLink = true; }
+  }
+  lines.push('（本人への自動送信はしていません。声かけはスタッフから）');
+  if (hasLink) lines.push(LINK_NOTE);
+  await pushToStaff(lines.join('\n'), env);
 }
 
 // スタッフ全員へ送る共通処理。通知先はSTAFF_USER_IDSのみ（会員本人には送らない）。
