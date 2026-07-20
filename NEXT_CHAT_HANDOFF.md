@@ -23,15 +23,24 @@
 ### 進行中（オーナーの手元）
 - **法人パイロット**: 福利厚生利用中の従業員3名（うち1名腰痛）で来週実行。LINEグループ「6時半だヨ！全員週5」をオーナーが開設中。文面は `drafts/corporate-wellness-counseling.md`（カウンセリング4本）と `drafts/corporate-wellness-week1-messages.md`（週1配信・月〜金）— **どちらもQA済み・オーナーに送付済み**。設計正本: `CORPORATE_WELLNESS_PROGRAM.md`
 
-### 次テーマ「ウェルネスクラスの募集・集客」（オーナー7/15宣言）
-- ⚠️ **最初に確認すべき盲点**: 「ウェルネスクラス」が指すのは (a)法人プログラム(BtoB・corp.html) か (b)Wellness Journey 7DAYS TRIAL(BtoC・¥39,800・締切7/31・別チャット設計) か。**両方が7月に併走しており、BUSINESS_RULES.md:49 にも「2系統の整理が必要」と明記**。集客を始める前にオーナーに1問確認すること
-- 集客の実働は `hacos-growth`（導線・計測・オファー設計）＋ `hacos-copywriter`（文面）に振る。8戦略の全体図は `STRATEGY_ECOSYSTEM.md`
+### 7/17 Wellness Journey 募集・集客フェーズの進捗（同セッション続き）
+**公開済み（PR#50・#53マージ・オーナー承認済み）**
+- 出張ウェルネス料金改定: **1回¥25,000/60分（拘束時間で変動）＋サポートプラン月¥100,000**（corp.html・BUSINESS_RULES反映済み）
+- **Wellness Journey LP強化版公開**: `retreat.html`（ローカルSEO・Product/FAQ構造化データ・1LP=1オファー階段設計・締切7/31カウントダウン・GA4計測 `journey_line`/`journey_stores`→generate_lead(journey)・食セクション実写・スティッキーCTAはヒーロー通過後表示）。QA高0・中2修正済み
+- **第1期開催週の第1候補は8月中旬に変更**（食事締切〔開催5日前〕が申込締切7/31より先に来る矛盾の解消。BUSINESS_RULES記録済み）
+- 内部リンク開通: メインLPフッター・法人LPリトリートカード→retreat.html
+- 集客・運営パック4本（drafts/journey-ops-pack / journey-testimonial-kit / journey-gbp-guide / journey-seo-article1。**全て未承認ドラフト・送信/公開禁止表記つき**）
 
-### 未完了（このセッションのやり残し）
-- LINE自動応答に「法人」キーワード→corp.htmlのURLを返すルール（Harness/LINE公式の応答設定側。連絡板参照）
-- 理学療法士・整体師の提携確定時にLP表記を「準備中」から格上げ＋BUSINESS_RULES更新
-- 第2弾: 料金シミュレーター・稟議用1枚資料（商談開始後に）／出張セッションの台本化（スタッフ委任・ライセンス素材）
-- パイロット実施後: 振り返り・本人アンケート・掲載許可→法人1号事例化
+**最優先の待ち（次セッションが最初に処理）**
+- **STORESの商品URL待ち**: オーナーがSTORESに「7DAYS TRIAL（第1期）¥34,800・在庫5」をアイテム登録中。説明文は `drafts/journey-stores-description.md`（送付済み）。**URLが届いたら retreat.html の「準備中」STORESボタン3箇所（hero/closing/sticky・href="#"）を実URLに差し替え→QA→公開**
+- ふたり割はSTORESクーポン（¥2,000オフ・モニター価格と併用不可）で運用
+
+**未完了（続き）**
+- 集客実行: LINE一斉配信の告知文面・IG（第1期の撮影計画→リール化。insta-*エージェント新設済み）・ふたり割の招待用転送文面（TOP11）・Meta Pixel先行設置（TOP12・オーナーのPixel ID発行待ち）
+- LINE自動応答「法人」キーワード→corp.html（Harness側・連絡板参照）
+- 法人パイロット: LINEグループ「6時半だヨ！全員週5」開設・進行はオーナーの手元。文面はdrafts/に送付済み
+- 理学療法士・整体師の提携確定時の表記格上げ／法人第2弾（シミュレーター・稟議資料）／出張台本化
+- SEO記事のHTML化（drafts/journey-seo-article1.md）とGoogleビジネスプロフィール登録（drafts/journey-gbp-guide.md・オーナー作業）
 
 ## ✅ 完了済み
 ### 〜6月（基盤）
