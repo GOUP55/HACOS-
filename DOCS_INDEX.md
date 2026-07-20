@@ -33,6 +33,7 @@
 |---|---|
 | `MEMBERS_PLAN.md` | **確定済み**（2026-07-09）。正本は BUSINESS_RULES.md |
 | `STRIPE_SETUP_GUIDE.md` | メンバーズ月額課金のオーナー作業手順（実施待ち） |
+| `MEDITATION_PROGRAM_PLAN.md` | 瞑想×写経プログラム企画（¥4,000確定・日時等はおかちんと打ち合わせ中） |
 | `CHALLENGE_21DAY_PLAN.md` | 21日チャレンジ（価格・実施日 未確定） |
 | `PREMIUM_2ND_LAUNCH_PLAN.md` | 第2期ローンチ計画（8〜9月・仮） |
 | `PREMIUM_2ND_LAUNCH_CALENDAR.md` | 第2期 逆算カレンダー＋LP改修案（日付すべて仮） |
