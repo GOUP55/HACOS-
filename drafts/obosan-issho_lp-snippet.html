@@ -7,12 +7,17 @@
     （7月の TACOS Party バナーと同じ位置づけ。8月プログラムヘッダは下の例を使用）
   - 編集は hacos-hmc-lp.html のみ。index.html は python3 build_index.py で生成
 
-  【公開前の必須確認（オーナー承認と合わせて）】
-  1. 日付「8/29（土）」はおかちんの最終確認待ち。確定後に差し替え
-  2. 瞑想風景の写真（event-obosan-meditation.jpg）は参加者3名の顔が写っている。
-     本人の掲載許可が取れるまでコメントアウトのまま。写経の手元写真のみ許可不要で使える
-  3. おかちんの氏名・寺名の掲載可否を本人に確認
-  4. ロゴ画像ができたら images/obosan-issho-logo.png で差し替え（下記プレースホルダ）
+  【状態メモ】
+  - 日付8/29（土）・講師表記「岡田隆弘僧正」は確定済み（2026-07-24おかちん承諾）
+  - お蕎麦の会は保留のため記載なし（復活したら追記）
+  - 予約CTAは #reservation（既存のLINE予約フォームへ誘導）。
+    公開前に予約システムへ8/29のイベント枠登録が必要（MEDITATION_PROGRAM_PLAN.md参照）
+
+  【状態】素材はすべて確定済み（2026-07-28時点）
+  - ロゴ組み込み済み（images/obosan-issho-logo.png・深緑×クリーム版）
+  - 瞑想写真の参加者3名の掲載許可取得済み → 写真2枚とも使用OK
+  - キャンセル規定は「開催前日以降は用紙代¥1,000」で確定
+  残タスクは「8月の朝活プログラム確定後に貼り込み→build→QA→オーナー承認→main公開」のみ
 ═══════════════════════════════════════════════════════════════ -->
 
 <!-- 8月プログラムヘッダ（7月の .program-header と差し替え or 追加） -->
@@ -27,9 +32,7 @@
 <div style="background:linear-gradient(135deg,#2A3F2B,#3D5A3E);border-radius:8px;padding:16px 18px;margin-top:8px;border-left:3px solid var(--amber);">
   <span style="display:inline-block;background:rgba(255,255,255,.15);color:var(--amber-light);font-size:10px;padding:2px 8px;border-radius:20px;font-family:'DM Sans',sans-serif;margin-bottom:8px;letter-spacing:.08em;">New・月1回開催 Special Event</span>
 
-  <!-- ロゴができたらここに：
-  <img loading="lazy" src="images/obosan-issho-logo.png" alt="おぼうさんといっしょ" style="width:180px;margin:4px 0 10px;display:block;">
-  -->
+  <img loading="lazy" src="images/obosan-issho-logo.png" alt="おぼうさんといっしょ" style="width:200px;margin:4px auto 10px;display:block;background:#fff;border-radius:8px;padding:6px;">
 
   <p style="font-size:17px;color:#fff;margin-bottom:4px;">🧘 お坊さんといっしょ。<br>初めての瞑想と写経体験</p>
   <p style="font-size:13px;color:rgba(245,240,232,.85);line-height:1.9;margin-top:8px;">
@@ -37,27 +40,25 @@
     瞑想30分＋写経60分。初めての方でも安心して参加できる、心を整える月1回の時間です。
   </p>
 
-  <div style="display:grid;grid-template-columns:1fr;gap:8px;margin:12px 0;">
-    <img loading="lazy" src="images/event-obosan-shakyo.jpg" alt="筆ペンで般若心経をなぞり書きする写経体験" style="width:100%;border-radius:6px;display:block;">
-    <!-- 参加者の掲載許可が取れたら有効化：
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0;">
     <img loading="lazy" src="images/event-obosan-meditation.jpg" alt="岡田隆弘僧正と一緒に瞑想する参加者" style="width:100%;border-radius:6px;display:block;">
-    -->
+    <img loading="lazy" src="images/event-obosan-shakyo.jpg" alt="筆ペンで般若心経をなぞり書きする写経体験" style="width:100%;border-radius:6px;display:block;">
   </div>
 
   <div style="background:rgba(0,0,0,.2);border-radius:6px;padding:10px 12px;">
     <p style="font-size:10px;color:var(--amber-light);font-family:'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">📅 SCHEDULE & PRICE</p>
     <p style="font-size:12px;color:#fff;line-height:2;">
       8月29日（土）17:00〜19:00　<strong>¥3,000</strong>（写経用紙代込み）<br>
-      🤸 17:00 ストレッチ（GO）→ 🧘 17:30 瞑想 → ✍️ 18:00 写経<br>
-      🍜 終了後19:00〜 お蕎麦の会　<strong>¥1,500〜</strong>（希望者のみ）
+      🤸 17:00 ストレッチ（GO）→ 🧘 17:30 瞑想 → ✍️ 18:00 写経
     </p>
-    <p style="font-size:11px;color:rgba(255,255,255,.7);margin-top:4px;">定員10名 ／ 持ち物不要（筆ペンは貸し出しします）／ 楽な服装でお越しください<br>写経は途中で帰ってもOK（書きかけは次回に続きから書けます）</p>
+    <p style="font-size:11px;color:rgba(255,255,255,.7);margin-top:4px;">定員10名 ／ 持ち物不要（筆ペンは貸し出しします）／ 楽な服装でお越しください ／ 写経は途中で帰ってもOK</p>
   </div>
 
   <p style="font-size:11px;color:rgba(255,255,255,.55);margin-top:10px;line-height:1.6;">
     ※ 効果には個人差があります。瞑想・写経による心身の効果を保証するものではありません。<br>
+    ※ 写経用紙を人数分お取り寄せするため、開催前日以降のキャンセルは用紙代¥1,000をいただきます。<br>
     ※ 講師の法事等により、日程が変更になる場合があります。あらかじめご了承ください。
   </p>
 
-  <a href="https://lin.ee/TsRy6I9" target="_blank" rel="noopener noreferrer" data-ga-event="cta_meditation_line" data-ga-loc="schedule-obosan" style="display:inline-block;margin-top:12px;background:var(--amber);color:#fff;font-size:13px;padding:10px 22px;border-radius:4px;text-decoration:none;font-weight:600;">LINEで「瞑想」と送って申し込む →</a>
+  <a href="#reservation" data-ga-event="cta_meditation_reserve" data-ga-loc="schedule-obosan" style="display:inline-block;margin-top:12px;background:var(--amber);color:#fff;font-size:13px;padding:10px 22px;border-radius:4px;text-decoration:none;font-weight:600;">この日に参加する（予約する）→</a>
 </div>

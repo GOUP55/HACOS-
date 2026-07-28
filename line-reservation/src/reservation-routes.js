@@ -303,6 +303,8 @@ reservationRoutes.get('/api/liff/sessions', async (c) => {
   // Workerの内部時刻はUTC。ビジネスはJST(UTC+9)基準のため、日付はJSTで計算する。
   // さらに「当日の朝クラスが終わった後も一日中表示され続ける」のを防ぐため、
   // JST正午(12:00)を過ぎたらその日のセッションもクローズ扱いにする。
+  // ただし特別枠（id ≠ date。瞑想イベント等、夕方開催がある）は正午カットオフの対象外とし、
+  // 開催日いっぱいまで表示する（正午で消えると当日昼〜開催前の予約導線が塞がるため）。
   const nowJst = new Date(Date.now() + 9 * 3600 * 1000);
   const todayJst = nowJst.toISOString().split('T')[0];
   let cutoffDate = todayJst;
@@ -317,10 +319,10 @@ reservationRoutes.get('/api/liff/sessions', async (c) => {
       COUNT(CASE WHEN r.status = 'confirmed' THEN 1 END) AS booked
     FROM sessions s
     LEFT JOIN reservations r ON r.session_id = s.id
-    WHERE s.is_open = 1 AND s.date >= ?
+    WHERE s.is_open = 1 AND (s.date >= ?1 OR (s.date = ?2 AND s.id <> s.date))
     GROUP BY s.id
     ORDER BY s.date
-  `).bind(cutoffDate).all();
+  `).bind(cutoffDate, todayJst).all();
 
   const sessions = results.map(s => ({
     id: s.id,
@@ -790,6 +792,7 @@ async function sendNotifications(userId, displayName, session, reservation, rema
     `${timeLabel} / 観音寺 HACOS`,
     `区分：${reservation.category}`,
     ...(reservation.category === '回数券' ? ['回数券のお支払い：初回参加日に現金でまとめてお願いします。'] : []),
+    ...(reservation.category === '瞑想' ? ['※写経用紙を人数分お取り寄せするため、開催前日以降のキャンセルは用紙代¥1,000をいただきます。'] : []),
     ...(reservation.trainer ? [`担当：${reservation.trainer}`] : []),
     '',
     ...(isSpecial
