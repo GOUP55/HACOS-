@@ -790,6 +790,7 @@ async function sendNotifications(userId, displayName, session, reservation, rema
     `${timeLabel} / 観音寺 HACOS`,
     `区分：${reservation.category}`,
     ...(reservation.category === '回数券' ? ['回数券のお支払い：初回参加日に現金でまとめてお願いします。'] : []),
+    ...(reservation.category === '瞑想' ? ['※写経用紙を人数分お取り寄せするため、開催前日以降のキャンセルは用紙代¥1,000をいただきます。'] : []),
     ...(reservation.trainer ? [`担当：${reservation.trainer}`] : []),
     '',
     ...(isSpecial
