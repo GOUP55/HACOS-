@@ -118,7 +118,7 @@ textarea:focus { border-color: var(--green); }
 <div id="app" style="display:none;">
   <div class="header">
     <div class="header-title">HACOS × HMC ご予約</div>
-    <div class="header-sub">毎週日曜 AM7:30〜 / 観音寺 HACOS</div>
+    <div class="header-sub">観音寺 HACOS ／ 朝活クラスは毎週日曜 AM7:30〜</div>
     <div class="user-chip">✅ <span id="user-name-chip">ログイン済み</span></div>
     <div style="font-size:11px;color:var(--gray);margin-top:4px;">お名前の入力は不要です😊</div>
   </div>
@@ -630,6 +630,18 @@ async function handleSubmit(e) {
   const form = e.target;
   const category = form.querySelector('input[name="category"]:checked')?.value;
   if (!category) { showError('参加区分を選択してください'); return; }
+
+  // 特別イベント（瞑想）は料金・キャンセル規定が朝クラスと違うため、専用区分以外との
+  // 組み合わせをUI側で弾く（会員¥2,000等で送られると案内と金額がズレる）
+  const obosanSelected = [...selectedIds].filter(id => id.endsWith('-obosan'));
+  if (obosanSelected.length && !['瞑想', '相談'].includes(category)) {
+    showError('「お坊さんといっしょ」は参加区分「お坊さんといっしょ（瞑想と写経）」でご予約ください。朝クラスと一緒の場合は、お手数ですが分けてご予約ください。');
+    return;
+  }
+  if (category === '瞑想' && obosanSelected.length !== selectedIds.size) {
+    showError('参加区分「お坊さんといっしょ（瞑想と写経）」は瞑想イベントの日程にのみ使えます。朝クラスは会員・ビジター等でご予約ください。');
+    return;
+  }
 
   const btn = document.getElementById('btn-submit');
   btn.disabled = true;

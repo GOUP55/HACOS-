@@ -26,7 +26,7 @@
 
 | 7/15 | 司令塔（法人ウェルネス担当）→次チャットへ引き継ぎ | 引き継ぎ: NEXT_CHAT_HANDOFF.md「🏢法人ウェルネス」節・CORPORATE_LP_HANDOFF.md。次チャットのテーマ=ウェルネスクラスの募集・集客 | 引き継ぎ済み |
 | 7/15 | →デプロイの手 or オーナーへ依頼 | LINE自動応答に「法人」キーワード→ `https://goup55.github.io/HACOS-/corp.html` を返すルール追加（「ガイド」ルールと同じ仕組み） | 依頼中 |
-| 7/28 | 司令塔（瞑想イベント） | line-reservation（reserve.html／reservation-routes.js／migrations/2026-07-28-obosan-session.sql） | 瞑想イベント区分を実装・全テスト合格・QAレビュー中。main反映後にHarnessの本番反映が必要（migrationのSQL実行含む） |
+| 7/28 | 司令塔（瞑想イベント） | line-reservation（reserve.html／reservation-routes.js／admin-page.js／migrations/2026-07-28-obosan-session.sql） | 実装・QA完了（指摘中4件修正済み・テスト86項目合格）。ユーザー承認待ち→main→Harnessの本番反映（migration適用含む）が必要 |
 <!-- ここに作業中の行を追加。完了したら行ごと削除 -->
 
 ## 現在の全体像（どこで何が動いているか）

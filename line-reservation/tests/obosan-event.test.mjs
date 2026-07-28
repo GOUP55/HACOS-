@@ -99,9 +99,22 @@ function check(name, ok, detail = '') {
   check('イベントカードに開催時間タグ「17:00〜19:00」が出る',
     (await card.textContent()).includes('17:00〜19:00'));
 
-  // ── シナリオ3: 瞑想イベントを選んで予約送信 ──
+  // ── シナリオ3: 区分の組み合わせガード ──
   await card.click();
+  await page.locator('input[name="category"][value="ビジター"]').check();
+  await page.locator('#btn-submit').click();
+  check('ガード: イベント日をビジター区分で送信するとエラーになり送信されない',
+    (await page.locator('#form-error').isVisible()) && lastPostBody === null);
+
+  const morningCard = page.locator(`#sessions-list [data-id="${morningSession.id}"]`);
+  await morningCard.click();
   await page.locator('input[name="category"][value="瞑想"]').check();
+  await page.locator('#btn-submit').click();
+  check('ガード: 瞑想区分に朝クラスが混ざっているとエラーになり送信されない',
+    (await page.locator('#form-error').isVisible()) && lastPostBody === null);
+  await morningCard.click(); // 朝クラスの選択を外す
+
+  // ── シナリオ4: 正しい組み合わせで予約送信 ──
   await page.locator('#btn-submit').click();
   await page.waitForSelector('#complete', { state: 'visible', timeout: 10000 });
 
