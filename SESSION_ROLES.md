@@ -26,7 +26,8 @@
 
 | 7/17 | 司令塔（Journey募集・集客）→次チャットへ引き継ぎ | NEXT_CHAT_HANDOFF.md「🏢」節参照。最優先=STORES商品URLが届いたらretreat.htmlのSTORESボタン差し替え→公開 | 引き継ぎ済み |
 | 7/15 | →デプロイの手 or オーナーへ依頼 | LINE自動応答に「法人」キーワード→ `https://goup55.github.io/HACOS-/corp.html` を返すルール追加（「ガイド」ルールと同じ仕組み） | 依頼中 |
-| 7/28 | 司令塔（瞑想イベント） | line-reservation（reserve.html／reservation-routes.js／admin-page.js／migrations/2026-07-28-obosan-session.sql） | 実装・QA完了（指摘中4件修正済み・テスト86項目合格）。ユーザー承認待ち→main→Harnessの本番反映（migration適用含む）が必要 |
+| 7/28 | 司令塔（瞑想イベント） | line-reservation（reserve.html／reservation-routes.js／admin-page.js／migrations/2026-07-28-obosan-session.sql） | main反映済み（PR #59）。Harnessの本番反映（Worker＋migration適用）が必要 |
+| 7/28 | 司令塔（PR #60） | hacos-hmc-lp.html・index.html・retreat.html・premium.html・line-reservation | 8月お弁当確定・予約ボタン・Journey第2期差し替え・ハコさんティザー・瞑想スニペット貼り込み。マージ処理中 |
 <!-- ここに作業中の行を追加。完了したら行ごと削除 -->
 
 ## 現在の全体像（どこで何が動いているか）

@@ -191,6 +191,9 @@ wrangler d1 execute line-harness --file=line-reservation/migrations/2026-07-04-t
 | `mig-2026-07-15-cancelled-at.sql` | reservations.cancelled_at列追加（キャンセル日時の記録。**Workerデプロイ前に適用**） |
 | `mig-2026-07-16-trial-decision.sql` | trial_requests.decided_at/decided_by列追加（体験判定の操作ログ。**Workerデプロイ前に適用**） |
 | `mig-2026-07-17-admin-ops-log.sql` | admin_ops_logテーブル追加（開催日操作の記録。新規テーブルのみ・再実行可） |
+| `2026-08-sessions.sql` | 8月の日曜HMC日程5件（確定クラス名・メニュー。再実行可） |
+| `2026-07-28-obosan-session.sql` | 「お坊さんといっしょ」8/29(土)17:00〜19:00を特別枠 `2026-08-29-obosan` で追加（再実行可。**KVのreserve.html更新・Worker再デプロイとセットで適用**） |
+| `2026-08-bento-swap-0816-0830.sql` | 8/16⇄8/30のお弁当入れ替え反映（8/16わっぱ弁当・8/30サラダボウル。再実行可。**適用前に既存のお弁当予約の有無を確認**） |
 
 ```bash
 wrangler d1 execute line-harness --file=line-reservation/migrations/<ファイル名> --remote

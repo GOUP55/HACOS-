@@ -601,9 +601,22 @@ function hmcDaysLeft(){
 }
 (function(){
   var days = hmcDaysLeft();
-  if(days < 1) return; // 締切後は何も表示しない
-  var label = (days === 1) ? '（本日締切）' : ('（残り' + days + '日）');
-  document.querySelectorAll('.days-left').forEach(function(el){ el.textContent = label; });
+  if(days >= 1){
+    var label = (days === 1) ? '（本日締切）' : ('（残り' + days + '日）');
+    document.querySelectorAll('.days-left').forEach(function(el){ el.textContent = label; });
+    return;
+  }
+  // 締切後: 「7/31まで」の静的文言を募集終了の案内に差し替える（期限切れ表示の放置防止）
+  var term = document.querySelector('.cohort-banner .term');
+  if(term) term.textContent = '第1期の募集は終了しました';
+  var cap = document.querySelector('.cohort-banner .cap');
+  if(cap) cap.textContent = '次期のご案内は公式LINEでお届けします。無料相談はいつでもどうぞ。';
+  var urgency = document.querySelector('.urgency');
+  if(urgency) urgency.textContent = '第1期の募集は終了しました ｜ 次期のご案内はLINEで';
+  var sticky = document.querySelector('.sticky-cta .sticky-text');
+  if(sticky) sticky.innerHTML = '<strong>第1期の募集は終了しました</strong> 次期のご案内・無料相談はLINEで';
+  var badge = document.querySelector('.p-badges .p-badge');
+  if(badge) badge.textContent = '第1期 募集終了';
 })();
 </script>
 
