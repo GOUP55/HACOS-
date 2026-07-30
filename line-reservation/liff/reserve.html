@@ -52,6 +52,7 @@ body { font-family: -apple-system, 'Hiragino Sans', 'Yu Gothic', sans-serif; bac
 .session-tags { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
 .tag { font-size: 10px; border-radius: 4px; padding: 2px 7px; font-weight: 600; }
 .tag-run { background: #fff3e0; color: #e65100; }
+.tag-time { background: #e8f0e8; color: #3D5A3E; }
 .remaining { position: absolute; top: 10px; right: 12px; font-size: 11px; font-weight: 700; }
 .remaining.ok { color: var(--green); }
 .remaining.low { color: var(--red); }
@@ -117,7 +118,7 @@ textarea:focus { border-color: var(--green); }
 <div id="app" style="display:none;">
   <div class="header">
     <div class="header-title">HACOS × HMC ご予約</div>
-    <div class="header-sub">毎週日曜 AM7:30〜 / 観音寺 HACOS</div>
+    <div class="header-sub">観音寺 HACOS ／ 朝活クラスは毎週日曜 AM7:30〜</div>
     <div class="user-chip">✅ <span id="user-name-chip">ログイン済み</span></div>
     <div style="font-size:11px;color:var(--gray);margin-top:4px;">お名前の入力は不要です😊</div>
   </div>
@@ -169,7 +170,7 @@ textarea:focus { border-color: var(--green); }
   </div>
 
   <form id="reserve-form" class="form-body" onsubmit="handleSubmit(event)" novalidate>
-    <div class="section-title" style="padding:0 4px;margin-top:4px;">朝クラス・イベントを予約する</div>
+    <div class="section-title" style="padding:0 4px;margin-top:4px;">クラス・イベントを予約する</div>
 
     <!-- 参加希望日 -->
     <div class="section">
@@ -189,8 +190,10 @@ textarea:focus { border-color: var(--green); }
           <span class="opt-label">回数券（月まとめ買い）<span class="opt-price">¥2,000／回・その月の開催回数ぶんをまとめて購入</span></span></label>
         <label class="opt"><input type="radio" name="category" value="ビジター">
           <span class="opt-label">ビジター<span class="opt-price">¥3,000／回</span></span></label>
-        <label class="opt"><input type="radio" name="category" value="瞑想イベント">
-          <span class="opt-label">瞑想イベント（お坊さんといっしょ）<span class="opt-price">¥3,000・写経用紙代込み（8/29 土 17:00〜19:00）</span></span></label>
+        <label class="opt" id="cat-tacos" style="display:none;"><input type="radio" name="category" value="TACOS">
+          <span class="opt-label">TACOS Party<span class="opt-price">¥3,000・タコス食べ放題／ドリンク・その他フード別</span></span></label>
+        <label class="opt" id="cat-obosan" style="display:none;"><input type="radio" name="category" value="瞑想">
+          <span class="opt-label">お坊さんといっしょ（瞑想と写経）<span class="opt-price">¥3,000・写経用紙代込み ※開催前日以降のキャンセルは用紙代¥1,000</span></span></label>
         <label class="opt"><input type="radio" name="category" value="相談">
           <span class="opt-label">迷っている・相談したい</span></label>
       </div>
@@ -316,6 +319,17 @@ async function loadSessions() {
     ? `朝RUNの開催日は ${runDays.join('・')} です`
     : '';
 
+  // 特別イベントの参加区分は、該当セッションが受付中のときだけ表示する
+  // （開催が終わった後もイベント区分と古い日付表記が残り続けるのを防ぐ）
+  const showCat = (id, visible) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.display = visible ? '' : 'none';
+    if (!visible) { const input = el.querySelector('input'); if (input) input.checked = false; }
+  };
+  showCat('cat-tacos', sessions.some(s => s.tacos || s.id.endsWith('-tacos')));
+  showCat('cat-obosan', sessions.some(s => s.id.endsWith('-obosan')));
+
   if (!sessions.length) {
     list.innerHTML = '<p style="color:var(--gray);font-size:13px;text-align:center;padding:12px 0;">現在受付中の日程がありません</p>';
     return;
@@ -344,6 +358,7 @@ async function loadSessions() {
       ${s.note ? `<div class="session-note">${esc(s.note)}</div>` : ''}
       <div class="session-tags">
         ${s.morning_run ? '<span class="tag tag-run">🏃 朝RUN 6:30〜</span>' : ''}
+        ${s.time_label ? `<span class="tag tag-time">🕔 ${esc(s.time_label)}</span>` : ''}
       </div>
       ${badge}
       <div class="check-icon">✓</div>
@@ -615,6 +630,18 @@ async function handleSubmit(e) {
   const form = e.target;
   const category = form.querySelector('input[name="category"]:checked')?.value;
   if (!category) { showError('参加区分を選択してください'); return; }
+
+  // 特別イベント（瞑想）は料金・キャンセル規定が朝クラスと違うため、専用区分以外との
+  // 組み合わせをUI側で弾く（会員¥2,000等で送られると案内と金額がズレる）
+  const obosanSelected = [...selectedIds].filter(id => id.endsWith('-obosan'));
+  if (obosanSelected.length && !['瞑想', '相談'].includes(category)) {
+    showError('「お坊さんといっしょ」は参加区分「お坊さんといっしょ（瞑想と写経）」でご予約ください。朝クラスと一緒の場合は、お手数ですが分けてご予約ください。');
+    return;
+  }
+  if (category === '瞑想' && obosanSelected.length !== selectedIds.size) {
+    showError('参加区分「お坊さんといっしょ（瞑想と写経）」は瞑想イベントの日程にのみ使えます。朝クラスは会員・ビジター等でご予約ください。');
+    return;
+  }
 
   const btn = document.getElementById('btn-submit');
   btn.disabled = true;

@@ -26,8 +26,8 @@
 
 | 7/17 | 司令塔（Journey募集・集客）→次チャットへ引き継ぎ | NEXT_CHAT_HANDOFF.md「🏢」節参照。最優先=STORES商品URLが届いたらretreat.htmlのSTORESボタン差し替え→公開 | 引き継ぎ済み |
 | 7/15 | →デプロイの手 or オーナーへ依頼 | LINE自動応答に「法人」キーワード→ `https://goup55.github.io/HACOS-/corp.html` を返すルール追加（「ガイド」ルールと同じ仕組み） | 依頼中 |
-| 7/20 | 司令塔（瞑想プログラム企画） | MEDITATION_PROGRAM_PLAN.md 新規・BUSINESS_RULES.md に¥4,000追記 | 企画書作成済み。日時・会場等はオーナーがおかちんとLINE打ち合わせ中 |
-| 7/28 | 司令塔 | hacos-hmc-lp.html（8月お弁当確定・予約ボタン）・line-reservation（瞑想イベント予約フォーム化） | 作業中（ブランチ claude/august-program-reservation-updates-7i3cle） |
+| 7/28 | 司令塔（瞑想イベント） | line-reservation（reserve.html／reservation-routes.js／admin-page.js／migrations/2026-07-28-obosan-session.sql） | main反映済み（PR #59）。Harnessの本番反映（Worker＋migration適用）が必要 |
+| 7/28 | 司令塔（PR #60） | hacos-hmc-lp.html・index.html・retreat.html・premium.html・line-reservation | 8月お弁当確定・予約ボタン・Journey第2期差し替え・ハコさんティザー・瞑想スニペット貼り込み。マージ処理中 |
 <!-- ここに作業中の行を追加。完了したら行ごと削除 -->
 
 ## 現在の全体像（どこで何が動いているか）
