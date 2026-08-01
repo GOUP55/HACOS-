@@ -29,6 +29,7 @@
 | 7/28 | 司令塔（瞑想イベント） | line-reservation（reserve.html／reservation-routes.js／admin-page.js／migrations/2026-07-28-obosan-session.sql） | main反映済み（PR #59）。Harnessの本番反映（Worker＋migration適用）が必要 |
 | 7/28 | 司令塔（PR #60） | hacos-hmc-lp.html・index.html・retreat.html・premium.html・line-reservation | 8月お弁当確定・予約ボタン・Journey第2期差し替え・ハコさんティザー・瞑想スニペット貼り込み。マージ処理中 |
 | 8/1 | 司令塔→**アパレル新チャットへ引き継ぎ** | `SPEES_APPAREL_HANDOFF.md`・images/spees/（ロゴ・企画ボード5点） | 引き継ぎ済み。新チャットは同ファイルを起点に。担当宣言をここに書くこと |
+| 8/1 | 🧵 **アパレル担当**（本セッション・担当宣言） | `APPAREL_ROADMAP.md`・`DOCS_INDEX.md`（索引1行）。LP・line-reservationには触らない | 引き継ぎ受領。ロードマップ整備・ロゴ色実測済み。Phase 0（名前決め）のオーナー壁打ち待ち |
 <!-- ここに作業中の行を追加。完了したら行ごと削除 -->
 
 ## 現在の全体像（どこで何が動いているか）
