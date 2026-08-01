@@ -35,7 +35,8 @@
 | `STRIPE_SETUP_GUIDE.md` | メンバーズ月額課金のオーナー作業手順（実施待ち） |
 | `MEDITATION_PROGRAM_PLAN.md` | 「お坊さんといっしょ」瞑想×写経企画（初回8/29確定・告知素材準備済み・予約組み込み実装待ち） |
 | `SPEES_APPAREL_HANDOFF.md` | **アパレル事業立ち上げの引き継ぎ**（2026-08-01。素材=images/spees/ はイメージ・使用不可。未決定多数） |
-| `APPAREL_ROADMAP.md` | アパレル立ち上げのフェーズ段取り＋名前決めの壁打ち材料（2026-08-01。担当=アパレルセッション。決定は BUSINESS_RULES.md へ） |
+| `APPAREL_ROADMAP.md` | アパレル立ち上げのフェーズ段取り（2026-08-01。第1弾商品の実務は HMC-SOCKS-PROJECT/ へ移行） |
+| `HMC-SOCKS-PROJECT/` | **アパレル第1弾: HMC 5本指ソックス開発の正本一式**（00企画〜08ロードマップ。決定=00_PROJECT/DECISIONS.md） |
 | `CHALLENGE_21DAY_PLAN.md` | 21日チャレンジ（価格・実施日 未確定） |
 | `PREMIUM_2ND_LAUNCH_PLAN.md` | 第2期ローンチ計画（8〜9月・仮） |
 | `PREMIUM_2ND_LAUNCH_CALENDAR.md` | 第2期 逆算カレンダー＋LP改修案（日付すべて仮） |
