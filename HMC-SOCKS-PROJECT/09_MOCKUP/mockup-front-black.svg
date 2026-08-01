@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 860" font-family="'DM Sans','Helvetica Neue',Arial,sans-serif">
+  <!-- HMC CORE 5 TOE HIGH — 正面ビュー モックアップ（BLACK × WHITE）2026-08-01 -->
+  <rect x="0" y="0" width="480" height="860" rx="18" fill="#F5F0E8"/>
+
+  <!-- ソック本体（ハイソックス・正面） -->
+  <path d="M 168 70
+           L 312 70
+           C 318 140, 332 200, 334 262
+           C 336 340, 308 424, 302 482
+           C 299 530, 322 584, 336 642
+           L 340 690
+           C 336 752, 300 752, 296 695
+           C 292 750, 258 750, 254 697
+           C 250 748, 218 748, 214 698
+           C 210 746, 180 746, 176 696
+           C 172 752, 142 752, 140 690
+           L 144 642
+           C 158 584, 181 530, 178 482
+           C 172 424, 144 340, 146 262
+           C 148 200, 162 140, 168 70 Z"
+        fill="#1C1C1A"/>
+
+  <!-- リブ履き口 -->
+  <g stroke="#3A3A38" stroke-width="2">
+    <line x1="176" y1="74" x2="173" y2="128"/><line x1="190" y1="72" x2="188" y2="130"/>
+    <line x1="204" y1="72" x2="203" y2="131"/><line x1="218" y1="71" x2="218" y2="132"/>
+    <line x1="232" y1="71" x2="232" y2="132"/><line x1="246" y1="71" x2="246" y2="132"/>
+    <line x1="260" y1="71" x2="260" y2="132"/><line x1="274" y1="72" x2="275" y2="131"/>
+    <line x1="288" y1="72" x2="290" y2="130"/><line x1="302" y1="74" x2="305" y2="128"/>
+  </g>
+  <path d="M 165 134 C 220 142, 260 142, 315 134" stroke="#3A3A38" stroke-width="2.5" fill="none"/>
+
+  <!-- カーフサポートの編み切替ライン（左右） -->
+  <path d="M 156 180 C 150 260, 152 350, 172 440" stroke="#2E2E2C" stroke-width="3" fill="none"/>
+  <path d="M 324 180 C 330 260, 328 350, 308 440" stroke="#2E2E2C" stroke-width="3" fill="none"/>
+
+  <!-- ワードマーク（履き口下） -->
+  <text x="240" y="170" text-anchor="middle" font-size="8" letter-spacing="2" fill="#F5F0E8" opacity="0.85">HEALTHY MORNING CLUB</text>
+
+  <!-- MCモノグラム（縦・正面すね/カーフ） -->
+  <g stroke="#F5F0E8" stroke-width="22" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M 211 332 L 211 256 L 240 300 L 269 256 L 269 332"/>
+  </g>
+  <circle cx="240" cy="408" r="38" stroke="#F5F0E8" stroke-width="22" fill="none"/>
+  <rect x="262" y="393" width="30" height="30" fill="#1C1C1A"/>
+
+  <!-- 甲メッシュの示唆 -->
+  <g fill="#33332F">
+    <circle cx="216" cy="612" r="2.2"/><circle cx="240" cy="610" r="2.2"/><circle cx="264" cy="612" r="2.2"/>
+    <circle cx="204" cy="628" r="2.2"/><circle cx="228" cy="626" r="2.2"/><circle cx="252" cy="626" r="2.2"/><circle cx="276" cy="628" r="2.2"/>
+    <circle cx="216" cy="644" r="2.2"/><circle cx="240" cy="642" r="2.2"/><circle cx="264" cy="644" r="2.2"/>
+  </g>
+
+  <!-- つま先補強ライン -->
+  <path d="M 148 676 C 200 662, 280 662, 336 676" stroke="#3A3A38" stroke-width="2.5" fill="none"/>
+
+  <!-- キャプション -->
+  <text x="240" y="806" text-anchor="middle" font-size="15" letter-spacing="1.5" fill="#1C1C1A" font-weight="600">HMC CORE 5 TOE HIGH — FRONT</text>
+  <text x="240" y="828" text-anchor="middle" font-size="11" letter-spacing="1" fill="#6b665c">BLACK × WHITE ｜ MOCKUP（サンプル検討用・寸法は仕様書準拠）</text>
+</svg>

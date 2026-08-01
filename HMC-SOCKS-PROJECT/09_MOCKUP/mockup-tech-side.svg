@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 880" font-family="'Noto Sans JP','Hiragino Sans','DM Sans',Arial,sans-serif">
+  <!-- HMC CORE 5 TOE HIGH — テックビュー（サイド・機能注釈）2026-08-01 -->
+  <rect x="0" y="0" width="960" height="880" rx="18" fill="#F5F0E8"/>
+  <text x="480" y="46" text-anchor="middle" font-size="20" font-weight="700" letter-spacing="1.5" fill="#1C1C1A">HMC CORE 5 TOE HIGH — TECH VIEW（サイド）</text>
+
+  <!-- ソック本体（サイドプロファイル・つま先は左） -->
+  <path d="M 560 90 L 700 90
+           C 715 170, 745 240, 738 320
+           C 731 398, 700 438, 695 478
+           C 722 498, 740 538, 736 578
+           C 732 626, 700 656, 648 660
+           L 262 672
+           C 192 674, 130 656, 122 620
+           C 117 596, 134 580, 160 572
+           C 300 536, 470 512, 574 482
+           C 566 380, 552 230, 560 90 Z"
+        fill="#1C1C1A"/>
+
+  <!-- リブ履き口 -->
+  <g stroke="#3A3A38" stroke-width="2">
+    <line x1="568" y1="93" x2="566" y2="146"/><line x1="583" y1="92" x2="582" y2="147"/>
+    <line x1="598" y1="92" x2="598" y2="148"/><line x1="613" y1="91" x2="613" y2="148"/>
+    <line x1="628" y1="91" x2="629" y2="148"/><line x1="643" y1="91" x2="644" y2="148"/>
+    <line x1="658" y1="91" x2="660" y2="148"/><line x1="673" y1="92" x2="676" y2="147"/>
+    <line x1="688" y1="92" x2="692" y2="146"/>
+  </g>
+  <path d="M 558 152 C 610 160, 650 160, 706 152" stroke="#3A3A38" stroke-width="2.5" fill="none"/>
+
+  <!-- カーフサポート編みゾーン（破線囲み） -->
+  <path d="M 566 175 C 640 180, 710 190, 728 210 C 736 280, 730 350, 710 420 C 660 430, 600 428, 566 420"
+        fill="none" stroke="#C8833A" stroke-width="2.5" stroke-dasharray="7 6"/>
+
+  <!-- ミニMCモノグラム（すね前面の位置示唆） -->
+  <g stroke="#F5F0E8" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M 585 302 L 585 258 L 604 285 L 623 258 L 623 302"/>
+  </g>
+  <circle cx="604" cy="345" r="24" stroke="#F5F0E8" stroke-width="13" fill="none"/>
+  <rect x="626" y="336" width="18" height="18" fill="#1C1C1A"/>
+
+  <!-- Y字ヒール示唆 -->
+  <path d="M 700 560 C 682 588, 668 612, 664 646" stroke="#3A3A38" stroke-width="3" fill="none"/>
+  <path d="M 700 560 C 716 588, 722 614, 718 636" stroke="#3A3A38" stroke-width="3" fill="none"/>
+
+  <!-- アーチサポート帯 -->
+  <path d="M 400 528 C 420 570, 430 620, 428 668 M 470 516 C 490 560, 498 616, 496 666"
+        stroke="#2E2E2C" stroke-width="3" fill="none"/>
+
+  <!-- 甲メッシュドット -->
+  <g fill="#33332F">
+    <circle cx="300" cy="560" r="2.4"/><circle cx="330" cy="552" r="2.4"/><circle cx="360" cy="545" r="2.4"/>
+    <circle cx="290" cy="580" r="2.4"/><circle cx="320" cy="572" r="2.4"/><circle cx="350" cy="565" r="2.4"/>
+    <circle cx="310" cy="596" r="2.4"/><circle cx="340" cy="588" r="2.4"/>
+  </g>
+
+  <!-- 5本指の分割線 -->
+  <path d="M 168 570 C 175 600, 178 636, 175 664 M 200 563 C 208 596, 211 636, 208 666 M 232 556 C 240 592, 243 634, 240 668"
+        stroke="#3A3A38" stroke-width="2.5" fill="none"/>
+
+  <!-- 前足部パイルゾーン（破線） -->
+  <path d="M 150 660 C 240 668, 330 666, 400 662" fill="none" stroke="#C8833A" stroke-width="2.5" stroke-dasharray="7 6"/>
+
+  <!-- ============ 注釈 ============ -->
+  <g font-size="14.5" fill="#1C1C1A">
+    <!-- 右上: 履き口 -->
+    <line x1="700" y1="110" x2="775" y2="96" stroke="#8a8474" stroke-width="1.5"/>
+    <text x="782" y="92" font-weight="600">ソフトリブ履き口</text>
+    <text x="782" y="110" font-size="12" fill="#57534a">締め付けすぎず跡が残りにくい</text>
+
+    <!-- 右: カーフ -->
+    <line x1="736" y1="300" x2="790" y2="290" stroke="#8a8474" stroke-width="1.5"/>
+    <text x="796" y="284" font-weight="600">カーフサポート編み</text>
+    <text x="796" y="302" font-size="12" fill="#57534a">ふくらはぎを覆って保護</text>
+    <text x="796" y="318" font-size="12" fill="#57534a">（トレイルの擦れ・草木・冷え対策）</text>
+
+    <!-- 左: モノグラム -->
+    <line x1="580" y1="300" x2="470" y2="250" stroke="#8a8474" stroke-width="1.5"/>
+    <text x="120" y="228" font-weight="600">正面: 縦型MCモノグラム（採用ロゴ）</text>
+    <text x="120" y="246" font-size="12" fill="#57534a">編地は着用時に横へ伸びるため、</text>
+    <text x="120" y="262" font-size="12" fill="#57534a">ロゴデータは横方向を約12%圧縮して作成（サンプルで実測補正）</text>
+
+    <!-- 右下: ヒール -->
+    <line x1="722" y1="600" x2="788" y2="612" stroke="#8a8474" stroke-width="1.5"/>
+    <text x="794" y="608" font-weight="600">Y字ヒール立体編み＋補強</text>
+    <text x="794" y="626" font-size="12" fill="#57534a">ズレ防止・摩耗対策</text>
+
+    <!-- 下: アーチ -->
+    <line x1="450" y1="600" x2="470" y2="740" stroke="#8a8474" stroke-width="1.5"/>
+    <text x="430" y="762" font-weight="600">アーチサポート＋薄手メッシュ</text>
+    <text x="430" y="780" font-size="12" fill="#57534a">フィットと地面感覚（土踏まず・ジャカードワードマーク候補位置）</text>
+
+    <!-- 左下: つま先 -->
+    <line x1="150" y1="600" x2="140" y2="736" stroke="#8a8474" stroke-width="1.5"/>
+    <text x="90" y="758" font-weight="600">5本指・つま先補強糸</text>
+    <text x="90" y="776" font-size="12" fill="#57534a">左右専用設計・指股フラット処理</text>
+
+    <!-- 中央下: パイル -->
+    <line x1="300" y1="668" x2="290" y2="700" stroke="#8a8474" stroke-width="1.5"/>
+    <text x="240" y="720" font-weight="600">前足部・かかとハーフパイル</text>
+    <text x="240" y="737" font-size="12" fill="#57534a">下り坂・立ち込み動作の衝撃をクッション</text>
+
+    <!-- 甲メッシュ -->
+    <line x1="330" y1="570" x2="330" y2="480" stroke="#8a8474" stroke-width="1.5"/>
+    <text x="290" y="470" font-weight="600">甲メッシュ（通気）</text>
+  </g>
+
+  <text x="480" y="836" text-anchor="middle" font-size="12.5" fill="#57534a">想定用途: トレイルランニング／HYROX系フィットネスレース／朝RUN／ジムトレーニング／日常</text>
+  <text x="480" y="856" text-anchor="middle" font-size="11" fill="#8a8474">MOCKUP（仕様検討用）— 医学的効果の断定表現は使用しない ｜ HEALTHY MORNING CLUB</text>
+</svg>
