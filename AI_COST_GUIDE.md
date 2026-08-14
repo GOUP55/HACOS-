@@ -17,6 +17,7 @@
 |---|---|---|
 | 難所の設計・複雑な判断 | Fable 5（メインセッション） | 方針決め・要件整理・最終判断だけ |
 | コード実装・文章の量産（約40〜60%安い） | Sonnet | `hacos-frontend` `hacos-copywriter` `hacos-designer` `hacos-growth` `hacos-qa` |
+| 日常運営の処理（週次まとめ・集計・返信下書き） | Sonnet | `hacos-operator` `hacos-analyst` `hacos-support` |
 | 分類・抽出・整形（最安） | Haiku | `hacos-ops` |
 
 ## 再現手順（頼み方のテンプレ）

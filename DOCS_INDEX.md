@@ -16,7 +16,9 @@
 |---|---|
 | `TEAM_WORKFLOW.md` | エージェント7体の役割と品質ループ |
 | `AI_COST_GUIDE.md` | モデルの使い分け（Fable=設計/Sonnet=実装/Haiku=定型） |
-| `SLASH_COMMANDS.md` | スラッシュコマンド20個の早見表 |
+| `SLASH_COMMANDS.md` | スラッシュコマンド23個の早見表 |
+| `ops/OPS_INPUT.md` | **運営インプット**（数字・スタッフ報告の転記先）。`/ops` `/numbers` の唯一のデータ元 |
+| `ops/reports/` | `/ops` `/numbers` が生成した週次レビュー・数字レポートの蓄積（自動生成・手で編集しない） |
 | `AI_HEAVY_TASK_PLAYBOOK.md` | 重量級タスクの投げ方・測り方・課金判断（実行は `/heavy-task`） |
 | `LINE_HARNESS_HANDOFF.md` | LINE予約システムの構成・デプロイ手順 |
 | `FABLE5_SYSTEM_PROMPT.md` | CLAUDE.md「思考の規律」の抽出元（参照用・編集しない） |

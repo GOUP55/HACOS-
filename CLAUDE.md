@@ -27,6 +27,7 @@
 - 上位モデル（メインセッション）＝**設計・方針決め・難しい判断だけ**
 - 実装・文章量産 → `hacos-frontend` / `hacos-copywriter`（Sonnet）
 - 定型処理（整形・抽出・一括チェック）→ `hacos-ops`（Haiku）
+- 日常運営 → `hacos-operator`（週次まとめ・期限監視 `/ops`）/ `hacos-analyst`（数字 `/numbers`）/ `hacos-support`（顧客対応 `/reply`）。数字の入口は `ops/OPS_INPUT.md` の1箇所だけ（本番D1は読めないので推測で埋めない）
 - 品質ループ: 制作 → build → `hacos-qa` レビュー → 高/中ゼロまで修正 → ユーザー承認後に公開（TEAM_WORKFLOW.md）
 
 ## 厳守
