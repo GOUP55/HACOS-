@@ -3,21 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HACOS × HMC — Healthy Morning Club</title>
+<title>朝のRUNFREE ¥0｜観音寺の日曜朝活 HACOS×HMC</title>
 
 <!-- ═══ SEO / OGP META ═══ -->
-<meta name="description" content="観音寺の日曜朝活コミュニティ。動く×食べる×つながる。毎週日曜AM7:30、HACOSで。初回体験¥3,500。">
+<meta name="description" content="毎週日曜AM6:30、観音寺のHACOSで開く朝RUN「RUNFREE」。参加費は¥0、予約不要。走った後は7:30〜の朝活クラスへの参加もできます。全ては、朝から始まります。">
 <link rel="canonical" href="https://goup55.github.io/HACOS-/">
-<meta property="og:title" content="HACOS × HMC — Healthy Morning Club">
-<meta property="og:description" content="観音寺から始まる、もうひとつの朝活。毎週日曜AM7:30。">
+<meta property="og:title" content="朝のRUNFREE ¥0｜観音寺の日曜朝活 HACOS×HMC">
+<meta property="og:description" content="朝のRUNFREE、参加費¥0。観音寺の日曜、走ることから始まります。">
 <meta property="og:image" content="https://goup55.github.io/HACOS-/images/ogp.jpg">
 <meta property="og:url" content="https://goup55.github.io/HACOS-/">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ja_JP">
 <meta property="og:site_name" content="HACOS × HMC">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="HACOS × HMC — Healthy Morning Club">
-<meta name="twitter:description" content="観音寺から始まる、もうひとつの朝活。毎週日曜AM7:30。">
+<meta name="twitter:title" content="朝のRUNFREE ¥0｜観音寺の日曜朝活 HACOS×HMC">
+<meta name="twitter:description" content="朝のRUNFREE、参加費¥0。観音寺の日曜、走ることから始まります。">
 <meta name="twitter:image" content="https://goup55.github.io/HACOS-/images/ogp.jpg">
 
 <!-- ═══ 構造化データ：ローカルSEO（「観音寺 朝活」対策） ═══ -->
@@ -26,7 +26,7 @@
   "@context": "https://schema.org",
   "@type": "HealthClub",
   "name": "HACOS × HMC — Healthy Morning Club",
-  "description": "観音寺の日曜朝活コミュニティ。動く×食べる×つながる。毎週日曜AM7:30開催。",
+  "description": "観音寺の日曜朝活コミュニティ。毎週日曜AM6:30、参加費¥0の朝RUN「RUNFREE」から始まる。動く×食べる×つながる。",
   "url": "https://goup55.github.io/HACOS-/",
   "image": "https://goup55.github.io/HACOS-/images/ogp.jpg",
   "address": {
@@ -38,7 +38,7 @@
   "openingHoursSpecification": {
     "@type": "OpeningHoursSpecification",
     "dayOfWeek": "Sunday",
-    "opens": "07:30",
+    "opens": "06:30",
     "closes": "10:00"
   },
   "sameAs": [
@@ -151,6 +151,10 @@ body { font-family:'Noto Serif JP',serif; background:var(--warm-white); color:va
   font-family:'Cormorant Garamond',serif; font-size:clamp(40px,11vw,72px);
   font-weight:300; color:var(--cream); line-height:1.1;
 }
+.hero-subhead {
+  font-family:'Cormorant Garamond',serif; font-style:italic; font-size:clamp(16px,4.4vw,22px);
+  font-weight:300; color:rgba(245,240,232,.85); margin-top:-8px;
+}
 .hero-subtitle {
   font-size:13px; color:rgba(245,240,232,.72); line-height:1.8;
   border-left:2px solid var(--amber); padding-left:12px;
@@ -206,8 +210,46 @@ section { padding:72px 24px; }
   font-weight:300; color:var(--dark); line-height:1.2; margin-bottom:8px;
 }
 .section-title em { font-style:italic; color:var(--forest); }
+/* 深緑・黒背景セクションでは em が背景に沈むため明色に */
+.weekly .section-title em, .method .section-title em, .cta-section .section-title em { color:var(--amber-light); }
 .section-body { font-size:14px; color:var(--mid); line-height:1.9; }
 .divider { width:40px; height:1px; background:var(--amber); margin:20px 0; }
+
+/* ── RUNFREE ── */
+.runfree { background:var(--forest); }
+.runfree .section-title { color:var(--cream); }
+.runfree .section-title em { color:var(--amber-light); }
+.runfree .section-label { color:var(--amber-light); }
+.runfree .divider { background:rgba(245,240,232,.3); }
+.runfree-lead { font-size:14px; color:rgba(245,240,232,.8); line-height:1.9; margin-top:16px; }
+.runfree-steps { display:flex; flex-direction:column; gap:0; margin-top:28px; }
+.runfree-step { display:flex; gap:16px; position:relative; padding-bottom:24px; }
+.runfree-step:not(:last-child)::after {
+  content:''; position:absolute; left:19px; top:40px; bottom:0;
+  width:1px; background:rgba(245,240,232,.2);
+}
+.runfree-num {
+  width:40px; height:40px; border-radius:50%; background:var(--amber);
+  color:#fff; display:flex; align-items:center; justify-content:center;
+  font-family:'DM Sans',sans-serif; font-size:16px; flex-shrink:0; z-index:1;
+}
+.runfree-step-title { font-size:15px; color:var(--cream); margin-bottom:4px; padding-top:8px; }
+.runfree-step-desc { font-size:12px; color:rgba(245,240,232,.65); line-height:1.7; }
+.runfree-pace-heading { font-size:14px; color:var(--cream); margin-top:28px; letter-spacing:.05em; }
+.runfree-pace { display:grid; grid-template-columns:1fr; gap:10px; margin-top:14px; }
+@media (min-width:640px){ .runfree-pace { grid-template-columns:1fr 1fr; } }
+.runfree-pace-card { background:rgba(245,240,232,.06); border:1px solid rgba(245,240,232,.18); border-radius:10px; padding:18px 16px; }
+.runfree-pace-who { font-size:11px; color:var(--amber-light); font-family:'DM Sans',sans-serif; letter-spacing:.06em; margin-bottom:6px; }
+.runfree-pace-title { font-size:15px; color:var(--cream); margin-bottom:6px; }
+.runfree-pace-desc { font-size:12px; color:rgba(245,240,232,.65); line-height:1.7; }
+.runfree-note { font-size:12px; color:rgba(245,240,232,.6); line-height:1.8; margin-top:8px; }
+.runfree-line-btn {
+  display:inline-flex; align-items:center; gap:10px; margin-top:16px;
+  background:#06c755; color:#fff; text-decoration:none;
+  padding:14px 28px; border-radius:50px; font-size:14px; font-weight:600;
+  font-family:'DM Sans',sans-serif; letter-spacing:.02em;
+  box-shadow:0 4px 16px rgba(6,199,85,.35);
+}
 
 /* ── WHAT IS HMC ── */
 .what-is { background:var(--cream); }
@@ -382,6 +424,7 @@ section { padding:72px 24px; }
 /* 改善③：「まず体験」の動線をステップ型に */
 .pricing { background:var(--forest); }
 .pricing .section-title { color:var(--cream); }
+.pricing .section-title em { color:var(--amber-light); }
 .pricing .section-label { color:var(--amber-light); }
 .pricing .divider { background:rgba(245,240,232,.3); }
 .pricing-steps { display:flex; flex-direction:column; gap:12px; margin-top:28px; }
@@ -617,10 +660,10 @@ footer {
 <!-- ═══ STICKY CTA ═══ -->
 <div class="sticky-cta" id="stickyCta">
   <div class="sticky-text">
-    <strong>日曜朝の体験を予約する</strong>
-    初回 ¥3,500 ・ 毎週日曜 AM7:30
+    <strong>朝のRUNFREE（¥0）</strong>
+    毎週日曜 AM6:30 ・ 予約不要
   </div>
-  <a href="#reservation">予約する →</a>
+  <a href="#runfree">詳しく →</a>
 </div>
 
 <!-- ═══ HERO ═══ -->
@@ -628,27 +671,26 @@ footer {
   <div class="hero-bg"></div>
   <div class="hero-inner">
     <img src="images/hacos-morning-club-logo.png" alt="HMC" class="hero-logo">
-    <p class="hero-eyebrow">Healthy Morning Club</p>
-    <h1 class="hero-title">朝の1時間が<br>変える。</h1>
+    <p class="hero-eyebrow">Sunday Morning, Free to Run</p>
+    <h1 class="hero-title">朝のRUNFREE、<br>¥0。</h1>
+    <p class="hero-subhead">全ては、朝から始まります。</p>
     <p class="hero-subtitle">
-      動く × 食べる × つながる。<br>
-      観音寺から始まる、もうひとつの朝活。
+      参加費¥0の朝RUNから、一緒に強くなる。<br>
+      毎週日曜、観音寺のHACOSで。
     </p>
-    <!-- ★改善①：具体的なバッジ追加 -->
     <div class="hero-meta">
-      <span class="hero-badge">毎週日曜 AM 7:30</span>
-      <span class="hero-badge">観音寺 / HACOS</span>
-      <span class="hero-badge">定員10名</span>
+      <span class="hero-badge">毎週日曜 AM6:30</span>
+      <span class="hero-badge">観音寺 HACOS</span>
+      <span class="hero-badge">参加費 ¥0</span>
     </div>
-    <!-- ★改善②：1週間プラン入口バナー（締切後はJSで非表示） -->
+    <!-- ★1週間プラン入口バナー（締切後はJSで非表示） -->
     <a href="retreat.html" class="hero-premium-banner" id="heroPremiumBanner" data-ga-event="cta_lp_to_journey" data-ga-loc="hero">
       1週間プラン 第2期 募集中｜定員5名・8/31まで <span class="hpb-days"></span> →
     </a>
-    <!-- ★改善①：HEROにCTAボタン追加 -->
-    <a href="#reservation" class="hero-cta">
-      日曜朝の体験を予約する →
+    <a href="#runfree" class="hero-cta">
+      RUNFREEに参加する（¥0）→
     </a>
-    <p class="hero-cta-sub">初回体験 ¥3,500 ｜ 無料相談あり</p>
+    <p class="hero-cta-sub">予約不要。初めての方は公式LINEでひとことどうぞ。</p>
   </div>
 </section>
 
@@ -668,24 +710,86 @@ footer {
 <!-- ═══ TICKER ═══ -->
 <div class="ticker">
   <div class="ticker-inner">
-    <span>HACOS = Healthy Authentic Community Organic Space</span>
+    <span>朝のRUNFREE ｜ 毎週日曜 AM6:30 ｜ 参加費 ¥0</span>
+    <span>全ては、朝から始まります</span>
     <span>動く × 食べる × つながる</span>
-    <span>毎週日曜 AM7:30 観音寺</span>
     <span>HACOS = Healthy Authentic Community Organic Space</span>
+    <span>朝のRUNFREE ｜ 毎週日曜 AM6:30 ｜ 参加費 ¥0</span>
+    <span>全ては、朝から始まります</span>
     <span>動く × 食べる × つながる</span>
-    <span>毎週日曜 AM7:30 観音寺</span>
+    <span>HACOS = Healthy Authentic Community Organic Space</span>
   </div>
 </div>
+
+<!-- ═══ RUNFREE ═══ -->
+<section class="runfree" id="runfree">
+  <p class="section-label">Sunday Morning, Free to Run</p>
+  <h2 class="section-title">朝の<br><em>RUNFREE</em></h2>
+  <div class="divider"></div>
+  <p class="runfree-lead">
+    毎週日曜 AM6:30、観音寺のHACOSに集まって、一緒に走ります。<br>
+    参加費は¥0。予約もいりません。<br>
+    走るのが得意じゃなくても、久しぶりでも大丈夫。<br>
+    まずは日曜の朝、外に出てみることから始まります。
+  </p>
+
+  <p class="runfree-pace-heading">走り方は、ふたつ。</p>
+  <div class="runfree-pace">
+    <div class="runfree-pace-card">
+      <p class="runfree-pace-who">担当：みどり・黒田陽子（KURO）</p>
+      <p class="runfree-pace-title">楽しくゆっくりRUN</p>
+      <p class="runfree-pace-desc">おしゃべりしながら、楽しくゆっくり走るチーム。走るのが久しぶりの方はこちらから。</p>
+    </div>
+    <div class="runfree-pace-card">
+      <p class="runfree-pace-who">担当：GO</p>
+      <p class="runfree-pace-title">自分と向き合うRUN</p>
+      <p class="runfree-pace-desc">自分の成長と向き合いたい人と、GOが一緒に走るチーム。</p>
+    </div>
+  </div>
+
+  <div class="runfree-steps">
+    <div class="runfree-step">
+      <div class="runfree-num">1</div>
+      <div class="step-content">
+        <p class="runfree-step-title">日曜の朝6:30、HACOSへ</p>
+        <p class="runfree-step-desc">動きやすい服装で、そのまま集まってください。</p>
+      </div>
+    </div>
+    <div class="runfree-step">
+      <div class="runfree-num">2</div>
+      <div class="step-content">
+        <p class="runfree-step-title">一緒に走る（参加費¥0）</p>
+        <p class="runfree-step-desc">チームはその日の気分で選べます。ひとりで走るより、ずっと続けやすい朝です。</p>
+      </div>
+    </div>
+    <div class="runfree-step">
+      <div class="runfree-num">3</div>
+      <div class="step-content">
+        <p class="runfree-step-title">そのまま7:30の朝活クラスへ（こちらは有料・任意）</p>
+        <p class="runfree-step-desc">もっと動きたい方は、続けて朝活クラスにも参加できます（会員・回数券¥2,000／ビジター¥3,000）。</p>
+      </div>
+    </div>
+  </div>
+
+  <p class="runfree-note">初めての方は、公式LINEでひとことメッセージをいただけると助かります（予約は不要です）。</p>
+  <a href="https://lin.ee/TsRy6I9" target="_blank" rel="noopener noreferrer" class="runfree-line-btn" data-ga-event="cta_runfree_line" data-ga-loc="runfree">
+    <div class="cta-line-icon" style="background:transparent;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M19.365 9.863c.349 0 .63.285.63.63 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.281.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+    </div>
+    公式LINEでひとこと送る →
+  </a>
+</section>
 
 <!-- ═══ WHAT IS HMC ═══ -->
 <section class="what-is">
   <p class="section-label">What is HMC</p>
-  <h2 class="section-title">動く。食べる。<br><em>つながる。</em></h2>
+  <h2 class="section-title">GOと、<br><em>一緒に強くなる。</em></h2>
   <div class="divider"></div>
   <p class="section-body">
-    HMCは毎週日曜の朝、観音寺のHACOSで開かれる朝活コミュニティです。
-    フィットネスだけじゃない。食も、人との繋がりも。
-    体が変わる朝を、一緒に作りましょう。
+    HMCは、HACOSオーナー・GOのInstagram（@go_room91）から生まれた朝活コミュニティです。<br>
+    毎週日曜の朝、観音寺のHACOSに集まって、動いて、食べて、話す。<br>
+    「一緒に朝活をして、強くなろう」——そんな気持ちで、GOと仲間が迎えます。<br>
+    動く × 食べる × つながる。ひとりじゃない朝を、ここから始められます。
   </p>
   <div class="pillar-grid">
     <div class="pillar-card">
@@ -712,6 +816,19 @@ footer {
         <p class="pillar-desc">日曜の朝、同じ志を持つ仲間と集まる。それだけで、また来週も頑張れる。</p>
       </div>
     </div>
+  </div>
+
+  <div style="margin-top:32px;padding-top:28px;border-top:1px solid var(--sand);text-align:center;">
+    <p class="section-body" style="margin-bottom:16px;">
+      GOの日々の発信は Instagram @go_room91 でも。<br>
+      朝活の日常や、走る理由を綴っています。
+    </p>
+    <a href="https://www.instagram.com/go_room91/" target="_blank" rel="noopener noreferrer" data-ga-event="cta_go_instagram" data-ga-loc="what-is" style="display:inline-block;text-decoration:none;">
+      <div style="max-width:200px;margin:0 auto;background:var(--warm-white);border:1px solid var(--sand);border-radius:12px;padding:16px;">
+        <img loading="lazy" src="images/go-room91-qr.jpg" alt="GOのInstagram（@go_room91）QRコード" style="width:100%;height:auto;display:block;border-radius:6px;">
+      </div>
+      <p style="font-size:11px;color:var(--light-text);margin-top:10px;font-family:'DM Sans',sans-serif;">@go_room91 をフォロー →</p>
+    </a>
   </div>
 </section>
 
@@ -1057,6 +1174,18 @@ footer {
   <div class="divider"></div>
   <div class="class-cards">
     <div class="class-card">
+      <span class="class-card-badge">予約不要</span>
+      <p class="class-card-title">RUNFREE — 朝RUN</p>
+      <p class="class-card-meta">
+        📅 毎週日曜<br>
+        ⏱ AM 6:30〜<br>
+        👥 どなたでも
+      </p>
+      <div class="class-card-price">
+        参加費 <strong>¥0</strong>
+      </div>
+    </div>
+    <div class="class-card">
       <span class="class-card-badge">受付中</span>
       <p class="class-card-title">HMC — Healthy Morning Club</p>
       <p class="class-card-meta">
@@ -1087,25 +1216,26 @@ footer {
 <!-- ★改善③：まず体験→会員→HACOSメンバーズのステップ型に -->
 <section class="pricing" id="pricing">
   <p class="section-label">Pricing</p>
-  <h2 class="section-title">まず、<br><em>体験から。</em></h2>
+  <h2 class="section-title">¥0から、<br><em>始まる階段。</em></h2>
   <div class="divider"></div>
   <p style="font-size:13px;color:rgba(245,240,232,.6);line-height:1.8;margin-top:4px;">
-    はじめての方は体験パーソナルから。<br>続けたくなったら会員に。本気になったら1週間プランへ。
+    毎週日曜のRUNFREEに、参加費はありません。<br>
+    そこから朝活クラス（¥2,000〜）、体験パーソナル（¥3,500）、1週間プラン（Wellness Journey 7DAYS）へ。<br>
+    あなたのペースで、一段ずつ進めます。
   </p>
 
   <div class="pricing-steps">
 
     <div class="pricing-step featured">
-      <span class="step-badge">おすすめのはじめ方</span>
+      <span class="step-badge">まずはここから</span>
       <p class="step-label">Step 1</p>
-      <p class="step-title">体験パーソナルトレーニング</p>
-      <p class="step-price">¥3,500<span class="step-price-unit"> / 1回</span></p>
+      <p class="step-title">朝のRUNFREE</p>
+      <p class="step-price">¥0</p>
       <p class="step-desc">
-        まずは一度体験してみてください。<br>
-        GOと1対1で、今の体とこれからの目標を話し合います。<br>
-        無理な勧誘は一切なし。
+        毎週日曜AM6:30、観音寺のHACOSに集まって一緒に走ります。<br>
+        参加費は¥0、予約もいりません。
       </p>
-      <a href="#reservation" class="step-cta">今すぐ予約する →</a>
+      <a href="#runfree" class="step-cta">RUNFREEを見る →</a>
     </div>
 
     <div class="pricing-step">
@@ -1129,6 +1259,18 @@ footer {
 
     <div class="pricing-step">
       <p class="step-label">Step 3</p>
+      <p class="step-title">体験パーソナルトレーニング</p>
+      <p class="step-price">¥3,500<span class="step-price-unit"> / 1回</span></p>
+      <p class="step-desc">
+        まずは一度体験してみてください。<br>
+        GOと1対1で、今の体とこれからの目標を話し合います。<br>
+        無理な勧誘は一切なし。
+      </p>
+      <a href="#reservation" class="step-cta">今すぐ予約する →</a>
+    </div>
+
+    <div class="pricing-step">
+      <p class="step-label">Step 4</p>
       <p class="step-title">1週間プラン（Wellness Journey 7DAYS）</p>
       <p class="step-price">¥39,800<span class="step-price-unit">（第2期 ¥34,800）</span></p>
       <p class="step-desc">
@@ -1196,12 +1338,15 @@ footer {
   <p class="section-label">How to Join</p>
   <h2 class="section-title">予約の<br><em>流れ</em></h2>
   <div class="divider"></div>
+  <p style="font-size:13px;color:var(--forest);line-height:1.8;margin-bottom:8px;">
+    RUNFREE（日曜6:30の朝RUN）は予約不要です。以下は朝活クラス・体験パーソナルの流れです。
+  </p>
   <div class="steps-list">
     <div class="how-step">
       <div class="step-num">1</div>
       <div class="step-content">
         <p class="step-title-how">LINEで予約する</p>
-        <p class="step-desc-how">参加したい日程とクラスを選んでご送信ください。LINEを使っていない方向けのフォームもあります。</p>
+        <p class="step-desc-how">参加したい日程とクラスを選んでご送信ください。ご予約はLINE予約フォームからのみ受け付けています。</p>
         <a href="#reservation" class="step-link">予約はこちら →</a>
       </div>
     </div>
@@ -1265,10 +1410,37 @@ footer {
   <div class="faq-list">
 
     <div class="faq-item">
+      <button class="faq-q">RUNFREEは本当に無料ですか？</button>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          はい、参加費は¥0です。毎週日曜AM6:30、観音寺のHACOSに集まって一緒に走るだけの時間です。予約も入会も必要ありません。
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q">走るのが苦手・遅くても大丈夫ですか？</button>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          大丈夫です。RUNFREEにタイムや順位はありません。みどり・黒田陽子（KURO）と楽しくゆっくり走るチームもあるので、それぞれのペースで走ってください。気になる方は、まず日曜の朝の様子を見にくるだけでも大丈夫です。
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q">RUNFREEだけの参加でもいいですか？</button>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          もちろんです。RUNFREEと朝活クラスは別の枠なので、走ってそのまま解散でも大丈夫です。7:30からの朝活クラスに続けて参加したい方は、定員10名のため事前にLINE予約フォームから予約しておくのがおすすめです（会員・回数券¥2,000／ビジター¥3,000）。
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
       <button class="faq-q">初めてでも参加できますか？</button>
       <div class="faq-a">
         <div class="faq-a-inner">
-          もちろんです。HMCは運動初心者の方も大歓迎。体験パーソナル（¥3,500）からスタートすれば、GOがあなたの体に合ったプランを一緒に考えます。
+          もちろんです。HMCは運動初心者の方も大歓迎。まずは参加費¥0のRUNFREE（日曜朝6:30・予約不要）からどうぞ。もっとしっかり始めたい方には体験パーソナル（¥3,500）で、GOがあなたの体に合ったプランを一緒に考えます。
         </div>
       </div>
     </div>
@@ -1292,7 +1464,7 @@ footer {
     </div>
 
     <div class="faq-item">
-      <button class="faq-q">単発で参加することはできますか？</button>
+      <button class="faq-q">朝活クラスに単発で参加することはできますか？</button>
       <div class="faq-a">
         <div class="faq-a-inner">
           できます。ビジター参加（¥3,000/回）で毎回単発でのご参加もOKです。ただし定員10名のため、事前予約をおすすめします。
@@ -1374,7 +1546,7 @@ footer {
       LINEで予約する（かんたん・おすすめ）
     </a>
     <p class="reserve-line-note">LINEアプリで予約フォームが開き、空き状況を見ながら予約できます</p>
-    <p class="reserve-form-divider">LINEをお使いでない方は、<a href="https://www.instagram.com/hmc.day/" target="_blank" rel="noopener noreferrer" style="color:inherit;">InstagramのDM</a>からお気軽にご相談ください</p>
+    <p class="reserve-form-divider">ご予約の受付は、このLINE予約フォームに一本化しています</p>
   </div>
 </section>
 
@@ -1384,13 +1556,14 @@ footer {
   <h2 class="section-title">さあ、<br><em>日曜の朝へ。</em></h2>
   <div class="divider"></div>
   <p class="section-body">
-    まずは体験から。<br>
-    GOが一緒に考えます。あなたのペースで、あなたの朝を変えましょう。
+    まずは、参加費¥0のRUNFREEから。<br>
+    続けたくなったら、体験パーソナルへ。あなたのペースで、あなたの朝を変えましょう。
   </p>
-  <a href="#reservation" class="cta-btn">
-    体験を予約する（¥3,500）→
+  <a href="#runfree" class="cta-btn">
+    RUNFREEに参加する（¥0）→
   </a>
-  <p class="cta-sub">定員10名 ／ 毎週日曜 AM7:30〜</p>
+  <p class="cta-sub">毎週日曜 AM6:30 ／ 予約不要</p>
+  <p class="cta-sub"><a href="#reservation" style="color:inherit;">体験パーソナル（¥3,500）の予約はこちら →</a></p>
   <a href="https://lin.ee/TsRy6I9" class="cta-line" target="_blank" rel="noopener noreferrer" data-ga-event="cta_counseling_line" data-ga-loc="final">
     <div class="cta-line-icon">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M19.365 9.863c.349 0 .63.285.63.63 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.281.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
@@ -1409,9 +1582,9 @@ footer {
   <h2 class="section-title">まずは<br><em>公式LINEから。</em></h2>
   <div class="divider"></div>
   <p class="line-cta-body">
-    先行案内・体験予約・お弁当のご注文・パーソナル相談まで、<br>
-    すべて公式LINEひとつで完結します。<br>
-    気になったその瞬間に、気軽にメッセージをどうぞ。
+    朝活に興味が出たら、まずは公式LINEに登録を。<br>
+    RUNFREEや朝活クラスの案内、無料ガイド、お弁当のご注文窓口が<br>
+    ここに届きます。気になったその瞬間に、気軽にどうぞ。
   </p>
   <a href="https://line-harness.hacos.workers.dev/auth/line?ref=lp" target="_blank" class="line-cta-btn">
     <div class="cta-line-icon">
