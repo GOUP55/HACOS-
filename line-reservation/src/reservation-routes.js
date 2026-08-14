@@ -381,9 +381,12 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
   // API直叩きで同一IDが重複していても1回だけ処理する（UI経由ではSetなので起きない）
   for (const sessionId of [...new Set(session_ids)]) {
     // 2. 残枠チェック（定員＋追加枠を超えたら満席）
+    // 「朝RUNのみ」（6:30〜・参加費¥0）は7:30の朝活クラスに出ないため、
+    // クラスの定員10名を消費しない。残枠の計算からも除外する
     const session = await c.env.DB.prepare(`
       SELECT s.*,
-        (s.capacity + ${EXTRA_SLOTS} - COUNT(CASE WHEN r.status = 'confirmed' THEN 1 END)) AS remaining
+        (s.capacity + ${EXTRA_SLOTS} - COUNT(CASE WHEN r.status = 'confirmed'
+              AND r.category != '朝RUNのみ' THEN 1 END)) AS remaining
       FROM sessions s
       LEFT JOIN reservations r ON r.session_id = s.id
       WHERE s.id = ? AND s.is_open = 1
@@ -391,13 +394,17 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
     `).bind(sessionId).first();
 
     if (!session) { failed.push({ session_id: sessionId, error: 'session_not_found' }); continue; }
-    // 回数券は朝クラス専用。特別枠（TACOS Party等、idが日付と異なるセッション）は
-    // 料金体系が違うため、UIをすり抜けてもサーバー側で拒否する
-    if (category === '回数券' && session.id !== session.date) {
-      failed.push({ session_id: sessionId, error: 'not_kaisuken' });
+    // 「朝RUNのみ」は朝RUNを開催する日にしか使えない。定員を消費しない区分なので、
+    // UIをすり抜けて別の日に付けられると席の計算が狂う
+    if (category === '朝RUNのみ' && !session.morning_run) {
+      failed.push({ session_id: sessionId, error: 'no_morning_run' });
       continue;
     }
-    if (session.remaining <= 0) { failed.push({ session_id: sessionId, error: 'full' }); continue; }
+    // 朝RUNのみはクラスの席を取らないため、満席でも受け付ける
+    if (category !== '朝RUNのみ' && session.remaining <= 0) {
+      failed.push({ session_id: sessionId, error: 'full' });
+      continue;
+    }
 
     // 3. 予約 INSERT（UNIQUE 制約で二重予約を自動防止）
     // 残枠チェックとINSERTを1本のSQLにまとめ、同時申込みでの定員オーバーを防ぐ。
@@ -410,9 +417,9 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
       const counted = await c.env.DB.prepare(`
         SELECT
           (capacity + ${EXTRA_SLOTS} - (SELECT COUNT(*) FROM reservations
-                WHERE session_id = ? AND status = 'confirmed')) AS remaining,
+                WHERE session_id = ? AND status = 'confirmed' AND category != '朝RUNのみ')) AS remaining,
           (capacity - (SELECT COUNT(*) FROM reservations
-                WHERE session_id = ? AND status = 'confirmed')) AS base_remaining
+                WHERE session_id = ? AND status = 'confirmed' AND category != '朝RUNのみ')) AS base_remaining
         FROM sessions WHERE id = ?
       `).bind(sessionId, sessionId, sessionId).first();
       const remain = Math.max(0, counted?.remaining ?? 0);
@@ -737,7 +744,7 @@ export async function sendReminders(env) {
     await pushToUser(row.line_user_id, [{ type: 'text', text: lines.join('\n') }], env);
   }
 
-  // ── 月末：来月の開催日案内＋回数券の再購入リマインド ──
+  // ── 月末：来月の開催日案内 ──
   // 毎日呼ばれるが、JSTで「今日が月の最終日」のときだけ送信する
   const nowJst2 = new Date(Date.now() + 9 * 3600 * 1000);
   const tomorrowJst = new Date(nowJst2);
@@ -754,16 +761,15 @@ export async function sendReminders(env) {
          JOIN sessions s ON s.id = r.session_id
          WHERE r.status = 'confirmed' AND s.date LIKE ?`
       ).bind(thisMonth + '%').all();
-      // 回数券の回数・金額は朝クラス（id = date）だけで数える。
-      // 特別枠（TACOS Party等）は回数券の対象外のため金額計算に含めない
+      // 朝クラス（id = date）の開催回数。特別枠（TACOS Party等）は数えない
       const n = next.results.filter(s => s.id === s.date).length;
       const text = [
         '🗓 来月のHMC開催日が決まりました！',
         ...next.results.map(s => `・${s.display_date} ${s.title}`),
         '',
-        ...(n > 0 ? [
-          `回数券（¥2,000×${n}回=¥${(2000 * n).toLocaleString()}）は月まとめ買いがお得です。`,
-          'お支払いは初回参加日に現金でお願いします（繰り越しはできません）。',
+        ...(n >= 3 ? [
+          `来月は朝活クラスが${n}回あります。`,
+          `毎週来られる方は、HMC会員（月額¥6,000・受け放題）がお得です（都度¥3,000×${n}回＝¥${(3000 * n).toLocaleString()}）。`,
           '',
         ] : []),
         'ご予約はこちら👇',
@@ -791,7 +797,8 @@ async function sendNotifications(userId, displayName, session, reservation, rema
     `${session.display_date} ${session.title}`,
     `${timeLabel} / 観音寺 HACOS`,
     `区分：${reservation.category}`,
-    ...(reservation.category === '回数券' ? ['回数券のお支払い：初回参加日に現金でまとめてお願いします。'] : []),
+    ...(reservation.category === '朝RUNのみ' ? ['朝RUN（6:30〜）のみのご参加です。参加費はかかりません。'] : []),
+    ...(['HMC会員', 'セミパ会員'].includes(reservation.category) ? ['月額プランにご加入中のため、当日のお支払いはありません。'] : []),
     ...(reservation.category === '瞑想' ? ['※写経用紙を人数分お取り寄せするため、開催前日以降のキャンセルは用紙代¥1,000をいただきます。'] : []),
     ...(reservation.trainer ? [`担当：${reservation.trainer}`] : []),
     '',
@@ -805,8 +812,8 @@ async function sendNotifications(userId, displayName, session, reservation, rema
 
   // スタッフ通知
   const staffText = [
-    reservation.category === '回数券'
-      ? (isExtra ? '🎫 新規予約【回数券・追加枠】' : '🎫 新規予約【回数券】')
+    reservation.category === '朝RUNのみ'
+      ? '🏃 新規予約【朝RUNのみ・¥0】'
       : (isExtra ? '🆕 新規予約（追加枠）' : '🆕 新規予約'),
     `${session.display_date} ／ ${reservation.category}`,
     ...(reservation.trainer ? [`担当：${reservation.trainer}`] : []),
@@ -833,7 +840,7 @@ async function sendCancelNotifications(userId, displayName, reservation, env) {
   await pushToUser(userId, [{ type: 'text', text: userText }], env);
 
   const staffText = [
-    reservation.category === '回数券' ? '❌ 予約キャンセル【🎫回数券】' : '❌ 予約キャンセル',
+    reservation.category === '朝RUNのみ' ? '❌ 予約キャンセル【🏃朝RUNのみ】' : '❌ 予約キャンセル',
     `${reservation.display_date} ／ ${reservation.category}`,
     ...(reservation.trainer ? [`担当：${reservation.trainer}`] : []),
     `お名前(LINE)：${displayName}`,

@@ -101,9 +101,9 @@ function check(name, ok, detail = '') {
 
   // ── シナリオ3: 区分の組み合わせガード ──
   await card.click();
-  await page.locator('input[name="category"][value="ビジター"]').check();
+  await page.locator('input[name="category"][value="都度"]').check();
   await page.locator('#btn-submit').click();
-  check('ガード: イベント日をビジター区分で送信するとエラーになり送信されない',
+  check('ガード: イベント日を都度区分で送信するとエラーになり送信されない',
     (await page.locator('#form-error').isVisible()) && lastPostBody === null);
 
   const morningCard = page.locator(`#sessions-list [data-id="${morningSession.id}"]`);
