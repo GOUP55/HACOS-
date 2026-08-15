@@ -72,14 +72,33 @@ TACOS・瞑想は今までどおり、該当セッションがある月だけ条
 ⚠️ **複数行をまとめて貼らないでください。** コマンドが連結して失敗した実例があります。
 ⚠️ 各コマンドは**前のコマンドが終わってから**次を貼ってください。
 
+> **`wrangler` は名前だけでは動きません。** このパソコン全体ではなく
+> プロジェクトの中にだけ入っているため、**`npx` を付けて**呼び出します。
+> また**設定ファイル（`wrangler.toml`）がある `apps\worker` の中で**実行する必要があります。
+> 以下はすべて `apps\worker` にいる前提です。
+
 ---
 
-### ステップ0 ｜ 作業フォルダを開く
+### ステップ0 ｜ 作業フォルダを開いて、wranglerが動くか確かめる
 
 コマンドプロンプトを開いて、下の1行を貼ってEnter。
 
 ```
-cd C:\Users\n9-f\.line-harness
+cd C:\Users\n9-f\.line-harness\apps\worker
+```
+
+続けて、下の1行。
+
+```
+npx wrangler --version
+```
+
+- **バージョン番号（`⛅️ wrangler 3.x.x` など）が出れば成功。** ステップ1へ進む
+- `Need to install the following packages` と聞かれたら **`y` を入力してEnter**
+- それでも動かない場合は、代わりに下の1行を試す（以降も `npx` を `pnpm exec` に読み替える）
+
+```
+pnpm exec wrangler --version
 ```
 
 ---
@@ -91,16 +110,16 @@ cd C:\Users\n9-f\.line-harness
 #### (1) 8/29の瞑想イベント
 
 ```
-wrangler d1 execute line-harness --remote --command "SELECT id FROM sessions WHERE id='2026-08-29-obosan';"
+npx wrangler d1 execute line-harness --remote --command "SELECT id FROM sessions WHERE id='2026-08-29-obosan';"
 ```
 
-- **`2026-08-29-obosan` という行が1つ出た** → 適用済み。ステップ2の(1)は飛ばす
+- **`2026-08-29-obosan` の行が1つ出た** → 適用済み。ステップ2の(1)は飛ばす
 - **何も出ない（0 rows）** → 未適用。ステップ2の(1)をやる
 
 #### (2) 8月の日曜日程
 
 ```
-wrangler d1 execute line-harness --remote --command "SELECT COUNT(*) AS n FROM sessions WHERE date LIKE '2026-08%';"
+npx wrangler d1 execute line-harness --remote --command "SELECT COUNT(*) AS n FROM sessions WHERE date LIKE '2026-08%';"
 ```
 
 - **n が 4 以上** → 適用済み。ステップ2の(2)は飛ばす
@@ -109,28 +128,27 @@ wrangler d1 execute line-harness --remote --command "SELECT COUNT(*) AS n FROM s
 #### (3) 申込の種別（今回の新規）
 
 ```
-wrangler d1 execute line-harness --remote --command "SELECT kind FROM trial_requests LIMIT 1;"
+npx wrangler d1 execute line-harness --remote --command "SELECT kind FROM trial_requests LIMIT 1;"
 ```
 
-- **エラーが出ず終わった**（0 rows でもOK）→ 適用済み。ステップ2の(3)は飛ばす
+- **エラーが出ずに終わった**（0 rows でもOK）→ 適用済み。ステップ2の(3)は飛ばす
 - **`no such column: kind` というエラーが出た** → 未適用。ステップ2の(3)をやる
 
 ---
 
 ### ステップ2 ｜ 未適用だったものだけ流す
 
-**ステップ1で「未適用」だったものだけ**やってください。適用済みのものは飛ばします。
+**ステップ1で「未適用」だったものだけ**やってください。
+ファイルは `apps\worker` の中に落とすので、**そのままファイル名だけで指定できます**。
 
 #### (1) 8/29の瞑想イベント
-
-ファイルを取ってくる（1行目）→ 流す（2行目）。**1行ずつ**です。
 
 ```
 curl -o obosan.sql https://raw.githubusercontent.com/GOUP55/HACOS-/main/line-reservation/migrations/2026-07-28-obosan-session.sql
 ```
 
 ```
-wrangler d1 execute line-harness --remote --file=obosan.sql
+npx wrangler d1 execute line-harness --remote --file=obosan.sql
 ```
 
 #### (2) 8月の日曜日程
@@ -140,7 +158,7 @@ curl -o aug.sql https://raw.githubusercontent.com/GOUP55/HACOS-/main/line-reserv
 ```
 
 ```
-wrangler d1 execute line-harness --remote --file=aug.sql
+npx wrangler d1 execute line-harness --remote --file=aug.sql
 ```
 
 #### (3) 申込の種別
@@ -150,11 +168,12 @@ curl -o kind.sql https://raw.githubusercontent.com/GOUP55/HACOS-/main/line-reser
 ```
 
 ```
-wrangler d1 execute line-harness --remote --file=kind.sql
+npx wrangler d1 execute line-harness --remote --file=kind.sql
 ```
 
 > 💡 (3)の中身は `ALTER TABLE trial_requests ADD COLUMN kind TEXT;` の1行だけです。
-> **同じものを2回流すとエラーになります**（列が既にあるため）。その場合は「もう入っている」ということなので、そのまま次へ進んでOKです。
+> **同じものを2回流すとエラーになります**（列が既にあるため）。その場合は「もう入っている」
+> ということなので、そのまま次へ進んでOKです。
 
 ---
 
@@ -169,21 +188,21 @@ curl -o reserve.html https://raw.githubusercontent.com/GOUP55/HACOS-/main/line-r
 KVに入れる。
 
 ```
-wrangler kv key put --binding=STATIC_KV "liff/reserve.html" --path=reserve.html --remote
+npx wrangler kv key put --binding=STATIC_KV "liff/reserve.html" --path=reserve.html --remote
 ```
 
 ---
 
 ### ステップ4 ｜ Workerのコードを2つ差し替える
 
-まず、置き換える先のファイルがどこにあるか探します。
+まず、置き換える先のファイルがどこにあるか探します（`apps\worker` の中にいる前提）。
 
 ```
-dir /s /b apps\worker\*reservation-routes.js
+dir /s /b *reservation-routes.js
 ```
 
 ```
-dir /s /b apps\worker\*admin-page.js
+dir /s /b *admin-page.js
 ```
 
 **表示されたパスをそのまま使って**、下の `<出てきたパス>` の部分を置き換えて実行してください。
@@ -196,27 +215,22 @@ curl -o <reservation-routes.jsの出てきたパス> https://raw.githubuserconte
 curl -o <admin-page.jsの出てきたパス> https://raw.githubusercontent.com/GOUP55/HACOS-/main/line-reservation/src/admin-page.js
 ```
 
-> 💡 例: `dir` の結果が `C:\Users\n9-f\.line-harness\apps\worker\src\reservation-routes.js` なら、
+> 💡 例: `dir` の結果が `C:\Users\n9-f\.line-harness\apps\worker\src\reservation-routes.js` なら
 > `curl -o C:\Users\n9-f\.line-harness\apps\worker\src\reservation-routes.js https://raw.githubusercontent.com/...` となります。
 
 ---
 
 ### ステップ5 ｜ デプロイする
 
-worker のフォルダへ移動。
-
-```
-cd apps\worker
-```
-
-デプロイ。**これが正しいコマンドです。**
+すでに `apps\worker` にいるので、そのまま下の1行。
 
 ```
 pnpm run deploy
 ```
 
-> ⚠️ **`npx wrangler deploy` は使わないでください。**
+> ⚠️ **ここだけは `npx wrangler deploy` を使わないでください。**
 > ビルドが飛ばされて、古いコードが本番に出る事故が実際に起きています。
+> （ステップ1〜3の `npx wrangler` はビルドが関係ないので問題ありません）
 
 ---
 
@@ -227,7 +241,9 @@ pnpm run deploy
 | `no such column: kind` | ステップ2(3)がまだ | ステップ2(3)を実行する |
 | `duplicate column name: kind` | ステップ2(3)は**もう入っている** | そのまま次へ進んでOK |
 | `curl` が「コマンドではありません」 | 古いWindows | ブラウザでURLを開き、「名前を付けて保存」で同じファイル名にする |
-| `wrangler` が見つからない | フォルダ違い | ステップ0の `cd` からやり直す |
+| `'wrangler' は、内部コマンドまたは外部コマンド…として認識されていません` | **`npx` を付け忘れている** | `wrangler` ではなく **`npx wrangler`** と打つ |
+| `npx wrangler` でも動かない | npxが使えない環境 | `pnpm exec wrangler` に読み替える |
+| `wrangler.toml not found` / DBが見つからない | フォルダ違い | ステップ0の `cd C:\Users\n9-f\.line-harness\apps\worker` からやり直す |
 | デプロイ後もフォームが古い | ブラウザ/LIFFのキャッシュ | LINEアプリを一度完全に閉じてから開き直す |
 
 **途中で分からなくなったら、そこで止めて連絡してください。** 中途半端に進めるより安全です。

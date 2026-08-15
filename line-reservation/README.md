@@ -16,6 +16,13 @@
 | index への組み込み | `export default {...}` を丸ごと追加 | **既存の `apps/worker/src/index.ts` に3行だけ追記**（丸ごと置き換えは既存機能を壊す） |
 | デプロイ | `npx wrangler deploy` | **`apps\worker` で `pnpm run deploy`**（`npx wrangler deploy` 単体はビルドを飛ばすため変更が反映されない事故が実際に起きた） |
 
+> ⚠️ **本ファイル内の `wrangler ...` は、実際には `npx wrangler ...` と打つ必要がある**（2026-08-15 実機で判明）。
+> wranglerはPC全体ではなくプロジェクト内にのみ入っているため、名前だけでは
+> `'wrangler' は、内部コマンドまたは外部コマンド…として認識されていません` になる。
+> また **`wrangler.toml` のある `apps\worker` の中で実行すること**。
+> `npx` が使えない場合は `pnpm exec wrangler ...`。
+> ただし**デプロイだけは `pnpm run deploy`**（上記のとおりビルドが必要なため）。
+
 ### なぜ `/api/liff/` パスなのか（401エラーの原因と対策）
 
 ハーネス本体は `app.use('*', authMiddleware)` で**すべてのパスに管理者認証**をかけている。
