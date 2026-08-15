@@ -90,10 +90,19 @@ reservationRoutes.get('/api/admin/reservations', async (c) => {
     ORDER BY s.date, r.created_at
   `).bind(fromDate).all();
 
-  const { results: trials } = await c.env.DB.prepare(`
-    SELECT id, display_name, trainer, preferred_date, preferred_time, alt_note, created_at
-    FROM trial_requests WHERE status = 'pending' ORDER BY created_at
-  `).all().catch(() => ({ results: [] })); // trial_requests未作成のDBでも落ちない
+  // kind列は 2026-08-15-trial-kind.sql で追加。未適用のDBでも落ちないよう2段構えで取る
+  let trials = [];
+  try {
+    ({ results: trials } = await c.env.DB.prepare(`
+      SELECT id, display_name, trainer, preferred_date, preferred_time, alt_note, created_at, kind
+      FROM trial_requests WHERE status = 'pending' ORDER BY created_at
+    `).all());
+  } catch {
+    ({ results: trials } = await c.env.DB.prepare(`
+      SELECT id, display_name, trainer, preferred_date, preferred_time, alt_note, created_at
+      FROM trial_requests WHERE status = 'pending' ORDER BY created_at
+    `).all().catch(() => ({ results: [] })));
+  }
 
   const byId = new Map(sessions.map(s => [s.id, { ...s, extra_slots: EXTRA_SLOTS, reservations: [], cancelled_people: [] }]));
   for (const p of people) byId.get(p.session_id)?.reservations.push(p);
@@ -597,24 +606,39 @@ reservationRoutes.post('/api/liff/trial-request', async (c) => {
     return c.json({ error: 'invalid_token' }, 401);
   }
 
-  const { trainer, preferred_date, preferred_time, alt_note, ref } = await c.req.json();
+  const { kind, trainer, preferred_date, preferred_time, alt_note, ref } = await c.req.json();
   if (!trainer || !preferred_date || !preferred_time) {
     return c.json({ error: 'missing_fields' }, 400);
   }
+  // 種別は2つだけ。知らない値が来たら体験パーソナル扱いにする
+  const reqKind = kind === 'journey_trial7' ? 'journey_trial7' : 'trial_personal';
 
   const id = crypto.randomUUID();
   const createdAt = new Date().toISOString();
-  await c.env.DB.prepare(`
-    INSERT INTO trial_requests
-      (id, line_user_id, display_name, trainer, preferred_date, preferred_time, alt_note, ref, status, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)
-  `).bind(
-    id, userId, displayName, trainer, preferred_date, preferred_time,
-    alt_note || null, ref || null, createdAt
-  ).run();
+  // kind列は 2026-08-15-trial-kind.sql で追加する。
+  // migration未適用の本番でも申込が落ちないよう、失敗したらkind無しで入れ直す
+  try {
+    await c.env.DB.prepare(`
+      INSERT INTO trial_requests
+        (id, line_user_id, display_name, trainer, preferred_date, preferred_time, alt_note, ref, status, created_at, kind)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)
+    `).bind(
+      id, userId, displayName, trainer, preferred_date, preferred_time,
+      alt_note || null, ref || null, createdAt, reqKind
+    ).run();
+  } catch {
+    await c.env.DB.prepare(`
+      INSERT INTO trial_requests
+        (id, line_user_id, display_name, trainer, preferred_date, preferred_time, alt_note, ref, status, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)
+    `).bind(
+      id, userId, displayName, trainer, preferred_date, preferred_time,
+      alt_note || null, ref || null, createdAt
+    ).run();
+  }
 
   c.executionCtx.waitUntil(
-    sendTrialNotifications(userId, displayName, { trainer, preferred_date, preferred_time, alt_note }, c.env)
+    sendTrialNotifications(userId, displayName, { kind: reqKind, trainer, preferred_date, preferred_time, alt_note }, c.env)
   );
 
   return c.json({ ok: true, id });
@@ -854,21 +878,31 @@ async function sendCancelNotifications(userId, displayName, reservation, env) {
 
 async function sendTrialNotifications(userId, displayName, t, env) {
   const when = `${t.preferred_date} ${t.preferred_time || ''}`.trim();
+  const isJourney7 = t.kind === 'journey_trial7';
 
   const userText = [
-    '🌟 体験パーソナルのリクエストを受け付けました！',
+    isJourney7
+      ? '🌟 フィットネスジャーニー 7日間お試しのリクエストを受け付けました！'
+      : '🌟 体験パーソナルのリクエストを受け付けました！',
     '',
     'まだ予約は確定していません。担当が空き状況を確認し、日時確定のご連絡をLINEでお送りします。少々お待ちください🙏',
     '',
     '▼ ご希望内容',
+    ...(isJourney7 ? ['内容：セミパーソナル1回＋グループパーソナル1回＋日曜の朝活1回（¥9,000）'] : []),
     `担当：${t.trainer}`,
     `第1希望：${when}`,
     ...(t.alt_note ? [`ご要望：${t.alt_note}`] : []),
+    ...(isJourney7
+      ? ['', 'そのまま2ヶ月のフィットネスジャーニーへお進みの場合、この¥9,000は参加費に充当します。']
+      : []),
   ].join('\n');
   await pushToUser(userId, [{ type: 'text', text: userText }], env);
 
   const staffText = [
-    '🌟 体験パーソナル【リクエスト・要日時確定】',
+    isJourney7
+      ? '🚩 ジャーニー7日間お試し【リクエスト・要日時確定】'
+      : '🌟 体験パーソナル【リクエスト・要日時確定】',
+    ...(isJourney7 ? ['¥9,000／セミパ1＋グルパー1＋朝活1。2ヶ月へ進む場合は参加費に充当'] : []),
     `担当希望：${t.trainer}`,
     `第1希望：${when}`,
     ...(t.alt_note ? [`ご要望：${t.alt_note}`] : []),

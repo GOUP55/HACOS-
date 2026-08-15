@@ -133,12 +133,20 @@ textarea:focus { border-color: var(--green); }
   <!-- 体験パーソナル（1対1・リクエスト型） -->
   <div style="margin:12px 12px 0;">
     <div class="section">
-      <div class="section-title">体験パーソナル（1対1）をご希望の方</div>
-      <p class="section-note">初回 ¥3,500。日曜クラスとは別に、ご希望の日時で1対1のパーソナルを承ります。担当が空き状況を確認のうえ、日時確定のご連絡をLINEでお送りします。</p>
-      <button type="button" id="trial-open-btn" class="btn-month">体験パーソナルを申し込む →</button>
+      <div class="section-title">1対1・お試しのお申し込み</div>
+      <p class="section-note">日曜クラスとは別枠です。担当が空き状況を確認のうえ、日時確定のご連絡をLINEでお送りします。</p>
+      <button type="button" id="trial-open-btn" class="btn-month">お試し・体験を申し込む →</button>
 
       <div id="trial-form" style="display:none;margin-top:14px;">
-        <div class="section-title" style="margin-top:4px;">ご希望の担当トレーナー<span class="required">必須</span></div>
+        <div class="section-title" style="margin-top:4px;">お申し込みの種類<span class="required">必須</span></div>
+        <div class="options">
+          <label class="opt"><input type="radio" name="trial_kind" value="trial_personal" checked>
+            <span class="opt-label">体験パーソナル（1対1）<span class="opt-price">¥3,500・初回限定の特別価格</span></span></label>
+          <label class="opt"><input type="radio" name="trial_kind" value="journey_trial7">
+            <span class="opt-label">フィットネスジャーニー 7日間お試し<span class="opt-price">¥9,000・セミパ1回＋グループパーソナル1回＋日曜朝活1回／2ヶ月へお進みの場合は参加費に充当します</span></span></label>
+        </div>
+
+        <div class="section-title" style="margin-top:14px;">ご希望の担当トレーナー<span class="required">必須</span></div>
         <div class="options">
           <label class="opt"><input type="radio" name="trial_trainer" value="GO"><span class="opt-label">GO</span></label>
           <label class="opt"><input type="radio" name="trial_trainer" value="片山めぐみ"><span class="opt-label">片山めぐみ</span></label>
@@ -163,7 +171,7 @@ textarea:focus { border-color: var(--green); }
 
         <div class="error-msg" id="trial-error" style="margin-top:12px;"></div>
 
-        <button type="button" id="trial-submit-btn" class="btn-submit" style="margin-top:14px;">体験パーソナルを申し込む（リクエスト）</button>
+        <button type="button" id="trial-submit-btn" class="btn-submit" style="margin-top:14px;">この内容で申し込む（リクエスト）</button>
         <p class="section-note" style="margin-top:8px;text-align:center;">※この時点では予約は確定しません。担当より日時確定のご連絡をします。</p>
       </div>
     </div>
@@ -498,14 +506,30 @@ function setupTrialForm() {
   // 過去日を選べないように最小日を今日(JST)に
   dateInput.min = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
 
+  const openForm = () => {
+    form.style.display = 'block';
+    openBtn.textContent = '× 閉じる';
+    form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+
   openBtn.addEventListener('click', () => {
     const opening = form.style.display === 'none';
-    form.style.display = opening ? 'block' : 'none';
-    openBtn.textContent = opening ? '× 閉じる' : '体験パーソナルを申し込む →';
-    if (opening) form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (opening) { openForm(); return; }
+    form.style.display = 'none';
+    openBtn.textContent = 'お試し・体験を申し込む →';
   });
 
   document.getElementById('trial-submit-btn').addEventListener('click', handleTrialSubmit);
+
+  // LPから「7日間お試しを申し込む」で来た人は、フォームを開いて種別まで選んだ状態にする。
+  // 開いてもらう手間をかけると、ここで離脱する（?apply=trial7 / ?apply=personal）
+  const apply = new URLSearchParams(location.search).get('apply');
+  if (apply === 'trial7' || apply === 'personal') {
+    const value = apply === 'trial7' ? 'journey_trial7' : 'trial_personal';
+    const radio = document.querySelector(`input[name="trial_kind"][value="${value}"]`);
+    if (radio) radio.checked = true;
+    openForm();
+  }
 }
 
 async function handleTrialSubmit() {
@@ -513,6 +537,7 @@ async function handleTrialSubmit() {
   errEl.style.display = 'none';
   const showTrialError = (m) => { errEl.textContent = m; errEl.style.display = 'block'; };
 
+  const kind = document.querySelector('input[name="trial_kind"]:checked')?.value || 'trial_personal';
   const trainer = document.querySelector('input[name="trial_trainer"]:checked')?.value;
   const date = document.getElementById('trial-date').value;
   const time = document.querySelector('input[name="trial_time"]:checked')?.value;
@@ -536,6 +561,7 @@ async function handleTrialSubmit() {
         'Idempotency-Key': crypto.randomUUID(),
       },
       body: JSON.stringify({
+        kind,
         trainer,
         preferred_date: date,
         preferred_time: time,
