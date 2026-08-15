@@ -136,6 +136,9 @@ npx wrangler d1 execute line-harness --remote --command "SELECT kind FROM trial_
 
 ---
 
+> 📌 **2026-08-15 実機での結果**：(1) 瞑想イベントと (2) 8月の日程は**すでに適用済み**でした。
+> 未適用だったのは **(3) 申込の種別だけ**です。次回もまず確認から入ってください。
+
 ### ステップ2 ｜ 未適用だったものだけ流す
 
 **ステップ1で「未適用」だったものだけ**やってください。
@@ -195,30 +198,27 @@ npx wrangler kv key put --binding=STATIC_KV "liff/reserve.html" --path=reserve.h
 
 ### ステップ4 ｜ Workerのコードを2つ差し替える
 
-まず、置き換える先のファイルがどこにあるか探します（`apps\worker` の中にいる前提）。
+`apps\worker` にいる前提です。**下の2行をそのまま貼るだけ**（置き換える箇所はありません）。
 
 ```
-dir /s /b *reservation-routes.js
-```
-
-```
-dir /s /b *admin-page.js
-```
-
-**表示されたパスをそのまま使って**、下の `<出てきたパス>` の部分を置き換えて実行してください。
-
-```
-curl -o <reservation-routes.jsの出てきたパス> https://raw.githubusercontent.com/GOUP55/HACOS-/main/line-reservation/src/reservation-routes.js
+curl -o src\reservation-routes.js https://raw.githubusercontent.com/GOUP55/HACOS-/main/line-reservation/src/reservation-routes.js
 ```
 
 ```
-curl -o <admin-page.jsの出てきたパス> https://raw.githubusercontent.com/GOUP55/HACOS-/main/line-reservation/src/admin-page.js
+curl -o src\admin-page.js https://raw.githubusercontent.com/GOUP55/HACOS-/main/line-reservation/src/admin-page.js
 ```
 
-> 💡 例: `dir` の結果が `C:\Users\n9-f\.line-harness\apps\worker\src\reservation-routes.js` なら
-> `curl -o C:\Users\n9-f\.line-harness\apps\worker\src\reservation-routes.js https://raw.githubusercontent.com/...` となります。
+どちらも `% Total ... 100 ...` の進捗が出れば成功です。
 
----
+> 💡 置き換え先が `apps\worker\src\` であることは 2026-08-15 に実機で確認済みです。
+> もし「指定されたファイルが見つかりません」と出たら、下で場所を確かめてください。
+>
+> ```
+> dir /s /b *reservation-routes.js
+> ```
+>
+> 表示されたパスが上と違う場合は、`src\reservation-routes.js` の部分を
+> **表示されたパスに丸ごと差し替えて**実行します。
 
 ### ステップ5 ｜ デプロイする
 
@@ -245,6 +245,8 @@ pnpm run deploy
 | `npx wrangler` でも動かない | npxが使えない環境 | `pnpm exec wrangler` に読み替える |
 | `wrangler.toml not found` / DBが見つからない | フォルダ違い | ステップ0の `cd C:\Users\n9-f\.line-harness\apps\worker` からやり直す |
 | デプロイ後もフォームが古い | ブラウザ/LIFFのキャッシュ | LINEアプリを一度完全に閉じてから開き直す |
+| `The given account is not valid or is not authorized [code: 7403]` | **一時的な失敗**（2026-08-15 実機で発生し、打ち直しで解消した） | **同じコマンドをもう一度**貼る。続くようなら `npx wrangler whoami` でアカウントIDが `565760fb...` か確認し、違えば `npx wrangler login` |
+| `指定されたファイルが見つかりません。` | `<...のパス>` のような**説明用の目印をそのまま貼っている** | `<` と `>` で囲まれた部分は実際の値に置き換える（ステップ4はそのまま貼れる形にしてあります） |
 
 **途中で分からなくなったら、そこで止めて連絡してください。** 中途半端に進めるより安全です。
 DBは壊れません（ステップ2は追加のみ・ステップ3以降はDBに触りません）。
