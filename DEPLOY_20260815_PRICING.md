@@ -67,28 +67,189 @@ TACOS・瞑想は今までどおり、該当セッションがある月だけ条
 
 参加区分（`category`）の変更については、自由文字列の列なのでテーブル定義は変わりません。
 
-### ⚠️ 先に確認してほしい未適用マイグレーション
+## 作業手順（コマンドは1行ずつ、コピー→貼り付け→Enter）
 
-過去のPRぶんが本番に未適用の可能性があります。**適用済みかを確認し、未適用なら各1回だけ**
-実行してください（`INSERT OR IGNORE` 等で再実行しても壊れない作りです）。
+⚠️ **複数行をまとめて貼らないでください。** コマンドが連結して失敗した実例があります。
+⚠️ 各コマンドは**前のコマンドが終わってから**次を貼ってください。
 
-- `migrations/2026-07-28-obosan-session.sql` … **8/29（土）の瞑想イベント**。
-  これが入っていないと予約できません。**開催まで日がないので最優先で確認**
-- `migrations/2026-08-sessions.sql` … 8月の日曜日程（朝RUNのフラグ `morning_run=1` を含む）。
-  **これが入っていないと「朝RUNのみ」区分を選んでも対象日が出ません**
-- `migrations/2026-08-bento-swap-0816-0830.sql` … 8/16と8/30のお弁当入れ替え
+> **`wrangler` は名前だけでは動きません。** このパソコン全体ではなく
+> プロジェクトの中にだけ入っているため、**`npx` を付けて**呼び出します。
+> また**設定ファイル（`wrangler.toml`）がある `apps\worker` の中で**実行する必要があります。
+> 以下はすべて `apps\worker` にいる前提です。
 
-実行例:
-`wrangler d1 execute line-harness --file=line-reservation/migrations/2026-07-28-obosan-session.sql --remote`
+---
 
-### 手順（いつもと同じルート）
+### ステップ0 ｜ 作業フォルダを開いて、wranglerが動くか確かめる
 
-1. mainから最新の `line-reservation/liff/reserve.html` を取得し、KVへ:
-   `wrangler kv key put --binding=STATIC_KV "liff/reserve.html" --path=<取得したreserve.html> --remote`
-2. mainの `line-reservation/src/reservation-routes.js` と `src/admin-page.js` の内容で、
-   `apps/worker` 側の同名ファイルを置換する
-3. デプロイは **`apps/worker` で `pnpm run deploy`**。
-   ⚠️ `npx wrangler deploy` 単体は使わない（ビルドが飛んで古いコードが出る事故が実際に発生済み）
+コマンドプロンプトを開いて、下の1行を貼ってEnter。
+
+```
+cd C:\Users\n9-f\.line-harness\apps\worker
+```
+
+続けて、下の1行。
+
+```
+npx wrangler --version
+```
+
+- **バージョン番号（`⛅️ wrangler 3.x.x` など）が出れば成功。** ステップ1へ進む
+- `Need to install the following packages` と聞かれたら **`y` を入力してEnter**
+- それでも動かない場合は、代わりに下の1行を試す（以降も `npx` を `pnpm exec` に読み替える）
+
+```
+pnpm exec wrangler --version
+```
+
+---
+
+### ステップ1 ｜ マイグレーションが適用済みか調べる（3つ・順に）
+
+**まだ何も変更しません。「入っているか見るだけ」です。**
+
+#### (1) 8/29の瞑想イベント
+
+```
+npx wrangler d1 execute line-harness --remote --command "SELECT id FROM sessions WHERE id='2026-08-29-obosan';"
+```
+
+- **`2026-08-29-obosan` の行が1つ出た** → 適用済み。ステップ2の(1)は飛ばす
+- **何も出ない（0 rows）** → 未適用。ステップ2の(1)をやる
+
+#### (2) 8月の日曜日程
+
+```
+npx wrangler d1 execute line-harness --remote --command "SELECT COUNT(*) AS n FROM sessions WHERE date LIKE '2026-08%';"
+```
+
+- **n が 4 以上** → 適用済み。ステップ2の(2)は飛ばす
+- **n が 0** → 未適用。ステップ2の(2)をやる
+
+#### (3) 申込の種別（今回の新規）
+
+```
+npx wrangler d1 execute line-harness --remote --command "SELECT kind FROM trial_requests LIMIT 1;"
+```
+
+- **エラーが出ずに終わった**（0 rows でもOK）→ 適用済み。ステップ2の(3)は飛ばす
+- **`no such column: kind` というエラーが出た** → 未適用。ステップ2の(3)をやる
+
+---
+
+> 📌 **2026-08-15 実機での結果**：(1) 瞑想イベントと (2) 8月の日程は**すでに適用済み**でした。
+> 未適用だったのは **(3) 申込の種別だけ**です。次回もまず確認から入ってください。
+
+### ステップ2 ｜ 未適用だったものだけ流す
+
+**ステップ1で「未適用」だったものだけ**やってください。
+ファイルは `apps\worker` の中に落とすので、**そのままファイル名だけで指定できます**。
+
+#### (1) 8/29の瞑想イベント
+
+```
+curl -o obosan.sql https://raw.githubusercontent.com/GOUP55/HACOS-/main/line-reservation/migrations/2026-07-28-obosan-session.sql
+```
+
+```
+npx wrangler d1 execute line-harness --remote --file=obosan.sql
+```
+
+#### (2) 8月の日曜日程
+
+```
+curl -o aug.sql https://raw.githubusercontent.com/GOUP55/HACOS-/main/line-reservation/migrations/2026-08-sessions.sql
+```
+
+```
+npx wrangler d1 execute line-harness --remote --file=aug.sql
+```
+
+#### (3) 申込の種別
+
+```
+curl -o kind.sql https://raw.githubusercontent.com/GOUP55/HACOS-/main/line-reservation/migrations/2026-08-15-trial-kind.sql
+```
+
+```
+npx wrangler d1 execute line-harness --remote --file=kind.sql
+```
+
+> 💡 (3)の中身は `ALTER TABLE trial_requests ADD COLUMN kind TEXT;` の1行だけです。
+> **同じものを2回流すとエラーになります**（列が既にあるため）。その場合は「もう入っている」
+> ということなので、そのまま次へ進んでOKです。
+
+---
+
+### ステップ3 ｜ 予約フォーム（見た目）を差し替える
+
+新しいフォームを取ってくる。
+
+```
+curl -o reserve.html https://raw.githubusercontent.com/GOUP55/HACOS-/main/line-reservation/liff/reserve.html
+```
+
+KVに入れる。
+
+```
+npx wrangler kv key put --binding=STATIC_KV "liff/reserve.html" --path=reserve.html --remote
+```
+
+---
+
+### ステップ4 ｜ Workerのコードを2つ差し替える
+
+`apps\worker` にいる前提です。**下の2行をそのまま貼るだけ**（置き換える箇所はありません）。
+
+```
+curl -o src\reservation-routes.js https://raw.githubusercontent.com/GOUP55/HACOS-/main/line-reservation/src/reservation-routes.js
+```
+
+```
+curl -o src\admin-page.js https://raw.githubusercontent.com/GOUP55/HACOS-/main/line-reservation/src/admin-page.js
+```
+
+どちらも `% Total ... 100 ...` の進捗が出れば成功です。
+
+> 💡 置き換え先が `apps\worker\src\` であることは 2026-08-15 に実機で確認済みです。
+> もし「指定されたファイルが見つかりません」と出たら、下で場所を確かめてください。
+>
+> ```
+> dir /s /b *reservation-routes.js
+> ```
+>
+> 表示されたパスが上と違う場合は、`src\reservation-routes.js` の部分を
+> **表示されたパスに丸ごと差し替えて**実行します。
+
+### ステップ5 ｜ デプロイする
+
+すでに `apps\worker` にいるので、そのまま下の1行。
+
+```
+pnpm run deploy
+```
+
+> ⚠️ **ここだけは `npx wrangler deploy` を使わないでください。**
+> ビルドが飛ばされて、古いコードが本番に出る事故が実際に起きています。
+> （ステップ1〜3の `npx wrangler` はビルドが関係ないので問題ありません）
+
+---
+
+### うまくいかないとき
+
+| 出たもの | 意味 | どうする |
+|---|---|---|
+| `no such column: kind` | ステップ2(3)がまだ | ステップ2(3)を実行する |
+| `duplicate column name: kind` | ステップ2(3)は**もう入っている** | そのまま次へ進んでOK |
+| `curl` が「コマンドではありません」 | 古いWindows | ブラウザでURLを開き、「名前を付けて保存」で同じファイル名にする |
+| `'wrangler' は、内部コマンドまたは外部コマンド…として認識されていません` | **`npx` を付け忘れている** | `wrangler` ではなく **`npx wrangler`** と打つ |
+| `npx wrangler` でも動かない | npxが使えない環境 | `pnpm exec wrangler` に読み替える |
+| `wrangler.toml not found` / DBが見つからない | フォルダ違い | ステップ0の `cd C:\Users\n9-f\.line-harness\apps\worker` からやり直す |
+| デプロイ後もフォームが古い | ブラウザ/LIFFのキャッシュ | LINEアプリを一度完全に閉じてから開き直す |
+| `The given account is not valid or is not authorized [code: 7403]` | **一時的な失敗**（2026-08-15 実機で発生し、打ち直しで解消した） | **同じコマンドをもう一度**貼る。続くようなら `npx wrangler whoami` でアカウントIDが `565760fb...` か確認し、違えば `npx wrangler login` |
+| `指定されたファイルが見つかりません。` | `<...のパス>` のような**説明用の目印をそのまま貼っている** | `<` と `>` で囲まれた部分は実際の値に置き換える（ステップ4はそのまま貼れる形にしてあります） |
+
+**途中で分からなくなったら、そこで止めて連絡してください。** 中途半端に進めるより安全です。
+DBは壊れません（ステップ2は追加のみ・ステップ3以降はDBに触りません）。
 
 ### 動作確認（必ずLINEアプリ内のLIFFで。ブラウザは管理者Cookieで素通りするため確認になりません）
 
@@ -111,10 +272,71 @@ TACOS・瞑想は今までどおり、該当セッションがある月だけ条
 - [ ] **LPの「7日間お試しを申し込む」ボタンから来ると、フォームが開いて種別まで選ばれている**
       （URLに `?apply=trial7` が付いています）
 
+### 差し替え前のバックアップ（ステップ3・4の前にやると安心）
+
+`apps\worker` にいる状態で、いまのファイルをコピーしておきます。
+
+```
+copy src\reservation-routes.js src\reservation-routes.js.bak
+```
+
+```
+copy src\admin-page.js src\admin-page.js.bak
+```
+
 ### 切り戻し
 
-KVに旧 `reserve.html` を戻し、置換前の `reservation-routes.js` / `admin-page.js` で
-`pnpm run deploy` すれば元に戻ります。DBは触らないので、切り戻しでデータは壊れません。
+**コードを戻す**（上のバックアップを取っていれば、そこから戻すのがいちばん確実）
+
+```
+copy src\reservation-routes.js.bak src\reservation-routes.js
+```
+
+```
+copy src\admin-page.js.bak src\admin-page.js
+```
+
+バックアップが無い場合は、変更前の状態（コミット `ae08c23`）から取り直せます。
+**この3ファイルは `ae08c23` と変更直前のmainで内容が同一であることを確認済み**（2026-08-15）。
+
+```
+curl -o src\reservation-routes.js https://raw.githubusercontent.com/GOUP55/HACOS-/ae08c23/line-reservation/src/reservation-routes.js
+```
+
+```
+curl -o src\admin-page.js https://raw.githubusercontent.com/GOUP55/HACOS-/ae08c23/line-reservation/src/admin-page.js
+```
+
+**予約フォームを戻す**
+
+```
+curl -o reserve-old.html https://raw.githubusercontent.com/GOUP55/HACOS-/ae08c23/line-reservation/liff/reserve.html
+```
+
+```
+npx wrangler kv key put --binding=STATIC_KV "liff/reserve.html" --path=reserve-old.html --remote
+```
+
+戻したら `pnpm run deploy` を実行します。
+**DBは触らないので、切り戻しでデータは壊れません**（追加した `kind` 列は残りますが、古いコードは
+その列を使わないだけなので問題ありません）。
+
+---
+
+## ⚠️ 別件・期限あり：9月の日程がまだD1に入っていない
+
+**2026-08-30 の正午（JST）を過ぎると、予約フォームの日程が空になります。**
+
+`/api/liff/sessions` は「JST正午を過ぎたら、その日のセッションも表示から外す」作りです
+（当日の朝クラスが終わったあとも一日中出続けるのを防ぐため）。
+いまD1にある朝クラスは **8/2・8/9・8/16・8/23・8/30 の5本が最後**なので、
+8/30の正午以降は表示できるものが無くなります。
+
+**9月の日曜は 9/6・9/13・9/20・9/27 の4回。** 8/30までに登録が必要です。
+
+登録は**管理画面の「🛠 開催日の管理」から追加できます（SQL不要）**。
+クラス名・担当・お弁当が決まり次第、そこで足してください。
+まとめてSQLで入れたい場合は、司令塔にマイグレーションを作ってもらってください。
 
 ## （ここまでコピー）
 
