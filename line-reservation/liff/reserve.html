@@ -506,14 +506,30 @@ function setupTrialForm() {
   // 過去日を選べないように最小日を今日(JST)に
   dateInput.min = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
 
+  const openForm = () => {
+    form.style.display = 'block';
+    openBtn.textContent = '× 閉じる';
+    form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+
   openBtn.addEventListener('click', () => {
     const opening = form.style.display === 'none';
-    form.style.display = opening ? 'block' : 'none';
-    openBtn.textContent = opening ? '× 閉じる' : 'お試し・体験を申し込む →';
-    if (opening) form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (opening) { openForm(); return; }
+    form.style.display = 'none';
+    openBtn.textContent = 'お試し・体験を申し込む →';
   });
 
   document.getElementById('trial-submit-btn').addEventListener('click', handleTrialSubmit);
+
+  // LPから「7日間お試しを申し込む」で来た人は、フォームを開いて種別まで選んだ状態にする。
+  // 開いてもらう手間をかけると、ここで離脱する（?apply=trial7 / ?apply=personal）
+  const apply = new URLSearchParams(location.search).get('apply');
+  if (apply === 'trial7' || apply === 'personal') {
+    const value = apply === 'trial7' ? 'journey_trial7' : 'trial_personal';
+    const radio = document.querySelector(`input[name="trial_kind"][value="${value}"]`);
+    if (radio) radio.checked = true;
+    openForm();
+  }
 }
 
 async function handleTrialSubmit() {

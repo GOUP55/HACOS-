@@ -164,6 +164,19 @@ function check(name, ok, detail = '') {
   check('送信ボディ: 担当・希望日時も一緒に送られる',
     lastTrialBody?.trainer === 'GO' && lastTrialBody?.preferred_date === '2026-08-20');
 
+  // ── LPから ?apply=trial7 で来たとき、開いて種別まで選ばれた状態にする ──
+  await page.goto(`http://127.0.0.1:${PORT}/liff/reserve?ref=journey&apply=trial7`);
+  await page.waitForSelector('#app', { state: 'visible', timeout: 10000 });
+  check('?apply=trial7 でフォームが自動で開く',
+    await page.locator('#trial-form').isVisible());
+  check('?apply=trial7 で7日間お試しが選ばれている',
+    await page.locator('input[name="trial_kind"][value="journey_trial7"]').isChecked());
+
+  await page.goto(`http://127.0.0.1:${PORT}/liff/reserve`);
+  await page.waitForSelector('#app', { state: 'visible', timeout: 10000 });
+  check('パラメータ無しならフォームは閉じたまま',
+    !(await page.locator('#trial-form').isVisible()));
+
   await browser.close();
   server.close();
 
