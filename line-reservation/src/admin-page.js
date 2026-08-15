@@ -21,13 +21,19 @@ function fmtJst(iso) {
 
 function categoryBadge(category) {
   const map = {
-    '回数券': ['🎫', '#7b1fa2'],
+    '朝RUNのみ': ['🏃', '#e65100'],
     '体験': ['🌱', '#00796b'],
     'TACOS': ['🌮', '#e65100'],
     '瞑想': ['🙏', '#3D5A3E'],
+    'ご利用中の方': ['✅', '#2e7d32'],
+    '都度': ['👤', '#1565c0'],
+    'HMC会員': ['🌅', '#2e7d32'],
+    'セミパ会員': ['💪', '#7b1fa2'],
+    '相談': ['💬', '#616161'],
+    // 旧区分（2026-08-14の商品体系リニューアル前の予約が履歴に残っている）
     '会員': ['✅', '#2e7d32'],
     'ビジター': ['👤', '#1565c0'],
-    '相談': ['💬', '#616161'],
+    '回数券': ['🎫', '#7b1fa2'],
   };
   const [icon, color] = map[category] || ['・', '#616161'];
   return `<span class="cat" style="color:${color};border-color:${color}44;">${icon} ${esc(category)}</span>`;

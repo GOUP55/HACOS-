@@ -1,0 +1,115 @@
+# 商品体系リニューアルの本番デプロイ指示書（LINE Harness側セッション用）
+
+> **使い方**: 下の「📋 貼り付け用プロンプト」を、LINE Harness（`apps/worker`）を
+> デプロイする Claude セッションにそのまま貼り付ける。
+>
+> ⚠️ **前提: この変更が `main` にマージされてから渡すこと。**
+> 2026-08-15 時点ではブランチ `claude/august-program-reservation-updates-7i3cle` にあり、
+> **まだ main には入っていない**。マージ前に渡すと、デプロイの手は古い main を
+> 反映してしまう。
+>
+> ⚠️ **LPと予約フォームは必ずセットで公開する。** LPは「朝RUNはLINEの予約フォームから
+> 申し込む」と案内する内容に変わる。フォーム側が本番反映されていないと、
+> 申し込めない導線になる。
+
+---
+
+## 📋 貼り付け用プロンプト（ここからコピー）
+
+HACOSのLINE予約フォームに「商品体系リニューアル」を本番反映してください。
+変更済みソースは GitHub `goup55/HACOS-` の **main** にあります（`line-reservation/` 配下）。
+
+### 何が変わるか
+
+**1. 回数券を廃止（全撤去）**
+オーナー決定で回数券は廃止し、月額プラン（HMC会員 ¥6,000/月）に置き換えました。
+参加区分・「今月の開催日をまとめて選択」ボタン・スタッフ通知の🎫・月末の再購入リマインドを
+すべて削除しています。
+
+**2. 参加区分を新体系に作り直し**
+
+| 新しい区分 | 料金 |
+|---|---|
+| 朝RUNのみ | ¥0（**新設**） |
+| ご利用中の方 | ¥2,000／回（旧「会員」から改称） |
+| 都度 | ¥3,000／回（旧「ビジター」から改称） |
+| HMC会員 | 月額¥6,000（当日の支払いなし） |
+| セミパ会員 | 月額¥24,000（当日の支払いなし） |
+| 相談 | — |
+
+TACOS・瞑想は今までどおり、該当セッションがある月だけ条件表示されます。
+
+**3. 「朝RUNのみ」は朝活クラスの定員を消費しない（いちばん注意が要る点）**
+6:30の朝RUNだけ参加して7:30のクラスには出ない予約です。**朝活クラスの定員10名から
+除外**するよう、残枠を数えるSQLに `AND r.category != '朝RUNのみ'` を入れています。
+サーバー側で「朝RUNのない日には付けられない」ガードも入れました。
+
+### 変更ファイルは3つだけ（DBのスキーマ変更なし）
+
+| ファイル | 反映先 |
+|---|---|
+| `line-reservation/liff/reserve.html` | KV（`STATIC_KV`） |
+| `line-reservation/src/reservation-routes.js` | `apps/worker` 側の同ファイルを置換 |
+| `line-reservation/src/admin-page.js` | `apps/worker` 側の同ファイルを置換 |
+
+**この変更に伴うD1マイグレーションはありません。** `category` は自由文字列の列なので、
+テーブル定義は変わりません。
+
+### ⚠️ 先に確認してほしい未適用マイグレーション
+
+過去のPRぶんが本番に未適用の可能性があります。**適用済みかを確認し、未適用なら各1回だけ**
+実行してください（`INSERT OR IGNORE` 等で再実行しても壊れない作りです）。
+
+- `migrations/2026-07-28-obosan-session.sql` … **8/29（土）の瞑想イベント**。
+  これが入っていないと予約できません。**開催まで日がないので最優先で確認**
+- `migrations/2026-08-sessions.sql` … 8月の日曜日程（朝RUNのフラグ `morning_run=1` を含む）。
+  **これが入っていないと「朝RUNのみ」区分を選んでも対象日が出ません**
+- `migrations/2026-08-bento-swap-0816-0830.sql` … 8/16と8/30のお弁当入れ替え
+
+実行例:
+`wrangler d1 execute line-harness --file=line-reservation/migrations/2026-07-28-obosan-session.sql --remote`
+
+### 手順（いつもと同じルート）
+
+1. mainから最新の `line-reservation/liff/reserve.html` を取得し、KVへ:
+   `wrangler kv key put --binding=STATIC_KV "liff/reserve.html" --path=<取得したreserve.html> --remote`
+2. mainの `line-reservation/src/reservation-routes.js` と `src/admin-page.js` の内容で、
+   `apps/worker` 側の同名ファイルを置換する
+3. デプロイは **`apps/worker` で `pnpm run deploy`**。
+   ⚠️ `npx wrangler deploy` 単体は使わない（ビルドが飛んで古いコードが出る事故が実際に発生済み）
+
+### 動作確認（必ずLINEアプリ内のLIFFで。ブラウザは管理者Cookieで素通りするため確認になりません）
+
+- [ ] 参加区分から「回数券（月まとめ買い）」が**消えている**
+- [ ] 「今月の開催日をまとめて選択」ボタンが**消えている**
+- [ ] 参加区分に「朝RUNのみ（6:30〜）参加費¥0」が出る
+- [ ] 「ご利用中の方 ¥2,000」「都度 ¥3,000」「HMC会員」「セミパ会員」が出る
+- [ ] 朝RUN開催日を選ぶと朝RUNの質問が出る／「朝RUNのみ」を選ぶとその質問が消える
+- [ ] **「朝RUNのみ」で予約しても、その日の残席が減らない**（← 今回いちばん大事）
+      確認方法: 予約前の残席をメモ → 朝RUNのみで予約 → フォームを開き直して残席が同じことを見る
+- [ ] 「朝RUNのみ」で予約するとスタッフLINEに「🏃 新規予約【朝RUNのみ・¥0】」で届く
+- [ ] 「HMC会員」で予約すると、予約完了メッセージに「当日のお支払いはありません」が入る
+- [ ] 既存の 体験／相談／TACOS／瞑想 の予約が今までどおり動く
+- [ ] 管理画面 `/admin/reservations` で新しい区分のバッジが出る（🏃 ✅ 👤 🌅 💪）
+      ※過去の予約（会員／ビジター／回数券）のバッジも今までどおり表示されること
+
+### 切り戻し
+
+KVに旧 `reserve.html` を戻し、置換前の `reservation-routes.js` / `admin-page.js` で
+`pnpm run deploy` すれば元に戻ります。DBは触らないので、切り戻しでデータは壊れません。
+
+## （ここまでコピー）
+
+---
+
+## このファイルの背景（HACOS-リポジトリ側の記録）
+
+- 設計の正本: `BUSINESS_RULES.md`（商品体系・参加区分）／経緯は `PRICING_RESTRUCTURE_2026-08.md`
+- 実装: 2026-08-15（司令塔セッション）。ブランチ `claude/august-program-reservation-updates-7i3cle`
+- テスト: `line-reservation/tests/` で **89項目すべて合格**
+  （`tests/morning-run.test.mjs` を新設＝13項目。`tests/kaisuken.test.js` は削除）
+  実行方法: `cd line-reservation/tests && npm install && PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers npm test`
+- LP側（料金・朝RUNの予約制表記）は main マージで GitHub Pages に自動公開される。
+  **本番Workerへの反映は本指示書の手順でのみ行う**（このリポジトリからは自動反映されない）
+- ⚠️ 未実装: 最少催行の前日判定（HMC3名未満・セミパ2名未満で前日に通知）。
+  当面は管理画面で人数を見て手動で判断する

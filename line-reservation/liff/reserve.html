@@ -184,12 +184,16 @@ textarea:focus { border-color: var(--green); }
     <div class="section">
       <div class="section-title">参加区分<span class="required">必須</span></div>
       <div class="options">
-        <label class="opt"><input type="radio" name="category" value="会員">
-          <span class="opt-label">HMC 会員<span class="opt-price">¥2,000／回</span></span></label>
-        <label class="opt"><input type="radio" name="category" value="回数券">
-          <span class="opt-label">回数券（月まとめ買い）<span class="opt-price">¥2,000／回・その月の開催回数ぶんをまとめて購入</span></span></label>
-        <label class="opt"><input type="radio" name="category" value="ビジター">
-          <span class="opt-label">ビジター<span class="opt-price">¥3,000／回</span></span></label>
+        <label class="opt"><input type="radio" name="category" value="朝RUNのみ">
+          <span class="opt-label">朝RUNのみ（6:30〜）<span class="opt-price">参加費 ¥0・7:30の朝活クラスには参加しない</span></span></label>
+        <label class="opt"><input type="radio" name="category" value="ご利用中の方">
+          <span class="opt-label">ご利用中の方<span class="opt-price">¥2,000／回・パーソナルを受けている方／ジャーニーの参加者・卒業生</span></span></label>
+        <label class="opt"><input type="radio" name="category" value="都度">
+          <span class="opt-label">都度（はじめての方）<span class="opt-price">¥3,000／回</span></span></label>
+        <label class="opt"><input type="radio" name="category" value="HMC会員">
+          <span class="opt-label">HMC会員<span class="opt-price">月額¥6,000・朝活クラス受け放題（当日のお支払いなし）</span></span></label>
+        <label class="opt"><input type="radio" name="category" value="セミパ会員">
+          <span class="opt-label">セミパ会員<span class="opt-price">月額¥24,000・朝活クラス受け放題（当日のお支払いなし）</span></span></label>
         <label class="opt" id="cat-tacos" style="display:none;"><input type="radio" name="category" value="TACOS">
           <span class="opt-label">TACOS Party<span class="opt-price">¥3,000・タコス食べ放題／ドリンク・その他フード別</span></span></label>
         <label class="opt" id="cat-obosan" style="display:none;"><input type="radio" name="category" value="瞑想">
@@ -197,13 +201,6 @@ textarea:focus { border-color: var(--green); }
         <label class="opt"><input type="radio" name="category" value="相談">
           <span class="opt-label">迷っている・相談したい</span></label>
       </div>
-    </div>
-
-    <!-- 回数券のまとめ選択（回数券選択時のみ表示） -->
-    <div class="section conditional" id="kaisuken-section">
-      <div class="section-title">回数券のまとめ選択</div>
-      <button type="button" id="select-month-btn" class="btn-month">今月の開催日をまとめて選択</button>
-      <p class="section-note" style="margin-top:8px;">回数券はその月のみ有効（繰り越し不可）。月の途中からは残りの開催回数ぶんのご購入になります。お支払いは初回参加日に現金でまとめてお願いします。</p>
     </div>
 
     <!-- 朝RUN（条件表示） -->
@@ -267,14 +264,14 @@ const sessionLabel = (id) => {
   return s ? `${s.display_date} ${s.title}` : id;
 };
 
-// 予約できなかった日程の理由別メッセージを組み立てる（満席／受付終了／回数券対象外）。
+// 予約できなかった日程の理由別メッセージを組み立てる（満席／受付終了／朝RUNなし）。
 // エラー時・一部成立時の両方で同じ文言を使い、表記ゆれを防ぐ
 function failedMessage(failedArr) {
-  const byReason = { full: [], session_not_found: [], not_kaisuken: [] };
+  const byReason = { full: [], session_not_found: [], no_morning_run: [] };
   failedArr.forEach(f => (byReason[f.error] || byReason.session_not_found).push(`「${sessionLabel(f.session_id)}」`));
   const parts = [];
   if (byReason.full.length) parts.push(`${byReason.full.join('、')}は満席のため予約できませんでした`);
-  if (byReason.not_kaisuken.length) parts.push(`${byReason.not_kaisuken.join('、')}は回数券の対象外です（会員・ビジター等でご予約ください）`);
+  if (byReason.no_morning_run.length) parts.push(`${byReason.no_morning_run.join('、')}は朝RUNの開催日ではありません（朝活クラスにご参加の場合は別の区分をお選びください）`);
   if (byReason.session_not_found.length) parts.push(`${byReason.session_not_found.join('、')}は受付を終了しています`);
   return parts.join('。');
 }
@@ -306,11 +303,6 @@ async function loadSessions() {
 
   const list = document.getElementById('sessions-list');
   list.innerHTML = '';
-
-  // 「今月まとめて選択」ボタンを初期状態に戻す（キャンセル後の再取得時など）
-  const monthBtn = document.getElementById('select-month-btn');
-  monthBtn.disabled = false;
-  monthBtn.textContent = '今月の開催日をまとめて選択';
 
   // 朝RUN開催日の案内を実データから生成（ハードコードだと月替わりで古くなる）
   const runDays = sessions.filter(s => s.morning_run).map(s => s.display_date);
@@ -478,29 +470,23 @@ async function cancelTrial(t, btn) {
   }
 }
 
-function setupKaisukenHelper() {
-  const section = document.getElementById('kaisuken-section');
-  const monthBtn = document.getElementById('select-month-btn');
+// 「朝RUNのみ」を選ぶと、7:30の朝活クラスには参加しない予約になる。
+// 朝RUNは参加費¥0なので、朝RUN参加の質問（morning-run-section）は聞くまでもなく
+// 「参加する」で確定させ、二重に選ばせない。
+function setupCategoryHandler() {
+  const runSection = document.getElementById('morning-run-section');
 
   document.querySelectorAll('input[name="category"]').forEach(input => {
     input.addEventListener('change', () => {
-      section.style.display = (input.checked && input.value === '回数券') ? 'block' : 'none';
-    });
-  });
-
-  monthBtn.addEventListener('click', () => {
-    const thisMonth = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 7);
-    const todayStr = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
-    sessions.forEach(s => {
-      // s.id === s.date は通常の朝クラス。特別枠（TACOS Party等、idにサフィックス付き）は
-      // 回数券の対象外なので、まとめて選択に含めない
-      if (s.id === s.date && s.date >= todayStr && s.remaining > 0 && s.date.slice(0, 7) === thisMonth && !selectedIds.has(s.id)) {
-        const card = document.querySelector(`#sessions-list [data-id="${s.id}"]`);
-        if (card) toggleSession(s.id, card);
+      if (!input.checked) return;
+      if (input.value === '朝RUNのみ') {
+        const join = document.querySelector('input[name="morning_run"][value="join"]');
+        if (join) join.checked = true;
+        runSection.style.display = 'none';
+      } else {
+        updateConditionals();
       }
     });
-    monthBtn.textContent = '✓ 今月の開催日を選択しました';
-    monthBtn.disabled = true;
   });
 }
 
@@ -639,8 +625,18 @@ async function handleSubmit(e) {
     return;
   }
   if (category === '瞑想' && obosanSelected.length !== selectedIds.size) {
-    showError('参加区分「お坊さんといっしょ（瞑想と写経）」は瞑想イベントの日程にのみ使えます。朝クラスは会員・ビジター等でご予約ください。');
+    showError('参加区分「お坊さんといっしょ（瞑想と写経）」は瞑想イベントの日程にのみ使えます。朝クラスは「ご利用中の方」「都度」等でご予約ください。');
     return;
+  }
+
+  // 「朝RUNのみ」は朝RUN（6:30〜）を開催する日にしか使えない。
+  // 朝活クラスの定員を消費しない予約なので、対象日を取り違えると席の計算が狂う
+  if (category === '朝RUNのみ') {
+    const noRun = [...selectedIds].filter(id => !sessions.find(s => s.id === id)?.morning_run);
+    if (noRun.length) {
+      showError('「朝RUNのみ」は朝RUN（6:30〜）を開催する日にのみお選びいただけます。7:30の朝活クラスにご参加の場合は、別の参加区分でご予約ください。');
+      return;
+    }
   }
 
   const btn = document.getElementById('btn-submit');
@@ -741,7 +737,7 @@ function hideError() {
   document.getElementById('form-error').style.display = 'none';
 }
 
-setupKaisukenHelper();
+setupCategoryHandler();
 setupTrialForm();
 init();
 </script>
