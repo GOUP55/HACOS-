@@ -172,6 +172,34 @@ function check(name, ok, detail = '') {
   check('?apply=trial7 で7日間お試しが選ばれている',
     await page.locator('input[name="trial_kind"][value="journey_trial7"]').isChecked());
 
+  // 種別で見出し・説明・担当欄の扱いが切り替わる（1対1と3回セットで中身が違うため）
+  check('7日間お試しの見出しになる',
+    (await page.locator('#trial-heading').textContent()).includes('7日間お試し'));
+  check('7日間お試しでは「日曜クラスとは別枠」と言わない（日曜朝活を含むため）',
+    !(await page.locator('#trial-note-top').textContent()).includes('日曜クラスとは別枠'));
+  check('7日間お試しでは担当の必須バッジが消える',
+    !(await page.locator('#trial-trainer-req').isVisible()));
+  const noteJ = await page.locator('#trial-note-top').textContent();
+  check('7日間お試しの説明にセミパ・グルパー・朝活が出る',
+    noteJ.includes('セミパーソナル') && noteJ.includes('グループパーソナル') && noteJ.includes('朝活'));
+
+  // 担当を選ばずに送信 → 「お任せ」で通る
+  await page.locator('#trial-date').fill('2026-08-21');
+  await page.locator('input[name="trial_time"][value="午前（9:00〜12:00）"]').check();
+  lastTrialBody = null;
+  await page.locator('#trial-submit-btn').click();
+  await page.waitForTimeout(400);
+  check('7日間お試しは担当未選択でも送信でき、trainer=お任せ になる',
+    lastTrialBody?.kind === 'journey_trial7' && lastTrialBody?.trainer === 'お任せ');
+
+  // 体験パーソナルに切り替えると元の文言に戻る
+  await page.goto(`http://127.0.0.1:${PORT}/liff/reserve?apply=personal`);
+  await page.waitForSelector('#app', { state: 'visible', timeout: 10000 });
+  check('体験パーソナルでは「1対1」の見出しに戻る',
+    (await page.locator('#trial-heading').textContent()).includes('1対1'));
+  check('体験パーソナルでは担当が必須のまま',
+    await page.locator('#trial-trainer-req').isVisible());
+
   await page.goto(`http://127.0.0.1:${PORT}/liff/reserve`);
   await page.waitForSelector('#app', { state: 'visible', timeout: 10000 });
   check('パラメータ無しならフォームは閉じたまま',

@@ -130,11 +130,11 @@ textarea:focus { border-color: var(--green); }
     <div id="my-reservations-list"></div>
   </div>
 
-  <!-- 体験パーソナル（1対1・リクエスト型） -->
+  <!-- 体験パーソナル／ジャーニー7日間お試し（リクエスト型） -->
   <div style="margin:12px 12px 0;">
     <div class="section">
-      <div class="section-title">1対1・お試しのお申し込み</div>
-      <p class="section-note">日曜クラスとは別枠です。担当が空き状況を確認のうえ、日時確定のご連絡をLINEでお送りします。</p>
+      <div class="section-title" id="trial-heading">体験・お試しのお申し込み</div>
+      <p class="section-note" id="trial-note-top">担当が空き状況を確認のうえ、日時確定のご連絡をLINEでお送りします。</p>
       <button type="button" id="trial-open-btn" class="btn-month">お試し・体験を申し込む →</button>
 
       <div id="trial-form" style="display:none;margin-top:14px;">
@@ -146,7 +146,7 @@ textarea:focus { border-color: var(--green); }
             <span class="opt-label">フィットネスジャーニー 7日間お試し<span class="opt-price">¥9,000・セミパ1回＋グループパーソナル1回＋日曜朝活1回／2ヶ月へお進みの場合は参加費に充当します</span></span></label>
         </div>
 
-        <div class="section-title" style="margin-top:14px;">ご希望の担当トレーナー<span class="required">必須</span></div>
+        <div class="section-title" style="margin-top:14px;" id="trial-trainer-title">ご希望の担当トレーナー<span class="required" id="trial-trainer-req">必須</span></div>
         <div class="options">
           <label class="opt"><input type="radio" name="trial_trainer" value="GO"><span class="opt-label">GO</span></label>
           <label class="opt"><input type="radio" name="trial_trainer" value="片山めぐみ"><span class="opt-label">片山めぐみ</span></label>
@@ -521,6 +521,27 @@ function setupTrialForm() {
 
   document.getElementById('trial-submit-btn').addEventListener('click', handleTrialSubmit);
 
+  // 種別によって中身がまったく違うので、見出し・説明・担当欄の扱いを切り替える。
+  // 体験パーソナル = 1対1・日曜クラスとは別枠
+  // 7日間お試し    = セミパ＋グルパー＋日曜朝活の3回セット（1対1ではないし、日曜朝活を含む）
+  const applyKindCopy = () => {
+    const kind = document.querySelector('input[name="trial_kind"]:checked')?.value || 'trial_personal';
+    const isJourney7 = kind === 'journey_trial7';
+    document.getElementById('trial-heading').textContent =
+      isJourney7 ? 'フィットネスジャーニー 7日間お試しのお申し込み' : '体験パーソナル（1対1）のお申し込み';
+    document.getElementById('trial-note-top').textContent = isJourney7
+      ? 'セミパーソナル1回・グループパーソナル1回・日曜の朝活1回をまとめて体験できます。日程を調整のうえ、確定のご連絡をLINEでお送りします。'
+      : '日曜クラスとは別枠です。担当が空き状況を確認のうえ、日時確定のご連絡をLINEでお送りします。';
+    // 7日間お試しは複数の枠にまたがるため「担当を1人選ぶ」のが噛み合わない。任意にする
+    document.getElementById('trial-trainer-title').firstChild.textContent =
+      isJourney7 ? 'ご希望の担当（あれば）' : 'ご希望の担当トレーナー';
+    document.getElementById('trial-trainer-req').style.display = isJourney7 ? 'none' : '';
+  };
+  document.querySelectorAll('input[name="trial_kind"]').forEach(r => {
+    r.addEventListener('change', applyKindCopy);
+  });
+  applyKindCopy();
+
   // LPから「7日間お試しを申し込む」で来た人は、フォームを開いて種別まで選んだ状態にする。
   // 開いてもらう手間をかけると、ここで離脱する（?apply=trial7 / ?apply=personal）
   const apply = new URLSearchParams(location.search).get('apply');
@@ -528,6 +549,7 @@ function setupTrialForm() {
     const value = apply === 'trial7' ? 'journey_trial7' : 'trial_personal';
     const radio = document.querySelector(`input[name="trial_kind"][value="${value}"]`);
     if (radio) radio.checked = true;
+    applyKindCopy();
     openForm();
   }
 }
@@ -543,7 +565,9 @@ async function handleTrialSubmit() {
   const time = document.querySelector('input[name="trial_time"]:checked')?.value;
   const note = document.getElementById('trial-note').value;
 
-  if (!trainer) { showTrialError('ご希望の担当トレーナーを選択してください'); return; }
+  // 7日間お試しは複数の枠にまたがるので担当は任意。未選択なら運営にお任せ扱いで送る
+  const trainerValue = trainer || (kind === 'journey_trial7' ? 'お任せ' : '');
+  if (!trainerValue) { showTrialError('ご希望の担当トレーナーを選択してください'); return; }
   if (!date) { showTrialError('第1希望日を選択してください'); return; }
   if (!time) { showTrialError('ご希望の時間帯を選択してください'); return; }
 
@@ -562,7 +586,7 @@ async function handleTrialSubmit() {
       },
       body: JSON.stringify({
         kind,
-        trainer,
+        trainer: trainerValue,
         preferred_date: date,
         preferred_time: time,
         alt_note: note || '',
