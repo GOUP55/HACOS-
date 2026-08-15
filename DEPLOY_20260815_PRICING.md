@@ -67,28 +67,171 @@ TACOS・瞑想は今までどおり、該当セッションがある月だけ条
 
 参加区分（`category`）の変更については、自由文字列の列なのでテーブル定義は変わりません。
 
-### ⚠️ 先に確認してほしい未適用マイグレーション
+## 作業手順（コマンドは1行ずつ、コピー→貼り付け→Enter）
 
-過去のPRぶんが本番に未適用の可能性があります。**適用済みかを確認し、未適用なら各1回だけ**
-実行してください（`INSERT OR IGNORE` 等で再実行しても壊れない作りです）。
+⚠️ **複数行をまとめて貼らないでください。** コマンドが連結して失敗した実例があります。
+⚠️ 各コマンドは**前のコマンドが終わってから**次を貼ってください。
 
-- `migrations/2026-07-28-obosan-session.sql` … **8/29（土）の瞑想イベント**。
-  これが入っていないと予約できません。**開催まで日がないので最優先で確認**
-- `migrations/2026-08-sessions.sql` … 8月の日曜日程（朝RUNのフラグ `morning_run=1` を含む）。
-  **これが入っていないと「朝RUNのみ」区分を選んでも対象日が出ません**
-- `migrations/2026-08-bento-swap-0816-0830.sql` … 8/16と8/30のお弁当入れ替え
+---
 
-実行例:
-`wrangler d1 execute line-harness --file=line-reservation/migrations/2026-07-28-obosan-session.sql --remote`
+### ステップ0 ｜ 作業フォルダを開く
 
-### 手順（いつもと同じルート）
+コマンドプロンプトを開いて、下の1行を貼ってEnter。
 
-1. mainから最新の `line-reservation/liff/reserve.html` を取得し、KVへ:
-   `wrangler kv key put --binding=STATIC_KV "liff/reserve.html" --path=<取得したreserve.html> --remote`
-2. mainの `line-reservation/src/reservation-routes.js` と `src/admin-page.js` の内容で、
-   `apps/worker` 側の同名ファイルを置換する
-3. デプロイは **`apps/worker` で `pnpm run deploy`**。
-   ⚠️ `npx wrangler deploy` 単体は使わない（ビルドが飛んで古いコードが出る事故が実際に発生済み）
+```
+cd C:\Users\n9-f\.line-harness
+```
+
+---
+
+### ステップ1 ｜ マイグレーションが適用済みか調べる（3つ・順に）
+
+**まだ何も変更しません。「入っているか見るだけ」です。**
+
+#### (1) 8/29の瞑想イベント
+
+```
+wrangler d1 execute line-harness --remote --command "SELECT id FROM sessions WHERE id='2026-08-29-obosan';"
+```
+
+- **`2026-08-29-obosan` という行が1つ出た** → 適用済み。ステップ2の(1)は飛ばす
+- **何も出ない（0 rows）** → 未適用。ステップ2の(1)をやる
+
+#### (2) 8月の日曜日程
+
+```
+wrangler d1 execute line-harness --remote --command "SELECT COUNT(*) AS n FROM sessions WHERE date LIKE '2026-08%';"
+```
+
+- **n が 4 以上** → 適用済み。ステップ2の(2)は飛ばす
+- **n が 0** → 未適用。ステップ2の(2)をやる
+
+#### (3) 申込の種別（今回の新規）
+
+```
+wrangler d1 execute line-harness --remote --command "SELECT kind FROM trial_requests LIMIT 1;"
+```
+
+- **エラーが出ず終わった**（0 rows でもOK）→ 適用済み。ステップ2の(3)は飛ばす
+- **`no such column: kind` というエラーが出た** → 未適用。ステップ2の(3)をやる
+
+---
+
+### ステップ2 ｜ 未適用だったものだけ流す
+
+**ステップ1で「未適用」だったものだけ**やってください。適用済みのものは飛ばします。
+
+#### (1) 8/29の瞑想イベント
+
+ファイルを取ってくる（1行目）→ 流す（2行目）。**1行ずつ**です。
+
+```
+curl -o obosan.sql https://raw.githubusercontent.com/GOUP55/HACOS-/main/line-reservation/migrations/2026-07-28-obosan-session.sql
+```
+
+```
+wrangler d1 execute line-harness --remote --file=obosan.sql
+```
+
+#### (2) 8月の日曜日程
+
+```
+curl -o aug.sql https://raw.githubusercontent.com/GOUP55/HACOS-/main/line-reservation/migrations/2026-08-sessions.sql
+```
+
+```
+wrangler d1 execute line-harness --remote --file=aug.sql
+```
+
+#### (3) 申込の種別
+
+```
+curl -o kind.sql https://raw.githubusercontent.com/GOUP55/HACOS-/main/line-reservation/migrations/2026-08-15-trial-kind.sql
+```
+
+```
+wrangler d1 execute line-harness --remote --file=kind.sql
+```
+
+> 💡 (3)の中身は `ALTER TABLE trial_requests ADD COLUMN kind TEXT;` の1行だけです。
+> **同じものを2回流すとエラーになります**（列が既にあるため）。その場合は「もう入っている」ということなので、そのまま次へ進んでOKです。
+
+---
+
+### ステップ3 ｜ 予約フォーム（見た目）を差し替える
+
+新しいフォームを取ってくる。
+
+```
+curl -o reserve.html https://raw.githubusercontent.com/GOUP55/HACOS-/main/line-reservation/liff/reserve.html
+```
+
+KVに入れる。
+
+```
+wrangler kv key put --binding=STATIC_KV "liff/reserve.html" --path=reserve.html --remote
+```
+
+---
+
+### ステップ4 ｜ Workerのコードを2つ差し替える
+
+まず、置き換える先のファイルがどこにあるか探します。
+
+```
+dir /s /b apps\worker\*reservation-routes.js
+```
+
+```
+dir /s /b apps\worker\*admin-page.js
+```
+
+**表示されたパスをそのまま使って**、下の `<出てきたパス>` の部分を置き換えて実行してください。
+
+```
+curl -o <reservation-routes.jsの出てきたパス> https://raw.githubusercontent.com/GOUP55/HACOS-/main/line-reservation/src/reservation-routes.js
+```
+
+```
+curl -o <admin-page.jsの出てきたパス> https://raw.githubusercontent.com/GOUP55/HACOS-/main/line-reservation/src/admin-page.js
+```
+
+> 💡 例: `dir` の結果が `C:\Users\n9-f\.line-harness\apps\worker\src\reservation-routes.js` なら、
+> `curl -o C:\Users\n9-f\.line-harness\apps\worker\src\reservation-routes.js https://raw.githubusercontent.com/...` となります。
+
+---
+
+### ステップ5 ｜ デプロイする
+
+worker のフォルダへ移動。
+
+```
+cd apps\worker
+```
+
+デプロイ。**これが正しいコマンドです。**
+
+```
+pnpm run deploy
+```
+
+> ⚠️ **`npx wrangler deploy` は使わないでください。**
+> ビルドが飛ばされて、古いコードが本番に出る事故が実際に起きています。
+
+---
+
+### うまくいかないとき
+
+| 出たもの | 意味 | どうする |
+|---|---|---|
+| `no such column: kind` | ステップ2(3)がまだ | ステップ2(3)を実行する |
+| `duplicate column name: kind` | ステップ2(3)は**もう入っている** | そのまま次へ進んでOK |
+| `curl` が「コマンドではありません」 | 古いWindows | ブラウザでURLを開き、「名前を付けて保存」で同じファイル名にする |
+| `wrangler` が見つからない | フォルダ違い | ステップ0の `cd` からやり直す |
+| デプロイ後もフォームが古い | ブラウザ/LIFFのキャッシュ | LINEアプリを一度完全に閉じてから開き直す |
+
+**途中で分からなくなったら、そこで止めて連絡してください。** 中途半端に進めるより安全です。
+DBは壊れません（ステップ2は追加のみ・ステップ3以降はDBに触りません）。
 
 ### 動作確認（必ずLINEアプリ内のLIFFで。ブラウザは管理者Cookieで素通りするため確認になりません）
 
