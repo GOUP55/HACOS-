@@ -29,8 +29,8 @@
 | 7/28 | 司令塔（瞑想イベント） | line-reservation（reserve.html／reservation-routes.js／admin-page.js／migrations/2026-07-28-obosan-session.sql） | main反映済み（PR #59）。Harnessの本番反映（Worker＋migration適用）が必要 |
 | 7/28 | 司令塔（PR #60） | hacos-hmc-lp.html・index.html・retreat.html・premium.html・line-reservation | 8月お弁当確定・予約ボタン・Journey第2期差し替え・ハコさんティザー・瞑想スニペット貼り込み。**mainマージ済み** |
 | 8/1 | 司令塔→**アパレル新チャットへ引き継ぎ** | `SPEES_APPAREL_HANDOFF.md`・images/spees/（ロゴ・企画ボード5点） | 引き継ぎ済み。新チャットは同ファイルを起点に。担当宣言をここに書くこと |
-| 8/14 | 司令塔（商品体系リニューアル）→次チャットへ引き継ぎ | `tokushoho.html`・`BUSINESS_RULES.md`・`hacos-hmc-lp.html`／`index.html`・`retreat.html` | ブランチ `claude/august-program-reservation-updates-7i3cle` にpush済み・QA1周済み。**main未マージ＝本番は旧料金のまま**。オーナー決定待ちが3件（朝RUNの予約制／パーソナル謝礼／ジャーニー返金規定）。詳細は NEXT_CHAT_HANDOFF.md 冒頭 |
-| 8/14 | →デプロイの手へ（**まだ着手しないこと**） | line-reservation 全体 | 商品体系の変更に伴い**回数券を全撤去**し参加区分を作り直す予定。**設計は確定したがコードは未着手**。司令塔が実装しmainマージするまで本番反映の作業は発生しない |
+| 8/15 | 司令塔（商品体系リニューアル）→次チャットへ引き継ぎ | `tokushoho.html`・`BUSINESS_RULES.md`・`hacos-hmc-lp.html`／`index.html`・`retreat.html`・`line-reservation/` | ブランチ `claude/august-program-reservation-updates-7i3cle` にpush済み・QA1周済み・テスト89項目合格。**main未マージ＝本番は旧料金のまま**。残るオーナー決定はジャーニーの返金規定。詳細は NEXT_CHAT_HANDOFF.md 冒頭 |
+| 8/15 | →デプロイの手へ（**mainマージ後に着手**） | line-reservation 全体 | 回数券を全撤去し参加区分を新体系に。**「朝RUNのみ」（¥0）区分を新設**。コードはmainマージ待ち。**マージされるまで本番反映に着手しないこと**（依頼プロンプトは司令塔から別途渡す） |
 <!-- ここに作業中の行を追加。完了したら行ごと削除 -->
 
 ## 現在の全体像（どこで何が動いているか）
