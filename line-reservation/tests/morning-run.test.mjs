@@ -26,6 +26,7 @@ const noRunSession = {
 
 let currentSessions = [];
 let lastPostBody = null;
+let lastTrialBody = null;
 
 function startMockServer() {
   const server = http.createServer((req, res) => {
@@ -44,6 +45,14 @@ function startMockServer() {
     } else if (url === '/api/liff/sessions') {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ sessions: currentSessions }));
+    } else if (url === '/api/liff/trial-request' && req.method === 'POST') {
+      let body = '';
+      req.on('data', c => { body += c; });
+      req.on('end', () => {
+        lastTrialBody = JSON.parse(body);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, id: 'trial-test-id' }));
+      });
     } else if (url === '/api/liff/reservations' && req.method === 'POST') {
       let body = '';
       req.on('data', c => { body += c; });
@@ -127,6 +136,33 @@ function check(name, ok, detail = '') {
     lastPostBody?.category === '朝RUNのみ' && lastPostBody?.morning_run === 'join');
   check('送信ボディ: 対象は朝RUN開催日だけ',
     JSON.stringify(lastPostBody?.session_ids) === JSON.stringify([runSession.id]));
+
+  // ── 7日間お試し（リクエスト型・体験パーソナルと同じ枠組み） ──
+  await page.goto(`http://127.0.0.1:${PORT}/liff/reserve`);
+  await page.waitForSelector('#app', { state: 'visible', timeout: 10000 });
+  await page.locator('#trial-open-btn').click();
+
+  check('申込の種類に「体験パーソナル」と「7日間お試し」がある',
+    (await page.locator('input[name="trial_kind"][value="trial_personal"]').count()) === 1 &&
+    (await page.locator('input[name="trial_kind"][value="journey_trial7"]').count()) === 1);
+  check('初期選択は体験パーソナル',
+    await page.locator('input[name="trial_kind"][value="trial_personal"]').isChecked());
+  const kindLabel = await page.locator('input[name="trial_kind"][value="journey_trial7"]')
+    .locator('xpath=..').textContent();
+  check('7日間お試しに¥9,000と充当の案内がある',
+    kindLabel.includes('¥9,000') && kindLabel.includes('充当'));
+
+  await page.locator('input[name="trial_kind"][value="journey_trial7"]').check();
+  await page.locator('input[name="trial_trainer"][value="GO"]').check();
+  await page.locator('#trial-date').fill('2026-08-20');
+  await page.locator('input[name="trial_time"][value="午前（9:00〜12:00）"]').check();
+  await page.locator('#trial-submit-btn').click();
+  await page.waitForFunction(() => true);
+  await page.waitForTimeout(300);
+
+  check('送信ボディ: kind=journey_trial7 が入る', lastTrialBody?.kind === 'journey_trial7');
+  check('送信ボディ: 担当・希望日時も一緒に送られる',
+    lastTrialBody?.trainer === 'GO' && lastTrialBody?.preferred_date === '2026-08-20');
 
   await browser.close();
   server.close();

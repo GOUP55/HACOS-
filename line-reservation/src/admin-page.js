@@ -30,7 +30,7 @@ function categoryBadge(category) {
     'HMC会員': ['🌅', '#2e7d32'],
     'セミパ会員': ['💪', '#7b1fa2'],
     '相談': ['💬', '#616161'],
-    // 旧区分（2026-08-14の商品体系リニューアル前の予約が履歴に残っている）
+    // 旧区分（2026-08-15の商品体系リニューアル前の予約が履歴に残っている）
     '会員': ['✅', '#2e7d32'],
     'ビジター': ['👤', '#1565c0'],
     '回数券': ['🎫', '#7b1fa2'],
@@ -163,12 +163,19 @@ function renderAdminReservations({ todayJst, sessions, trials }) {
     is_open: s.is_open, bento_json: s.bento_json,
   }))).replace(/</g, '\\u003c');
 
+  // kindがNULLの行は、種別を足す前（2026-08-15以前）の体験パーソナル
+  const trialKindLabel = (kind) =>
+    kind === 'journey_trial7'
+      ? '<span style="display:inline-block;background:#fff3e0;color:#e65100;font-size:11px;font-weight:700;border-radius:4px;padding:3px 9px;">🚩 ジャーニー7日間お試し ¥9,000</span>'
+      : '<span style="display:inline-block;background:#e0f2f1;color:#00796b;font-size:11px;font-weight:700;border-radius:4px;padding:3px 9px;">🌱 体験パーソナル ¥3,500</span>';
+
   const trialRows = trials.map(t => `
     <li class="person">
       <div class="person-main">
         <span class="name">${esc(t.display_name || '(名前なし)')}</span>
         <span class="meta">希望: ${esc(t.trainer)}</span>
       </div>
+      <div style="margin:4px 0;">${trialKindLabel(t.kind)}</div>
       <div class="msg">第1希望 ${esc(t.preferred_date)}（${esc(t.preferred_time)}）${t.alt_note ? ` ／ 第2希望・要望: ${esc(t.alt_note)}` : ''}</div>
       <div class="ts">${esc(fmtJst(t.created_at))} 受付</div>
       ${t.id ? `
@@ -273,7 +280,7 @@ details .card { padding: 12px 0 0; }
     </form>
   </details>
 
-  <div class="section-label">🌱 体験パーソナル リクエスト（確定待ち）</div>
+  <div class="section-label">🌱 体験パーソナル・7日間お試し リクエスト（確定待ち）</div>
   ${trialRows ? `<div class="card"><ul class="people" style="border-top:none;margin-top:0;">${trialRows}</ul></div>` : '<div class="card"><p class="empty">確定待ちのリクエストはありません</p></div>'}
 
   ${past.length ? `<details><summary>🗂 過去30日の開催（${past.length}件）</summary>${past.map(s => sessionCard(s)).join('')}</details>` : ''}
@@ -300,7 +307,7 @@ document.querySelectorAll('[data-trial-action]').forEach(btn => {
   btn.addEventListener('click', async () => {
     const { trialId, trialAction, trialName } = btn.dataset;
     const label = trialAction === 'confirm' ? '確定' : '不成立';
-    if (!confirm(trialName + ' さんの体験リクエストを「' + label + '」にしますか？\\n（お客様への連絡は自動送信されません。別途スタッフからお願いします）')) return;
+    if (!confirm(trialName + ' さんのリクエストを「' + label + '」にしますか？\\n（お客様への連絡は自動送信されません。別途スタッフからお願いします）')) return;
 
     const row = btn.closest('.trial-actions');
     row.querySelectorAll('button').forEach(b => { b.disabled = true; });
