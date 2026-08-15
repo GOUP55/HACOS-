@@ -46,7 +46,8 @@
 | `REMOTE_OPS_SYSTEM.md` | 不在運営システム設計（方針のみ） |
 | `FOOD_BOX_DESIGN.md` | 食材BOX設計（案） |
 | `GOOGLE_FORM_DESIGN.md` | 週次チェックインフォーム設計（案） |
-| `PERSONAL_BRAND_PLAN.md` | パーソナルブランド発信計画（案） |
+| `PERSONAL_BRAND_PLAN.md` | パーソナルブランド発信計画（案・GO本人向け） |
+| `MIDORI_ACTION_PLAN.md` | みどりさんの個人事業 行動計画（IG初週・おかずセット定期・イベントのドリンク。**金額は全て仮・保健所確認が前提**） |
 
 ## 素材・テンプレ（使うときに参照）
 | ファイル | 役割 |
