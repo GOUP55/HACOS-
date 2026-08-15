@@ -63,9 +63,13 @@ reservationRoutes.get('/api/admin/reservations', async (c) => {
   // capacity > 0 のフィルタは置かない。定員0の行（SQL運用の「お休み」等）が
   // 管理画面から完全に見えなくなり、UIから復旧・確認できなくなるため。
   // お客様向けフォームは is_open=1 で絞っているのでここで全件見えても影響しない
+  // booked は「7:30の朝活クラスに出る人数」＝定員10名に対する数。
+  // 「朝RUNのみ」は席を使わないので除外する（含めると 11/10 のような表示になる）。
+  // 朝RUNのみの方は下の people に含まれ、カードには🏃バッジ付きで並ぶ
   const { results: sessions } = await c.env.DB.prepare(`
     SELECT s.*,
-      COUNT(CASE WHEN r.status = 'confirmed' THEN 1 END) AS booked,
+      COUNT(CASE WHEN r.status = 'confirmed'
+            AND r.category != '朝RUNのみ' THEN 1 END) AS booked,
       COUNT(CASE WHEN r.status = 'cancelled' THEN 1 END) AS cancelled
     FROM sessions s
     LEFT JOIN reservations r ON r.session_id = s.id
@@ -323,9 +327,13 @@ reservationRoutes.get('/api/liff/sessions', async (c) => {
     cutoffDate = tomorrow.toISOString().split('T')[0];
   }
 
+  // 「朝RUNのみ」（6:30〜・参加費¥0）は7:30の朝活クラスに出ないため、定員10名を消費しない。
+  // お客様に見える残席の計算からも必ず除外する（除外を外すと、朝RUNだけの申込みで
+  // クラスの残席が減って見える）。
   const { results } = await c.env.DB.prepare(`
     SELECT s.*,
-      COUNT(CASE WHEN r.status = 'confirmed' THEN 1 END) AS booked
+      COUNT(CASE WHEN r.status = 'confirmed'
+            AND r.category != '朝RUNのみ' THEN 1 END) AS booked
     FROM sessions s
     LEFT JOIN reservations r ON r.session_id = s.id
     WHERE s.is_open = 1 AND (s.date >= ?1 OR (s.date = ?2 AND s.id <> s.date))
@@ -379,6 +387,10 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
   if (category === '体験' && !trainer) {
     return c.json({ error: 'trainer_required' }, 400);
   }
+
+  // 「朝RUNのみ」はクラスの席を取らない区分。満席でも受け付ける（＝定員ガードを通さない）。
+  // 1 なら席を取る＝定員ガードあり、0 なら席を取らない＝ガードなし。
+  const takesSeat = category === '朝RUNのみ' ? 0 : 1;
 
   const reservations = [];
   // 満席などで予約できなかった日程。途中でreturnせず最後まで処理して、
@@ -447,8 +459,10 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
         SELECT ?, s.id, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'confirmed', ?
         FROM sessions s
         WHERE s.id = ? AND s.is_open = 1
-          AND (SELECT COUNT(*) FROM reservations r
-               WHERE r.session_id = s.id AND r.status = 'confirmed') < s.capacity + ${EXTRA_SLOTS}
+          AND (? = 0 OR
+               (SELECT COUNT(*) FROM reservations r
+                WHERE r.session_id = s.id AND r.status = 'confirmed'
+                  AND r.category != '朝RUNのみ') < s.capacity + ${EXTRA_SLOTS})
       `).bind(
         reservationId, userId, displayName, category,
         morning_run || null,
@@ -458,7 +472,8 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
         message || null,
         ref || null,
         createdAt,
-        sessionId
+        sessionId,
+        takesSeat
       ).run();
     } catch (e) {
       if (!e.message?.includes('UNIQUE')) throw e;
@@ -488,15 +503,17 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
             display_name = ?, category = ?, morning_run = ?,
             bento = ?, trainer = ?, message = ?, ref = ?, created_at = ?
         WHERE id = ? AND status = 'cancelled'
-          AND (SELECT COUNT(*) FROM reservations r2
-               WHERE r2.session_id = ? AND r2.status = 'confirmed') <
-              (SELECT capacity + ${EXTRA_SLOTS} FROM sessions WHERE id = ?)
+          AND (? = 0 OR
+               (SELECT COUNT(*) FROM reservations r2
+                WHERE r2.session_id = ? AND r2.status = 'confirmed'
+                  AND r2.category != '朝RUNのみ') <
+               (SELECT capacity + ${EXTRA_SLOTS} FROM sessions WHERE id = ?))
       `;
       const reactivateBinds = [
         displayName, category, morning_run || null,
         Array.isArray(bento) && bento.length ? bento.join(',') : null,
         trainer || null, message || null, ref || null, createdAt,
-        existing.id, sessionId, sessionId,
+        existing.id, takesSeat, sessionId, sessionId,
       ];
       let reactivated;
       try {
