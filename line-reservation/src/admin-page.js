@@ -72,10 +72,11 @@ function isTacos(r) {
 // 日程ごとの集計行（KITCHEN向け）: お弁当×個数・朝RUN人数・TACOS人数
 function aggLine(s) {
   const bentoCount = new Map();
-  let run = 0, runDecide = 0, tacos = 0;
+  let run = 0, runDecide = 0, tacos = 0, runOnly = 0;
   for (const r of s.reservations) {
     if (RUN_JOIN.includes(r.morning_run)) run++;
     else if (RUN_DECIDE.includes(r.morning_run)) runDecide++;
+    if (r.category === '朝RUNのみ') runOnly++;
     if (isTacos(r)) tacos++;
     for (const name of bentoItemsFor(s.id, r.bento)) {
       bentoCount.set(name, (bentoCount.get(name) || 0) + 1);
@@ -84,6 +85,9 @@ function aggLine(s) {
   const parts = [];
   if (bentoCount.size) parts.push([...bentoCount].map(([n, c]) => `🍱 ${esc(n)}×${c}`).join('、'));
   if (run || runDecide) parts.push(`🏃 朝RUN ${run}名${runDecide ? `（＋当日決め${runDecide}）` : ''}`);
+  // 上の人数バッジ（◯/10）は7:30のクラスの人数。朝RUNのみの方は席を使わないため
+  // そこに入らない。名前は下に並ぶので、人数が合わなく見えないようここで断っておく
+  if (runOnly) parts.push(`うち朝RUNのみ ${runOnly}名（クラスの席は使いません）`);
   if (tacos) parts.push(`🌮 TACOS ${tacos}名`);
   return parts.length ? `<div class="agg">${parts.join(' ／ ')}</div>` : '';
 }
