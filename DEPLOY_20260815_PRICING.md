@@ -272,10 +272,71 @@ DBは壊れません（ステップ2は追加のみ・ステップ3以降はDB�
 - [ ] **LPの「7日間お試しを申し込む」ボタンから来ると、フォームが開いて種別まで選ばれている**
       （URLに `?apply=trial7` が付いています）
 
+### 差し替え前のバックアップ（ステップ3・4の前にやると安心）
+
+`apps\worker` にいる状態で、いまのファイルをコピーしておきます。
+
+```
+copy src\reservation-routes.js src\reservation-routes.js.bak
+```
+
+```
+copy src\admin-page.js src\admin-page.js.bak
+```
+
 ### 切り戻し
 
-KVに旧 `reserve.html` を戻し、置換前の `reservation-routes.js` / `admin-page.js` で
-`pnpm run deploy` すれば元に戻ります。DBは触らないので、切り戻しでデータは壊れません。
+**コードを戻す**（上のバックアップを取っていれば、そこから戻すのがいちばん確実）
+
+```
+copy src\reservation-routes.js.bak src\reservation-routes.js
+```
+
+```
+copy src\admin-page.js.bak src\admin-page.js
+```
+
+バックアップが無い場合は、変更前の状態（コミット `ae08c23`）から取り直せます。
+**この3ファイルは `ae08c23` と変更直前のmainで内容が同一であることを確認済み**（2026-08-15）。
+
+```
+curl -o src\reservation-routes.js https://raw.githubusercontent.com/GOUP55/HACOS-/ae08c23/line-reservation/src/reservation-routes.js
+```
+
+```
+curl -o src\admin-page.js https://raw.githubusercontent.com/GOUP55/HACOS-/ae08c23/line-reservation/src/admin-page.js
+```
+
+**予約フォームを戻す**
+
+```
+curl -o reserve-old.html https://raw.githubusercontent.com/GOUP55/HACOS-/ae08c23/line-reservation/liff/reserve.html
+```
+
+```
+npx wrangler kv key put --binding=STATIC_KV "liff/reserve.html" --path=reserve-old.html --remote
+```
+
+戻したら `pnpm run deploy` を実行します。
+**DBは触らないので、切り戻しでデータは壊れません**（追加した `kind` 列は残りますが、古いコードは
+その列を使わないだけなので問題ありません）。
+
+---
+
+## ⚠️ 別件・期限あり：9月の日程がまだD1に入っていない
+
+**2026-08-30 の正午（JST）を過ぎると、予約フォームの日程が空になります。**
+
+`/api/liff/sessions` は「JST正午を過ぎたら、その日のセッションも表示から外す」作りです
+（当日の朝クラスが終わったあとも一日中出続けるのを防ぐため）。
+いまD1にある朝クラスは **8/2・8/9・8/16・8/23・8/30 の5本が最後**なので、
+8/30の正午以降は表示できるものが無くなります。
+
+**9月の日曜は 9/6・9/13・9/20・9/27 の4回。** 8/30までに登録が必要です。
+
+登録は**管理画面の「🛠 開催日の管理」から追加できます（SQL不要）**。
+クラス名・担当・お弁当が決まり次第、そこで足してください。
+まとめてSQLで入れたい場合は、司令塔にマイグレーションを作ってもらってください。
 
 ## （ここまでコピー）
 
