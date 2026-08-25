@@ -42,6 +42,7 @@
 | `S_CLASS_PROJECTS.md` | S級プロジェクト構想書3本＋引継ぎ（コンパニオン等） |
 | `DEPLOY_COMPANION.md` | コンパニオンβのデプロイ手順書（**実施待ち**・条件2つあり） |
 | `DEPLOY_20260815_SEATFIX.md` | 席の数え方の修正＋9月日程の反映手順（**実施待ち**・貼り付け用プロンプトあり） |
+| `HMC_SEPTEMBER_CLASS_PLAN.md` | 9月の日曜クラス（4回とも確定・トレーナー共有文面／告知文つき） |
 | `BENTO_SUBSCRIPTION_PLAN.md` | 弁当定期便（全て仮） |
 | `PROFIT_10M_ROADMAP.md` | 利益ロードマップ（全て仮・要オーナー数値） |
 | `REMOTE_OPS_SYSTEM.md` | 不在運営システム設計（方針のみ） |
