@@ -48,9 +48,12 @@ CREATE TABLE IF NOT EXISTS trial_requests (
   alt_note       TEXT,   -- 第2希望・ご要望（自由記述）
   ref            TEXT,
   status         TEXT NOT NULL DEFAULT 'pending',  -- pending / confirmed(確定) / declined(不成立) / cancelled(顧客自身の取消)
+  kind           TEXT,   -- trial_personal(体験パーソナル) / journey_trial7(7日間お試し)。NULL＝種別を足す前の体験パーソナル
   created_at     TEXT NOT NULL,
   decided_at     TEXT,   -- スタッフが確定/不成立にした日時
-  decided_by     TEXT    -- 操作したスタッフID（共有キー運用中は 'env-owner'）
+  decided_by     TEXT,   -- 操作したスタッフID（共有キー運用中は 'env-owner'）
+  updated_at     TEXT,   -- スタッフが希望日を書き換えた日時（NULL＝お客様が出したまま）
+  updated_by     TEXT    -- 希望日を書き換えたスタッフID
 );
 
 CREATE INDEX IF NOT EXISTS idx_trial_user ON trial_requests(line_user_id, status);

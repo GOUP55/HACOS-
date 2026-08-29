@@ -68,6 +68,9 @@ const html = renderAdminReservations({
   ],
   trials: [
     { id: 'trial-1', display_name: '体験希望さん', trainer: 'GO', preferred_date: '2026-07-15', preferred_time: '午前', alt_note: '夕方でも可', created_at: '2026-07-06T09:00:00Z' },
+    // 第1希望日が過ぎてしまい、スタッフが希望日を書き換えたあとの行
+    { id: 'trial-2', display_name: '日程変更さん', trainer: 'お任せ', preferred_date: '2026-07-20', preferred_time: '午後（15:00〜18:00）',
+      alt_note: null, kind: 'journey_trial7', created_at: '2026-07-01T09:00:00Z', updated_at: '2026-07-07T02:15:00Z', updated_by: 'env-owner' },
   ],
 });
 
@@ -130,6 +133,41 @@ check('confirm/declineルートが /api/admin/ 配下（認証必須）にある
 check('二重処理防止: UPDATEに AND status = \'pending\' ガードがある',
   /UPDATE trial_requests SET[\s\S]*?WHERE id = \? AND status = 'pending'/.test(routesSrc));
 
+// ── 第4弾: 体験リクエストの希望日変更（スタッフが管理画面で書き換える） ──
+// 「変更済み」の印は編集ボタンより前に出るため、行の先頭（<li>）から切り出す
+const trialRow = (id) => {
+  const li = html.split('<li class="person">').find(c => c.includes('data-trial-form="' + id + '"')) || '';
+  return li.split('</li>')[0];
+};
+check('確定待ちの行に「希望日を変更」ボタンと変更フォームが出る',
+  html.includes('data-trial-edit="trial-1"') && html.includes('📅 希望日を変更') &&
+  html.includes('data-trial-form="trial-1"'));
+check('変更フォームに現在の希望日がプリフィルされる',
+  trialRow('trial-1').includes('type="date" value="2026-07-15"'));
+check('時間帯は4区分から選ぶ（LIFFの選択肢と同じ）',
+  ['午前（9:00〜12:00）', '昼（12:00〜15:00）', '午後（15:00〜18:00）', '夜（18:00〜21:00）']
+    .every(t => trialRow('trial-1').includes('<option value="' + t + '"')));
+check('4区分に無い既存の時間帯も選択肢に残る（日付だけ直すつもりで時間帯が変わらない）',
+  trialRow('trial-1').includes('<option value="午前" selected>'));
+check('4区分の値はそのまま選択状態になる（重複して増えない）',
+  trialRow('trial-2').includes('<option value="午後（15:00〜18:00）" selected>') &&
+  (trialRow('trial-2').match(/<option value="午後（15:00〜18:00）"/g) || []).length === 1);
+check('変更フォームは初期状態では閉じている（誤操作防止）',
+  /<form class="trial-edit" hidden/.test(html));
+check('自動送信されないことをフォーム内にも明示する',
+  html.includes('連絡は自動送信されないので、変更後にLINEでお伝えください'));
+check('スタッフが変更済みの行にはその印と日時が出る',
+  trialRow('trial-2').includes('✏️ 7/7 11:15 スタッフが希望日を変更') &&
+  !trialRow('trial-1').includes('スタッフが希望日を変更'));
+check('希望日変更ルートが /api/admin/ 配下（認証必須）にある',
+  /\.post\(\s*'\/api\/admin\/trials\/:id'/.test(routesSrc));
+check('希望日変更も確定済みには効かない（UPDATEに pending ガード）',
+  /UPDATE trial_requests SET preferred_date = \?, preferred_time = \?[\s\S]*?WHERE id = \? AND status = 'pending'/.test(routesSrc));
+check('第2希望・ご要望（お客様の記録）は書き換え対象に入っていない',
+  !/UPDATE trial_requests SET[^;]*alt_note = \?/.test(routesSrc));
+check('日程変更が操作ログに残る（変更前後つき）',
+  /logAdminOp\(c, 'trial_reschedule'/.test(routesSrc));
+
 // ── 第3弾: 開催日の登録・編集 ──
 check('開催日管理フォームが出る（日付・クラス名・定員・お弁当）',
   html.includes('id="session-form"') && html.includes('id="sf-date"') &&
@@ -185,6 +223,59 @@ const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PAT
 const page = await browser.newPage({ viewport: { width: 390, height: 1500 } });
 await page.goto('file://' + htmlPath);
 await page.screenshot({ path: path.join(__dirname, 'admin-ui.png'), fullPage: true });
+
+// ── 実ブラウザでの動作確認: 希望日の変更フォーム ──
+// HTMLの文字列検査だけでは通ってしまう不具合（.trial-edit の display 指定が
+// [hidden] に勝って開きっぱなしになる／画面JSの文法エラーでボタンが無反応）をここで止める。
+// confirm・fetch・location.reload を差し替えられないため、記録は sessionStorage に残して
+// リロードをまたいで確認する。
+const trialPage = await browser.newPage({ viewport: { width: 390, height: 900 } });
+let pageError = '';
+trialPage.on('pageerror', (e) => { pageError = e.message; });
+await trialPage.addInitScript(() => {
+  const log = (k, v) => sessionStorage.setItem(k, v);
+  window.confirm = (m) => { log('confirm', m); return true; };
+  window.alert = (m) => { log('alert', m); };
+  const orig = window.fetch;
+  window.fetch = async (url, opts) => {
+    const u = String(url);
+    if (u === '/api/auth/session') return new Response('{"csrfToken":"tok123"}', { status: 200 });
+    if (u.startsWith('/api/admin/')) {
+      log('post', JSON.stringify({ url: u, body: opts?.body, csrf: opts?.headers?.['X-CSRF-Token'] }));
+      return new Response('{"ok":true}', { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+    return orig(url, opts);
+  };
+});
+await trialPage.goto('file://' + htmlPath);
+check('画面JSに文法エラーがない（ボタンが無反応にならない）', pageError === '', pageError);
+
+const editForm = trialPage.locator('[data-trial-form="trial-1"]');
+check('変更フォームは閉じた状態で表示される', await editForm.isHidden());
+await trialPage.click('[data-trial-edit="trial-1"]');
+check('「希望日を変更」を押すとフォームが開く', await editForm.isVisible());
+await trialPage.click('[data-trial-edit-cancel]');
+check('「やめる」で閉じる', await editForm.isHidden());
+
+await trialPage.click('[data-trial-edit="trial-1"]');
+await trialPage.fill('[data-trial-form="trial-1"] input[type=date]', '2026-09-03');
+await trialPage.selectOption('[data-trial-form="trial-1"] select', '午後（15:00〜18:00）');
+await trialPage.click('[data-trial-form="trial-1"] button[type=submit]');
+await trialPage.waitForTimeout(500);
+const sent = await trialPage.evaluate(() => ({
+  confirm: sessionStorage.getItem('confirm'),
+  post: JSON.parse(sessionStorage.getItem('post') || 'null'),
+  alert: sessionStorage.getItem('alert'),
+}));
+check('確認ダイアログに変更後の日時と「自動送信されません」が出る',
+  !!sent.confirm && sent.confirm.includes('2026-09-03（午後（15:00〜18:00））') &&
+  sent.confirm.includes('自動送信されません'), sent.confirm || '(出なかった)');
+check('変更内容がCSRFトークン付きで /api/admin/trials/:id にPOSTされる',
+  !!sent.post && sent.post.url === '/api/admin/trials/trial-1' && sent.post.csrf === 'tok123' &&
+  sent.post.body === JSON.stringify({ preferred_date: '2026-09-03', preferred_time: '午後（15:00〜18:00）' }),
+  JSON.stringify(sent.post));
+check('エラーダイアログは出ない', sent.alert === null, sent.alert || '');
+await trialPage.close();
 await browser.close();
 
 const fail = results.filter(r => !r.ok).length;

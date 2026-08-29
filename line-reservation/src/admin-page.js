@@ -167,6 +167,16 @@ function renderAdminReservations({ todayJst, sessions, trials }) {
     is_open: s.is_open, bento_json: s.bento_json,
   }))).replace(/</g, '\\u003c');
 
+  // 希望日変更フォームの時間帯。値はLIFF（reserve.html の trial_time）と一致させること。
+  // 過去データや手入力で4区分に無い値が入っている場合は、それも選択肢に残して
+  // 「日付だけ直すつもりが時間帯まで変わっていた」を防ぐ
+  const TRIAL_TIMES = ['午前（9:00〜12:00）', '昼（12:00〜15:00）', '午後（15:00〜18:00）', '夜（18:00〜21:00）'];
+  const timeOptions = (current) => {
+    const cur = String(current || '');
+    const list = !cur || TRIAL_TIMES.includes(cur) ? TRIAL_TIMES : [cur, ...TRIAL_TIMES];
+    return list.map(o => `<option value="${esc(o)}"${o === cur ? ' selected' : ''}>${esc(o)}</option>`).join('');
+  };
+
   // kindがNULLの行は、種別を足す前（2026-08-15以前）の体験パーソナル
   const trialKindLabel = (kind) =>
     kind === 'journey_trial7'
@@ -181,8 +191,22 @@ function renderAdminReservations({ todayJst, sessions, trials }) {
       </div>
       <div style="margin:4px 0;">${trialKindLabel(t.kind)}</div>
       <div class="msg">第1希望 ${esc(t.preferred_date)}（${esc(t.preferred_time)}）${t.alt_note ? ` ／ 第2希望・要望: ${esc(t.alt_note)}` : ''}</div>
-      <div class="ts">${esc(fmtJst(t.created_at))} 受付</div>
+      <div class="ts">${esc(fmtJst(t.created_at))} 受付${t.updated_at ? ` ／ ✏️ ${esc(fmtJst(t.updated_at))} スタッフが希望日を変更` : ''}</div>
       ${t.id ? `
+      <div class="trial-actions">
+        <button type="button" class="btn-trial edit" data-trial-edit="${esc(t.id)}">📅 希望日を変更</button>
+      </div>
+      <form class="trial-edit" hidden data-trial-form="${esc(t.id)}" data-trial-name="${esc(t.display_name || '(名前なし)')}">
+        <label>変更後の日付
+          <input type="date" value="${esc(t.preferred_date)}" required></label>
+        <label>時間帯
+          <select>${timeOptions(t.preferred_time)}</select></label>
+        <p class="hint">お客様のLINE画面もこの日付に変わります。連絡は自動送信されないので、変更後にLINEでお伝えください</p>
+        <div class="trial-actions">
+          <button type="submit" class="btn-trial save">この内容に変更する</button>
+          <button type="button" class="btn-trial" data-trial-edit-cancel>やめる</button>
+        </div>
+      </form>
       <div class="trial-actions">
         <button type="button" class="btn-trial confirm" data-trial-id="${esc(t.id)}" data-trial-action="confirm" data-trial-name="${esc(t.display_name || '(名前なし)')}">✅ 確定にする</button>
         <button type="button" class="btn-trial decline" data-trial-id="${esc(t.id)}" data-trial-action="decline" data-trial-name="${esc(t.display_name || '(名前なし)')}">✖ 不成立にする</button>
@@ -246,7 +270,16 @@ details .card { padding: 12px 0 0; }
 .btn-trial { flex: 1; border-radius: 8px; padding: 9px 10px; font-size: 12px; font-weight: 700; cursor: pointer; border: 1.5px solid; background: #fff; }
 .btn-trial.confirm { color: #2e7d32; border-color: #2e7d32; }
 .btn-trial.decline { color: #b85c38; border-color: #b85c38; }
+.btn-trial.edit { color: #C8833A; border-color: #C8833A; }
+.btn-trial.save { background: #3D5A3E; color: #fff; border-color: #3D5A3E; }
 .btn-trial:disabled { opacity: .5; cursor: default; }
+.trial-edit { background: #faf8f4; border: 1px solid #eee3d3; border-radius: 10px; padding: 10px; margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
+/* display指定はブラウザ既定の [hidden]{display:none} に勝ってしまう。閉じた状態を明示する */
+.trial-edit[hidden] { display: none; }
+.trial-edit label { font-size: 12px; font-weight: 700; }
+.trial-edit input, .trial-edit select { width: 100%; border: 1.5px solid #e0e0e0; border-radius: 8px; padding: 10px; font-size: 14px; font-family: inherit; background: #fff; margin-top: 4px; }
+.trial-edit .hint { font-size: 11px; color: #8a7a63; line-height: 1.6; }
+.trial-edit .trial-actions { margin-top: 0; }
 </style>
 </head>
 <body>
@@ -334,6 +367,54 @@ document.querySelectorAll('[data-trial-action]').forEach(btn => {
     }
     row.querySelectorAll('button').forEach(b => { b.disabled = false; });
     btn.textContent = trialAction === 'confirm' ? '✅ 確定にする' : '✖ 不成立にする';
+  });
+});
+
+// ── 体験リクエストの希望日変更 ──
+// 「第1希望日が過ぎた」「LINEで別日に決まった」ときに、確定の前に日付だけを直す。
+// 送信するのは日付と時間帯だけ（第2希望・ご要望はお客様の記録なので触らない）。
+// postAdmin / adminError は下の「開催日の管理」節の関数宣言（巻き上げで先に使える）。
+document.querySelectorAll('[data-trial-edit]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const form = btn.closest('li').querySelector('.trial-edit');
+    form.hidden = !form.hidden;
+    btn.textContent = form.hidden ? '📅 希望日を変更' : '📅 変更フォームを閉じる';
+    if (!form.hidden) form.querySelector('input[type=date]').focus();
+  });
+});
+
+document.querySelectorAll('[data-trial-edit-cancel]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const li = btn.closest('li');
+    li.querySelector('.trial-edit').hidden = true;
+    li.querySelector('[data-trial-edit]').textContent = '📅 希望日を変更';
+  });
+});
+
+document.querySelectorAll('[data-trial-form]').forEach(form => {
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const date = form.querySelector('input[type=date]').value;
+    const time = form.querySelector('select').value;
+    if (!date) { alert('変更後の日付を選んでください。'); return; }
+    if (!confirm(form.dataset.trialName + ' さんの希望日を\\n' + date + '（' + time + '）に変更しますか？\\n（お客様への連絡は自動送信されません。別途スタッフからお願いします）')) return;
+
+    const btns = form.querySelectorAll('button');
+    btns.forEach(b => { b.disabled = true; });
+    try {
+      const res = await postAdmin('/api/admin/trials/' + encodeURIComponent(form.dataset.trialForm), {
+        preferred_date: date,
+        preferred_time: time,
+      });
+      if (res.ok) { location.reload(); return; }
+      if (res.status === 409) { alert('このリクエストはすでに確定/不成立になっています。最新の状態に更新します。'); location.reload(); return; }
+      if (res.status === 404) { alert('このリクエストは見つかりませんでした。画面を更新します。'); location.reload(); return; }
+      const err = (await res.json().catch(() => ({}))).error;
+      if (err === 'invalid_date') alert('日付を確認してください（実在する日付を選んでください）。');
+      else if (err === 'time_required') alert('時間帯を選んでください。');
+      else adminError(res);
+    } catch { alert('通信エラーが発生しました。もう一度お試しください。'); }
+    btns.forEach(b => { b.disabled = false; });
   });
 });
 

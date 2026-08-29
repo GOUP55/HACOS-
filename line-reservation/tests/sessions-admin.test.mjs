@@ -47,7 +47,47 @@ check('日程自体は残っている',
 db.prepare(`DELETE FROM reservations WHERE id = 'r1'`).run();
 check('予約履歴が無くなれば削除できる', delGuarded.run('2026-08-02').changes === 1);
 
-// ── 4. 操作ログ ──
+// ── 4. 体験リクエストの希望日変更（スタッフが管理画面で書き換える） ──
+db.prepare(`INSERT INTO trial_requests (id, line_user_id, display_name, trainer, preferred_date, preferred_time, alt_note, status, created_at)
+            VALUES ('t1','u1','明日香','お任せ','2026-08-25','午前（9:00〜12:00）','8月27日午前中','pending','x')`).run();
+db.prepare(`INSERT INTO trial_requests (id, line_user_id, display_name, trainer, preferred_date, preferred_time, status, created_at)
+            VALUES ('t2','u2','確定済み','GO','2026-08-20','夜（18:00〜21:00）','confirmed','x')`).run();
+const resched = db.prepare(`
+  UPDATE trial_requests SET preferred_date = ?, preferred_time = ?, updated_at = ?, updated_by = ?
+  WHERE id = ? AND status = 'pending'
+`);
+check('確定待ちの希望日を書き換えられる',
+  resched.run('2026-09-03', '午後（15:00〜18:00）', '2026-08-29T12:00:00Z', 'env-owner', 't1').changes === 1);
+const t1 = db.prepare(`SELECT * FROM trial_requests WHERE id='t1'`).get();
+check('希望日と時間帯が新しい値になる',
+  t1.preferred_date === '2026-09-03' && t1.preferred_time === '午後（15:00〜18:00）');
+check('第2希望・ご要望（お客様の記録）は残る', t1.alt_note === '8月27日午前中');
+check('いつ・誰が変更したかが残る',
+  t1.updated_at === '2026-08-29T12:00:00Z' && t1.updated_by === 'env-owner');
+check('確定済みのリクエストは書き換えられない（変化0行＝409になる）',
+  resched.run('2026-09-03', '午前（9:00〜12:00）', 'x', 'env-owner', 't2').changes === 0);
+check('存在しないIDの変更は変化0行（404になる）',
+  resched.run('2026-09-03', '午前（9:00〜12:00）', 'x', 'env-owner', 'no-such-id').changes === 0);
+
+// migrationファイルが「列がまだ無いDB」に適用できる
+const oldTrials = new DatabaseSync(':memory:');
+oldTrials.exec(`CREATE TABLE trial_requests (
+  id TEXT PRIMARY KEY, line_user_id TEXT NOT NULL, display_name TEXT, trainer TEXT,
+  preferred_date TEXT, preferred_time TEXT, alt_note TEXT, ref TEXT,
+  status TEXT NOT NULL DEFAULT 'pending', created_at TEXT NOT NULL)`);
+oldTrials.exec(read('../migrations/2026-08-29-trial-reschedule.sql'));
+const cols = oldTrials.prepare(`PRAGMA table_info(trial_requests)`).all().map(r => r.name);
+check('reschedule migrationで updated_at / updated_by が追加される',
+  cols.includes('updated_at') && cols.includes('updated_by'));
+check('migration適用前のDBでも「日付と時間帯だけ」のUPDATEは通る（コード側フォールバック）', (() => {
+  const bare2 = new DatabaseSync(':memory:');
+  bare2.exec(`CREATE TABLE trial_requests (id TEXT PRIMARY KEY, preferred_date TEXT, preferred_time TEXT, status TEXT)`);
+  bare2.prepare(`INSERT INTO trial_requests VALUES ('t','2026-08-25','午前','pending')`).run();
+  return bare2.prepare(`UPDATE trial_requests SET preferred_date = ?, preferred_time = ? WHERE id = ? AND status = 'pending'`)
+    .run('2026-09-03', '午後', 't').changes === 1;
+})());
+
+// ── 5. 操作ログ ──
 db.prepare(`INSERT INTO admin_ops_log (id, staff_id, action, target_id, detail, created_at)
             VALUES ('l1','env-owner','session_create','2026-08-02','{}','x')`).run();
 check('admin_ops_log に staff_id 付きで記録できる',
