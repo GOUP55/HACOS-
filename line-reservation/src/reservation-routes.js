@@ -94,19 +94,11 @@ reservationRoutes.get('/api/admin/reservations', async (c) => {
     ORDER BY s.date, r.created_at
   `).bind(fromDate).all();
 
-  // kind列は 2026-08-15-trial-kind.sql で追加。未適用のDBでも落ちないよう2段構えで取る
-  let trials = [];
-  try {
-    ({ results: trials } = await c.env.DB.prepare(`
-      SELECT id, display_name, trainer, preferred_date, preferred_time, alt_note, created_at, kind
-      FROM trial_requests WHERE status = 'pending' ORDER BY created_at
-    `).all());
-  } catch {
-    ({ results: trials } = await c.env.DB.prepare(`
-      SELECT id, display_name, trainer, preferred_date, preferred_time, alt_note, created_at
-      FROM trial_requests WHERE status = 'pending' ORDER BY created_at
-    `).all().catch(() => ({ results: [] })));
-  }
+  // kind列は 2026-08-15-trial-kind.sql、updated_at/updated_by列は 2026-08-29-trial-reschedule.sql で
+  // 追加する。migration未適用のDBでも落ちないよう、キャンセル者一覧と同じく * で取る（列の増減に強い）
+  const { results: trials } = await c.env.DB.prepare(`
+    SELECT * FROM trial_requests WHERE status = 'pending' ORDER BY created_at
+  `).all().catch(() => ({ results: [] }));
 
   const byId = new Map(sessions.map(s => [s.id, { ...s, extra_slots: EXTRA_SLOTS, reservations: [], cancelled_people: [] }]));
   for (const p of people) byId.get(p.session_id)?.reservations.push(p);
@@ -162,6 +154,64 @@ async function decideTrial(c, newStatus) {
 
 reservationRoutes.post('/api/admin/trials/:id/confirm', (c) => decideTrial(c, 'confirmed'));
 reservationRoutes.post('/api/admin/trials/:id/decline', (c) => decideTrial(c, 'declined'));
+
+// ── 管理: 体験リクエストの希望日変更（スタッフ用・認証必須） ──
+// 「第1希望日が過ぎてしまった」「LINEのやりとりで別日に決まった」ときに、確定/不成立の前に
+// 希望日と時間帯だけを書き換える。第2希望・ご要望（alt_note）はお客様が書いた記録なので変更しない。
+// 確定/不成立と同じく、お客様への連絡は自動送信しない（スタッフが別途LINEで連絡する運用）。
+// 変更するとLIFFの「予約中」表示も新しい日付に変わるため、連絡なしで直すと混乱する点に注意。
+reservationRoutes.post('/api/admin/trials/:id', async (c) => {
+  let body;
+  try { body = await c.req.json(); } catch { return c.json({ error: 'invalid_body' }, 400); }
+  const trialId = c.req.param('id');
+
+  // toDisplayDate は下の「開催日の管理」節で定義（関数宣言なので巻き上げられる）。
+  // ここでは 'YYYY-MM-DD' として実在する日付かの判定にだけ使う（2026-02-31 等を弾く）
+  const preferredDate = String(body.preferred_date || '');
+  if (!toDisplayDate(preferredDate)) return c.json({ error: 'invalid_date' }, 400);
+  const preferredTime = String(body.preferred_time || '').trim().slice(0, 50);
+  if (!preferredTime) return c.json({ error: 'time_required' }, 400);
+
+  // 変更前の値は操作ログ用（「誰がいつ何日から何日へ動かしたか」を残す）
+  const before = await c.env.DB.prepare(
+    `SELECT preferred_date, preferred_time, status FROM trial_requests WHERE id = ?`
+  ).bind(trialId).first();
+  if (!before) return c.json({ error: 'not_found' }, 404);
+  if (before.status !== 'pending') return c.json({ error: 'already_decided', status: before.status }, 409);
+
+  // updated_at / updated_by 列は 2026-08-29-trial-reschedule.sql で追加する。
+  // 未適用の本番でも日程変更自体は成立させる（記録だけ落ちる）
+  const updatedAt = new Date().toISOString();
+  const updatedBy = c.get('staff')?.id || null;
+  let res;
+  try {
+    res = await c.env.DB.prepare(`
+      UPDATE trial_requests SET preferred_date = ?, preferred_time = ?, updated_at = ?, updated_by = ?
+      WHERE id = ? AND status = 'pending'
+    `).bind(preferredDate, preferredTime, updatedAt, updatedBy, trialId).run();
+  } catch (e) {
+    if (!e.message?.includes('no such column')) throw e;
+    res = await c.env.DB.prepare(`
+      UPDATE trial_requests SET preferred_date = ?, preferred_time = ?
+      WHERE id = ? AND status = 'pending'
+    `).bind(preferredDate, preferredTime, trialId).run();
+  }
+
+  // SELECTとUPDATEの間にスタッフが確定/不成立にした場合はここで止まる
+  if (!res.meta || res.meta.changes === 0) {
+    const existing = await c.env.DB.prepare(
+      `SELECT status FROM trial_requests WHERE id = ?`
+    ).bind(trialId).first();
+    if (!existing) return c.json({ error: 'not_found' }, 404);
+    return c.json({ error: 'already_decided', status: existing.status }, 409);
+  }
+
+  await logAdminOp(c, 'trial_reschedule', trialId, {
+    from: { date: before.preferred_date, time: before.preferred_time },
+    to: { date: preferredDate, time: preferredTime },
+  });
+  return c.json({ ok: true, id: trialId, preferred_date: preferredDate, preferred_time: preferredTime });
+});
 
 // ── 管理: 開催日の登録・編集・削除（スタッフ用・認証必須） ──
 // 月末の来月分登録をスマホで完結させるための機能。d1_sessions.cjs（ハーネス側リポジトリの

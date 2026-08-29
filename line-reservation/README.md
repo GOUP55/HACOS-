@@ -201,6 +201,9 @@ wrangler d1 execute line-harness --file=line-reservation/migrations/2026-07-04-t
 | `2026-08-sessions.sql` | 8月の日曜HMC日程5件（確定クラス名・メニュー。再実行可） |
 | `2026-07-28-obosan-session.sql` | 「お坊さんといっしょ」8/29(土)17:00〜19:00を特別枠 `2026-08-29-obosan` で追加（再実行可。**KVのreserve.html更新・Worker再デプロイとセットで適用**） |
 | `2026-08-bento-swap-0816-0830.sql` | 8/16⇄8/30のお弁当入れ替え反映（8/16わっぱ弁当・8/30サラダボウル。再実行可。**適用前に既存のお弁当予約の有無を確認**） |
+| `2026-08-15-trial-kind.sql` | trial_requests.kind列追加（体験パーソナル／7日間お試しの種別。**Workerデプロイ前に適用**） |
+| `2026-09-sessions.sql` | 9月の日曜HMC日程4件（再実行可） |
+| `2026-08-29-trial-reschedule.sql` | trial_requests.updated_at/updated_by列追加（スタッフが希望日を変更した記録。未適用でも変更機能は動く・記録だけ残らない） |
 
 ```bash
 wrangler d1 execute line-harness --file=line-reservation/migrations/<ファイル名> --remote
@@ -288,6 +291,25 @@ LIFF（reserve.html）は無変更のため**KV更新は不要**。顧客への�
   UPDATE自体に `AND status='pending'` を入れてあり、二重押下・処理済みIDへの再操作は409
 - 操作ログ: `decided_at`（日時）と `decided_by`（スタッフID）を記録。共有キー運用中は
   'env-owner' が入り、スタッフ個別キー発行後は個人が特定できるログになる
+
+## 2026-08-29 の変更（体験リクエストの希望日をスタッフが変更できるように）
+
+**`migrations/2026-08-29-trial-reschedule.sql` を本番D1に1回だけ実行してから、Workerをデプロイすること。**
+LIFF（reserve.html）は無変更のため**KV更新は不要**。顧客への自動送信はなし（連絡はスタッフ手動のまま）。
+migration未適用でも希望日の変更自体は動く（コード側にフォールバックあり）。その間は管理画面の
+「✏️ スタッフが希望日を変更」の印だけが出ない。
+
+- 「第1希望日が過ぎてしまった」「LINEのやりとりで別日に決まった」ときに、確定/不成立の前に
+  管理画面の「📅 希望日を変更」から**希望日と時間帯を書き換えられる**
+- `POST /api/admin/trials/:id`（認証必須・CSRFはミドルウェアが自動検証）。
+  受け付けるのは `preferred_date`（YYYY-MM-DD・実在する日付のみ）と `preferred_time` だけ。
+  **第2希望・ご要望（alt_note）は書き換えない**（お客様が書いた記録のため）
+- 確定/不成立と同じく `AND status='pending'` ガードつき。確定済み・不成立済みは409、無いIDは404
+- 時間帯はLIFFと同じ4区分から選ぶ。4区分に無い値が入っている行はその値も選択肢に残す
+  （日付だけ直すつもりで時間帯が変わってしまうのを防ぐ）
+- 記録: `updated_at` / `updated_by` と、`admin_ops_log` に `trial_reschedule`（変更前後つき）
+- ⚠️ **変更するとお客様のLINE画面（予約中の表示）も新しい日付に変わる。** 連絡は自動送信されないので、
+  変更したら必ずスタッフからLINEで伝えること（画面と確認ダイアログにも同じ注意を出している）
 
 ## 2026-07-17 の変更（改善第3弾: 開催日の登録・編集＋弁当の個人行表示）
 
