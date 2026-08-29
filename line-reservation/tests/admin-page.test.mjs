@@ -47,6 +47,19 @@ const html = renderAdminReservations({
       cancelled_people: [
         { display_name: 'とりけし次郎', cancelled_at: '2026-07-06T12:03:00Z' }, // JST 7/6 21:03
       ] },
+    // 1日に2品を並べる回（2026-09の みどり担当日で初めて使う形）。
+    // 品目ごとに個数が分かれて出ないと、シェフが仕込む数を読み違える
+    { id: '2026-07-26', date: '2026-07-26', display_date: '7/26（日）', title: 'わっぱ弁当2種の日', time_label: null,
+      capacity: 10, extra_slots: 3, booked: 3, cancelled: 0,
+      reservations: [
+        { display_name: 'おむすび希望', category: '都度', trainer: null, morning_run: null,
+          bento: '2026-07-26:新米おむすびわっぱ弁当', tacos: null, message: null, created_at: '2026-07-20T03:00:00Z' },
+        { display_name: 'さんま希望', category: '都度', trainer: null, morning_run: null,
+          bento: '2026-07-26:さんまの炊き込みわっぱ弁当', tacos: null, message: null, created_at: '2026-07-20T04:00:00Z' },
+        { display_name: '両方たのむ人', category: '都度', trainer: null, morning_run: null,
+          bento: '2026-07-26:新米おむすびわっぱ弁当,2026-07-26:さんまの炊き込みわっぱ弁当',
+          tacos: null, message: null, created_at: '2026-07-20T05:00:00Z' },
+      ] },
     { id: '2026-07-19-tacos', date: '2026-07-19', display_date: '7/19（日）午後', title: 'TACOS Party（午後の部）', time_label: '12:00〜21:00',
       capacity: 10, extra_slots: 3, booked: 13, cancelled: 0,
       reservations: Array.from({ length: 13 }, (_, i) => (
@@ -78,6 +91,11 @@ check('cancelled_atがNULLの旧データは「日時不明」と表示される
   html.includes('<s>やめた花子</s>（日時不明）'));
 check('お弁当の集計が日程ごとに出る（他日程ぶんは混ざらない）',
   html.includes('🍱 サラダビビンそば×1') && html.includes('🍱 カオマンガイ×2') && !html.includes('カオマンガイ×3'));
+check('1日に2品ある回は、品目ごとに個数が分かれて出る',
+  html.includes('🍱 新米おむすびわっぱ弁当×2') && html.includes('🍱 さんまの炊き込みわっぱ弁当×2'));
+check('1人が2品たのんだ場合も両方数えられる',
+  html.includes('両方たのむ人'));
+
 check('朝RUNの集計（join＋当日決め）が出る',
   html.includes('🏃 朝RUN 1名（＋当日決め1）'));
 check('TACOSの人数集計が出る', html.includes('🌮 TACOS 13名'));
@@ -117,8 +135,11 @@ check('開催日管理フォームが出る（日付・クラス名・定員・�
   html.includes('id="session-form"') && html.includes('id="sf-date"') &&
   html.includes('id="sf-capacity"') && html.includes('id="sf-bento"'));
 check('今後の開催カードにだけ編集/締切/削除ボタンが出る（過去カードには出ない）',
-  (html.match(/data-session-edit="/g) || []).length === 2 &&
-  html.includes('data-session-edit="2026-07-12"'));
+  // 件数だけを数えると日程を1つ足すたびに落ちるので、どの日程に出ているかで見る。
+  // 今日は 2026-07-07。7/5 は過去、7/12・7/19・7/26 が今後
+  ['2026-07-12', '2026-07-19-tacos', '2026-07-26'].every(id => html.includes(`data-session-edit="${id}"`)) &&
+  !html.includes('data-session-edit="2026-07-05"') &&
+  (html.match(/data-session-edit="/g) || []).length === 3);
 check('受付停止中の日程にバッジと「受付再開」が出る',
   html.includes('受付停止中') && html.includes('▶️ 受付再開'));
 check('編集用データがscript安全にJSON埋め込みされる（<が\\u003cにエスケープ）',
