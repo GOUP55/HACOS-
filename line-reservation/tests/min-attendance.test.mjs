@@ -1,6 +1,10 @@
 // 最少催行（朝活クラス4名未満で中止）のサーバー側テスト。実SQLite＝D1と同じエンジン。
 //
-// なぜ要るか: 中止の判定・連絡・受付停止はすべて cron の sendReminders() の中で起きる。
+// ご連絡は2段階:
+//   18:00 sendReminders()  … 4名未満なら「未定・今夜中にご予約を」。まだ中止しない
+//   21:00 sendFinalCall()  … もう一度数えて、開催か中止かを確定する
+//
+// なぜ要るか: 中止の判定・連絡・受付停止はすべて cron の中で起きる。
 // 予約フォームのテストでは一切通らない経路なので、ここで実際に関数を動かして確かめる。
 // LINEへの送信は fetch を差し替えて捕まえる（本番のLINE APIは叩かない）。
 import { DatabaseSync } from 'node:sqlite';
@@ -23,8 +27,10 @@ const src = read('../src/reservation-routes.js');
 check('最少催行が4名（3名以下で中止）', /const MIN_ATTENDANCE = 4;/.test(src));
 check('中止の判定に「朝RUNのみ」を数えない除外がある',
   /category !== '朝RUNのみ'/.test(src));
-check('中止した日はリマインドを送らない（continue がある）',
-  /cancelSessionForLowAttendance[\s\S]{0,200}continue/.test(src));
+check('18時は中止を確定させず「未定」を送る',
+  /sendPendingNotice\(session, rows, classCount, env\);\s*\n\s*continue;/.test(src));
+check('21時の確定連絡（sendFinalCall）がある', /export async function sendFinalCall\(env\)/.test(src));
+check('21時も特別枠は最少催行の対象外', /if \(session\.id !== session\.date\) continue;/.test(src));
 
 // ── D1互換のうすいアダプタ（node:sqlite を D1 の顔にする）──────────
 function d1(db) {
@@ -57,12 +63,14 @@ mkdirSync(stage, { recursive: true });
 for (const f of readdirSync(path.join(__dirname, '..', 'src'))) {
   copyFileSync(path.join(__dirname, '..', 'src', f), path.join(stage, f));
 }
-const { sendReminders } = await import(pathToFileURL(path.join(stage, 'reservation-routes.js')).href);
+const { sendReminders, sendFinalCall } = await import(pathToFileURL(path.join(stage, 'reservation-routes.js')).href);
 
 // 1シナリオ＝DB作り直し。sendReminders を1回流して、送られたメッセージを集める
-async function run({ classMembers, runOnly = 0, special = false, capacity = 10 }) {
+async function run({ classMembers, runOnly = 0, special = false, capacity = 10,
+                    finalCall = false, lateJoiners = 0 }) {
   const db = new DatabaseSync(':memory:');
   db.exec(read('../schema.sql'));
+  db.exec(read('../migrations/2026-08-16-pending-notice.sql'));
   const sessionId = special ? `${TOMORROW}-obosan` : TOMORROW;
   db.prepare(`
     INSERT INTO sessions
@@ -91,19 +99,26 @@ async function run({ classMembers, runOnly = 0, special = false, capacity = 10 }
     sent.push({ to: body.to, text: body.messages[0].text });
     return { ok: true, json: async () => ({}) };
   };
+  const env = { DB: d1(db), STAFF_USER_IDS: 'STAFF1', CHANNEL_ACCESS_TOKEN: 'x' };
   try {
-    await sendReminders({ DB: d1(db), STAFF_USER_IDS: 'STAFF1', CHANNEL_ACCESS_TOKEN: 'x' });
+    await sendReminders(env);
+    if (lateJoiners) for (let i = 0; i < lateJoiners; i++) add('都度');  // 18時以降のご予約
+    if (finalCall) await sendFinalCall(env);
   } finally {
     globalThis.fetch = realFetch;
   }
 
   // 月末案内（🗓）はこのテストの対象外なので除く
-  const msgs = sent.filter(m => !m.text.startsWith('🗓'));
+  // 月末案内（🗓）とスタッフ宛はこのテストの対象外
+  const msgs = sent.filter(m => !m.text.startsWith('🗓') && m.to !== 'STAFF1');
   return {
-    cancelMsgs: msgs.filter(m => m.text.includes('お休みとさせていただきます')),
-    // 中止の文面にも「お待ちしています」が入るので、リマインドは冒頭で見分ける
-    remindMsgs: msgs.filter(m => m.text.startsWith('🌅 明日')),
-    staffMsgs: msgs.filter(m => m.to === 'STAFF1'),
+    // 文面は先頭の記号で見分ける（🌅通常リマインド／⏳未定／✅開催確定／😢中止）。
+    // 本文には「お休み」「お待ちしています」が複数の文面に出てくるため、本文では判定しない
+    cancelMsgs: msgs.filter(m => m.text.startsWith('😢')),
+    pendingMsgs: msgs.filter(m => m.text.startsWith('⏳')),
+    confirmMsgs: msgs.filter(m => m.text.startsWith('✅')),
+    remindMsgs: msgs.filter(m => m.text.startsWith('🌅')),
+    staffMsgs: sent.filter(m => m.to === 'STAFF1'),  // msgs はスタッフ宛を除いてあるので sent から取る
     isOpen: db.prepare(`SELECT is_open FROM sessions WHERE id = ?`).get(sessionId).is_open,
     confirmed: db.prepare(
       `SELECT COUNT(*) AS n FROM reservations WHERE session_id = ? AND status = 'confirmed'`
@@ -111,28 +126,49 @@ async function run({ classMembers, runOnly = 0, special = false, capacity = 10 }
   };
 }
 
-// ── 1. 境界: 3名で中止・4名で開催 ──────────────────────────────────
+// ── 1. 18時：4名未満は「未定」。まだ中止しない ──────────────────
 {
   const r = await run({ classMembers: 3 });
-  check('クラス3名 → 中止の連絡が3名に届く', r.cancelMsgs.length === 3, `${r.cancelMsgs.length}通`);
-  check('クラス3名 → リマインドは送らない', r.remindMsgs.length === 0, `${r.remindMsgs.length}通`);
-  check('クラス3名 → その日の受付が閉じる（is_open=0）', r.isOpen === 0);
-  check('クラス3名 → 予約が全てキャンセルになる', r.confirmed === 0, `残${r.confirmed}件`);
+  check('18時・クラス3名 → 「未定」のご連絡が3名に届く', r.pendingMsgs.length === 3, `${r.pendingMsgs.length}通`);
+  check('18時・クラス3名 → まだ中止しない', r.cancelMsgs.length === 0);
+  check('18時・クラス3名 → 受付は開いたまま（今夜の予約を受けるため）', r.isOpen === 1);
+  check('18時・クラス3名 → 予約はconfirmedのまま', r.confirmed === 3, `${r.confirmed}件`);
+  check('18時・クラス3名 → リマインドは送らない', r.remindMsgs.length === 0);
 }
 {
   const r = await run({ classMembers: 4 });
-  check('クラス4名 → 開催。リマインドが4名に届く', r.remindMsgs.length === 4, `${r.remindMsgs.length}通`);
-  check('クラス4名 → 中止の連絡は送らない', r.cancelMsgs.length === 0);
-  check('クラス4名 → 受付は開いたまま（is_open=1）', r.isOpen === 1);
-  check('クラス4名 → 予約はconfirmedのまま', r.confirmed === 4, `${r.confirmed}件`);
+  check('18時・クラス4名 → 通常のリマインドが4名に届く', r.remindMsgs.length === 4, `${r.remindMsgs.length}通`);
+  check('18時・クラス4名 → 「未定」は送らない', r.pendingMsgs.length === 0);
+  check('18時・クラス4名 → 受付は開いたまま', r.isOpen === 1);
 }
 
-// ── 2. 「朝RUNのみ」は人数に数えないが、中止には巻き込まれる ────────
+// ── 2. 21時：確定 ─────────────────────────────────────────────
 {
-  const r = await run({ classMembers: 3, runOnly: 2 });
+  const r = await run({ classMembers: 3, finalCall: true });
+  check('21時・3名のまま → 中止の連絡が3名に届く', r.cancelMsgs.length === 3, `${r.cancelMsgs.length}通`);
+  check('21時・3名のまま → 受付が閉じる', r.isOpen === 0);
+  check('21時・3名のまま → 予約が全てキャンセルになる', r.confirmed === 0, `残${r.confirmed}件`);
+}
+{
+  // 18時に3名 →「未定」→ 夜に1名増えて4名 → 21時に開催確定
+  const r = await run({ classMembers: 3, lateJoiners: 1, finalCall: true });
+  check('18時以降に4人目が入ると開催できる（受付を閉じていないため）', r.confirmed === 4, `${r.confirmed}件`);
+  check('21時・4名に届いた → 開催確定のご連絡が4名に届く', r.confirmMsgs.length === 4, `${r.confirmMsgs.length}通`);
+  check('21時・4名に届いた → 中止の連絡は送らない', r.cancelMsgs.length === 0);
+  check('21時・4名に届いた → 受付は開いたまま', r.isOpen === 1);
+}
+{
+  // 18時の時点で4名 → 通常リマインド済み。21時に二重で送らない
+  const r = await run({ classMembers: 4, finalCall: true });
+  check('18時に4名あった日は、21時に二重のご連絡をしない', r.confirmMsgs.length === 0, `${r.confirmMsgs.length}通`);
+  check('18時に4名あった日は21時も開催のまま', r.isOpen === 1 && r.confirmed === 4);
+}
+
+// ── 3. 「朝RUNのみ」は人数に数えないが、中止には巻き込まれる ────────
+{
+  const r = await run({ classMembers: 3, runOnly: 2, finalCall: true });
   check('クラス3名＋朝RUNのみ2名 → 合計5名でも中止（朝RUNは数えない）',
     r.cancelMsgs.length === 5, `${r.cancelMsgs.length}通`);
-  check('朝RUNのみの方にも中止の連絡が届く', r.cancelMsgs.length === 5);
   check('中止の文面に朝RUNもお休みと書かれている',
     r.cancelMsgs.every(m => m.text.includes('朝RUN（6:30〜）も、あわせてお休みです。')));
   check('クラス3名＋朝RUNのみ2名 → 予約5件すべてキャンセル', r.confirmed === 0);
@@ -143,28 +179,31 @@ async function run({ classMembers, runOnly = 0, special = false, capacity = 10 }
     r.remindMsgs.length === 7, `${r.remindMsgs.length}通`);
 }
 
-// ── 3. 特別枠（瞑想・TACOS等）は最少催行の対象外 ───────────────────
+// ── 4. 特別枠（瞑想・TACOS等）は最少催行の対象外 ───────────────────
 {
-  const r = await run({ classMembers: 1, special: true });
+  const r = await run({ classMembers: 1, special: true, finalCall: true });
   check('特別枠は1名でも中止しない', r.cancelMsgs.length === 0);
+  check('特別枠に「未定」は送らない', r.pendingMsgs.length === 0);
   check('特別枠にはリマインドが届く', r.remindMsgs.length === 1);
   check('特別枠の受付は閉じない', r.isOpen === 1);
 }
 
-// ── 4. 予約0件の日 ────────────────────────────────────────────────
+// ── 5. 予約0件の日 ────────────────────────────────────────────────
 {
-  const r = await run({ classMembers: 0 });
-  check('予約0件の日も受付を閉じる（前夜の駆け込み予約を防ぐ）', r.isOpen === 0);
+  const r = await run({ classMembers: 0, finalCall: true });
+  check('予約0件の日も21時に受付を閉じる（前夜の駆け込み予約を防ぐ）', r.isOpen === 0);
   check('予約0件なら参加者への連絡は送らない', r.cancelMsgs.length === 0);
 }
 
-// ── 5. スタッフ通知 ───────────────────────────────────────────────
+// ── 6. スタッフ通知 ───────────────────────────────────────────────
 {
-  const r = await run({ classMembers: 2, runOnly: 1 });
+  const r = await run({ classMembers: 2, runOnly: 1, finalCall: true });
   const staff = r.staffMsgs.find(m => m.text.includes('中止'));
   check('スタッフに中止の通知が届く', !!staff);
-  check('スタッフ通知にクラス人数が出る', !!staff && staff.text.includes('クラス 2名'), staff?.text);
+  check('スタッフ通知にクラス人数が出る', !!staff && staff.text.includes('クラス 2名'));
   check('スタッフ通知に朝RUNのみの人数が出る', !!staff && staff.text.includes('朝RUNのみ 1名'));
+  check('18時の時点でもスタッフに「21時に確定」の予告が届く',
+    r.staffMsgs.some(m => m.text.includes('21時に確定')));
 }
 
 const ok = results.filter(Boolean).length;

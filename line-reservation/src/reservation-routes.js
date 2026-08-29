@@ -1,6 +1,6 @@
 // HACOS × HMC 予約ルート（Hono）
 // 既存ハーネスの src/index.js に追加する:
-//   import { reservationRoutes, sendReminders } from './reservation-routes.js';
+//   import { reservationRoutes, sendReminders, sendFinalCall } from './reservation-routes.js';
 //   app.route('/', reservationRoutes);
 // wrangler.toml に追加:
 //   [[d1_databases]]
@@ -8,7 +8,10 @@
 //   database_name = "<YOUR_D1_NAME>"
 //   database_id = "<YOUR_D1_ID>"
 //   [triggers]
-//   crons = ["0 9 * * *"]   // 毎日 18:00 JST (UTC+9)
+//   crons = ["0 9 * * *", "0 12 * * *"]   // 18:00 JST と 21:00 JST (UTC+9)
+//   scheduled() の分岐:
+//     "0 9 * * *"  -> sendReminders(env)  … 前日18時のご連絡
+//     "0 12 * * *" -> sendFinalCall(env)  … 前日21時の確定連絡
 
 import { Hono } from 'hono';
 import { verifyIdToken, pushToUser } from './line-utils.js';
@@ -757,13 +760,15 @@ reservationRoutes.post('/api/liff/reservations/:id/cancel', async (c) => {
 // ただし中止するときは朝RUNもあわせてお休みにするので、連絡はその日の予約者全員に送る。
 const MIN_ATTENDANCE = 4;
 
-// ── Cron: 前日18時のご連絡（リマインド／最少催行による中止）──
+// ── Cron: 前日18時のご連絡（リマインド／人数が足りない日は「未定」のお知らせ）──
 // wrangler.toml: crons = ["0 9 * * *"]  (JST 18:00)
 // scheduled(event, env, ctx) { ctx.waitUntil(sendReminders(env)); }
 //
-// 判定も連絡も18時に一本化してある（2026-08-16 オーナー決定）。
-// 15時に判定して18時に送る形にすると、その3時間のあいだに4人目の予約が入って
-// 「中止と伝えたのに開催できる」状態が起きうるため、同じ時刻でまとめて処理する。
+// ご連絡は2段階（2026-08-16 オーナー決定）。
+//   18:00 … 4名に満たない日は「まだ未定・今夜中にご予約を」とお伝えする
+//   21:00 … sendFinalCall() でもう一度数え、開催か中止かを確定してご連絡する
+// 18時に中止を確定させてしまうと、その日の夜に4人目が予約したくても受付が閉じており、
+// 開催できたはずの日を落とすことになるため、確定を21時まで待つ。
 export async function sendReminders(env) {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -804,8 +809,10 @@ export async function sendReminders(env) {
       // 7:30のクラスに出る人数。「朝RUNのみ」は数えない
       const classCount = rows.filter(r => r.category !== '朝RUNのみ').length;
       if (classCount < MIN_ATTENDANCE) {
-        await cancelSessionForLowAttendance(session, rows, classCount, env);
-        continue; // 中止した日にリマインドを送ると矛盾するので、ここで打ち切る
+        // ここでは中止を確定させない。まだ今夜のご予約で4名に届く可能性があるため、
+        // 「未定です・今夜中にご予約ください」とだけお伝えして、21時に確定する
+        await sendPendingNotice(session, rows, classCount, env);
+        continue; // 「未定」とお伝えした日に「お待ちしています」を送ると矛盾する
       }
     }
 
@@ -857,6 +864,120 @@ export async function sendReminders(env) {
       for (const u of users.results || []) {
         await pushToUser(u.line_user_id, [{ type: 'text', text }], env);
       }
+    }
+  }
+}
+
+// 前日18時：まだ4名に届いていない日のご連絡。
+// 中止は確定させず、今夜のご予約で届く可能性を残す。
+async function sendPendingNotice(session, rows, classCount, env) {
+  // 21時の「開催します」は、ここで未定とお伝えした日にだけ送る。
+  // 印がないと、18時の時点で4名以上あった日にも21時に二重で送ってしまう。
+  // pending_notified_at列は 2026-08-16-pending-notice.sql で追加する。
+  // 未適用でも中止の判定は動くよう、列が無いときは黙って先へ進める
+  try {
+    await env.DB.prepare(`UPDATE sessions SET pending_notified_at = ? WHERE id = ?`)
+      .bind(new Date().toISOString(), session.id).run();
+  } catch (e) {
+    if (!e.message?.includes('no such column')) throw e;
+  }
+
+  const userText = [
+    `⏳ 明日 ${session.display_date} の朝活クラスについてのご連絡です。`,
+    '',
+    `いまのところ、ご参加は${classCount}名です。`,
+    `${MIN_ATTENDANCE}名に満たない場合はお休みとさせていただきます。`,
+    '',
+    'ご参加を迷っている方は、今夜のうちにご予約ください。',
+    '開催するかどうかは、**今夜21時**にあらためてご連絡します。',
+  ].join('\n').replace(/\*\*/g, '');
+
+  for (const row of rows) {
+    await pushToUser(row.line_user_id, [{ type: 'text', text: userText }], env);
+  }
+
+  const staffText = [
+    '⏳ 最少催行に未達【21時に確定します】',
+    `${session.display_date} ${session.title}`,
+    `クラス ${classCount}名（最少催行${MIN_ATTENDANCE}名）`,
+    rows.length ? `予約${rows.length}件の方へ「未定」のご連絡を送りました。` : '予約はまだ0件です。',
+  ].join('\n');
+  const staffIds = (env.STAFF_USER_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
+  for (const staffId of staffIds) {
+    await pushToUser(staffId, [{ type: 'text', text: staffText }], env);
+  }
+}
+
+// ── Cron: 前日21時の確定連絡 ──
+// wrangler.toml: crons に "0 12 * * *" を追加（JST 21:00）
+// scheduled(event, env, ctx) の cron 分岐から ctx.waitUntil(sendFinalCall(env)) を呼ぶ
+//
+// 18時に「未定」とお伝えした日を、ここで開催か中止かに決める。
+// 18時に4名以上あってその後キャンセルで割った日も、ここで拾って中止にする。
+export async function sendFinalCall(env) {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+  const { results: sessionsTomorrow } = await env.DB.prepare(
+    `SELECT * FROM sessions WHERE date = ? AND is_open = 1`
+  ).bind(tomorrowStr).all();
+
+  const { results } = await env.DB.prepare(`
+    SELECT r.id AS reservation_id, r.line_user_id, r.display_name, r.category,
+           s.*, s.id AS session_id, s.date AS session_date
+    FROM reservations r
+    JOIN sessions s ON s.id = r.session_id
+    WHERE s.date = ? AND r.status = 'confirmed'
+  `).bind(tomorrowStr).all();
+
+  const bySession = new Map();
+  for (const row of results) {
+    if (!bySession.has(row.session_id)) bySession.set(row.session_id, []);
+    bySession.get(row.session_id).push(row);
+  }
+
+  for (const session of sessionsTomorrow || []) {
+    // 特別枠（TACOS・瞑想など）は最少催行の対象外
+    if (session.id !== session.date) continue;
+
+    const rows = bySession.get(session.id) || [];
+    const classCount = rows.filter(r => r.category !== '朝RUNのみ').length;
+
+    if (classCount < MIN_ATTENDANCE) {
+      await cancelSessionForLowAttendance(session, rows, classCount, env);
+      continue;
+    }
+
+    // 18時に「未定」とお伝えした日だけ、開催のご連絡をする。
+    // 列が無い（migration未適用）ときは送らない。二重送信になるより、
+    // 送らないほうが害が小さいため
+    const notifiedAt = session.pending_notified_at;
+    if (!notifiedAt) continue;
+
+    await env.DB.prepare(`UPDATE sessions SET pending_notified_at = NULL WHERE id = ?`)
+      .bind(session.id).run();
+
+    const userText = [
+      `✅ 明日 ${session.display_date} の朝活クラスは、予定どおり開催します！`,
+      '',
+      `ご参加は${classCount}名です。AM7:30、HMCでお待ちしています。`,
+      ...(session.morning_run ? ['朝RUNは6:30〜です。'] : []),
+      '',
+      '動きやすい服装でお越しください🌅',
+    ].join('\n');
+    for (const row of rows) {
+      await pushToUser(row.line_user_id, [{ type: 'text', text: userText }], env);
+    }
+
+    const staffIds = (env.STAFF_USER_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
+    const staffText = [
+      '✅ 開催確定【21時の判定】',
+      `${session.display_date} ${session.title}`,
+      `クラス ${classCount}名`,
+    ].join('\n');
+    for (const staffId of staffIds) {
+      await pushToUser(staffId, [{ type: 'text', text: staffText }], env);
     }
   }
 }
