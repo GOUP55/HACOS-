@@ -754,11 +754,13 @@ reservationRoutes.post('/api/liff/reservations/:id/cancel', async (c) => {
   return c.json({ ok: true });
 });
 
-// 最少催行人数（朝活クラス）。参加者が4名に満たない日は中止する。
-// 2026-08-16 オーナー決定（それ以前の正本は「3名に満たない場合は休講」＝1名ぶん緩かった）。
+// 最少催行人数（朝活クラス）。参加者が3名に満たない日は中止する（＝2名以下で中止）。
+// 2026-08-16 オーナー確定。お弁当とトレーナー謝礼の兼ね合いで4名も検討したが3名に決めた。
 // 「朝RUNのみ」（6:30〜・¥0）は7:30のクラスに出ないため、この人数には数えない。
 // ただし中止するときは朝RUNもあわせてお休みにするので、連絡はその日の予約者全員に送る。
-const MIN_ATTENDANCE = 4;
+// お弁当を注文している方がいても、人数が足りなければ中止する（お弁当は中止を止める理由にしない。
+// 2026-08-16 オーナー決定。中止時のお弁当はHACOSが買い取り、ご注文の方へお渡しする）。
+const MIN_ATTENDANCE = 3;
 
 // ── Cron: 前日18時のご連絡（リマインド／人数が足りない日は「未定」のお知らせ）──
 // wrangler.toml: crons = ["0 9 * * *"]  (JST 18:00)
@@ -785,7 +787,7 @@ export async function sendReminders(env) {
   // （素のs.id/s.dateのままだと、行オブジェクトのidが「セッションのid」であることが
   //   コード上読み取れず、将来の列追加で静かに壊れるため）
   const { results } = await env.DB.prepare(`
-    SELECT r.id AS reservation_id, r.line_user_id, r.display_name, r.category,
+    SELECT r.id AS reservation_id, r.line_user_id, r.display_name, r.category, r.bento,
            s.*, s.id AS session_id, s.date AS session_date
     FROM reservations r
     JOIN sessions s ON s.id = r.session_id
@@ -924,7 +926,7 @@ export async function sendFinalCall(env) {
   ).bind(tomorrowStr).all();
 
   const { results } = await env.DB.prepare(`
-    SELECT r.id AS reservation_id, r.line_user_id, r.display_name, r.category,
+    SELECT r.id AS reservation_id, r.line_user_id, r.display_name, r.category, r.bento,
            s.*, s.id AS session_id, s.date AS session_date
     FROM reservations r
     JOIN sessions s ON s.id = r.session_id
@@ -1007,19 +1009,23 @@ async function cancelSessionForLowAttendance(session, rows, classCount, env) {
     ).bind(session.id).run();
   }
 
-  // 予約者へのご連絡。「朝RUNのみ」の方にも同じ文面を送る（朝RUNもお休みになるため）
-  const userText = [
+  // 予約者へのご連絡。「朝RUNのみ」の方にも送る（朝RUNもあわせてお休みになるため）。
+  // お弁当をご注文の方には、お渡しできる旨を添える（中止でもHACOSが買い取ってお渡しする。
+  // 2026-08-16 オーナー決定）。注文の有無で文面が変わるので、お一人ずつ組み立てる
+  const baseLines = [
     `😢 明日 ${session.display_date} の朝活クラスは、お休みとさせていただきます。`,
     '',
     `ご参加予定の方が${MIN_ATTENDANCE}名に満たなかったためです。`,
     ...(session.morning_run ? ['朝RUN（6:30〜）も、あわせてお休みです。'] : []),
-    '',
-    '前日のご連絡になり、申し訳ありません。',
-    'またのご参加をお待ちしています🌅',
-  ].join('\n');
+  ];
 
   for (const row of rows) {
-    await pushToUser(row.line_user_id, [{ type: 'text', text: userText }], env);
+    const lines = [...baseLines];
+    if (row.bento) {
+      lines.push('', 'ご注文のお弁当はご用意しています。HACOSでお受け取りいただけます。');
+    }
+    lines.push('', '前日のご連絡になり、申し訳ありません。', 'またのご参加をお待ちしています🌅');
+    await pushToUser(row.line_user_id, [{ type: 'text', text: lines.join('\n') }], env);
   }
 
   const staffText = [
@@ -1027,6 +1033,9 @@ async function cancelSessionForLowAttendance(session, rows, classCount, env) {
     `${session.display_date} ${session.title}`,
     `クラス ${classCount}名（最少催行${MIN_ATTENDANCE}名）${runOnlyCount ? ` ／ 朝RUNのみ ${runOnlyCount}名` : ''}`,
     `予約${rows.length}件をキャンセルにし、受付を閉じました。`,
+    ...(rows.filter(r => r.bento).length
+      ? [`🍱 お弁当 ${rows.filter(r => r.bento).length}件は買い取り。HACOSでお渡しします`]
+      : []),
     ...(rows.length ? ['', '▼ ご連絡した方', ...rows.map(r => `・${r.display_name || '(名前なし)'}（${r.category}）`)] : []),
   ].join('\n');
 
