@@ -169,8 +169,10 @@ async function run({ classMembers, runOnly = 0, special = false, capacity = 10,
   const r = await run({ classMembers: 2, runOnly: 3, finalCall: true });
   check('クラス2名＋朝RUNのみ3名 → 合計5名でも中止（朝RUNは数えない）',
     r.cancelMsgs.length === 5, `${r.cancelMsgs.length}通`);
-  check('中止の文面に朝RUNもお休みと書かれている',
-    r.cancelMsgs.every(m => m.text.includes('朝RUN（6:30〜）も、あわせてお休みです。')));
+  check('中止の文面で、朝RUNはHACOS主催としてお休みと伝えている',
+    r.cancelMsgs.every(m => m.text.includes('HACOSの主催としてはお休みです')));
+  check('中止の文面で、集まって走るのは自由だと伝えている',
+    r.cancelMsgs.every(m => m.text.includes('集まって走っていただくのは大丈夫')));
   check('クラス2名＋朝RUNのみ3名 → 予約5件すべてキャンセル', r.confirmed === 0);
 }
 {
@@ -202,6 +204,8 @@ async function run({ classMembers, runOnly = 0, special = false, capacity = 10,
   check('お弁当を頼んでいても、3名未満なら中止になる', r.cancelMsgs.length === 2, `${r.cancelMsgs.length}通`);
   const withBento = r.cancelMsgs.filter(m => m.text.includes('HACOSでお受け取りいただけます'));
   check('お弁当を注文した方にだけ、受け取りの案内が入る', withBento.length === 1, `${withBento.length}通`);
+  check('お弁当代は通常どおりの支払いだと伝えている',
+    withBento.every(m => m.text.includes('お弁当代は通常どおりのお支払いです')));
   check('注文していない方の文面には受け取りの案内が入らない',
     r.cancelMsgs.filter(m => !m.text.includes('HACOSでお受け取り')).length === 1);
   const staff = r.staffMsgs.find(m => m.text.includes('中止'));

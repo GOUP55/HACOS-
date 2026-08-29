@@ -757,7 +757,8 @@ reservationRoutes.post('/api/liff/reservations/:id/cancel', async (c) => {
 // 最少催行人数（朝活クラス）。参加者が3名に満たない日は中止する（＝2名以下で中止）。
 // 2026-08-16 オーナー確定。お弁当とトレーナー謝礼の兼ね合いで4名も検討したが3名に決めた。
 // 「朝RUNのみ」（6:30〜・¥0）は7:30のクラスに出ないため、この人数には数えない。
-// ただし中止するときは朝RUNもあわせてお休みにするので、連絡はその日の予約者全員に送る。
+// 中止のときは朝RUNもHACOSの主催としてはお休みになるため、連絡はその日の予約者全員に送る
+// （走ること自体は止めない。集まって走るのは自由・2026-08-16 オーナー決定）。
 // お弁当を注文している方がいても、人数が足りなければ中止する（お弁当は中止を止める理由にしない。
 // 2026-08-16 オーナー決定。中止時のお弁当はHACOSが買い取り、ご注文の方へお渡しする）。
 const MIN_ATTENDANCE = 3;
@@ -1016,13 +1017,17 @@ async function cancelSessionForLowAttendance(session, rows, classCount, env) {
     `😢 明日 ${session.display_date} の朝活クラスは、お休みとさせていただきます。`,
     '',
     `ご参加予定の方が${MIN_ATTENDANCE}名に満たなかったためです。`,
-    ...(session.morning_run ? ['朝RUN（6:30〜）も、あわせてお休みです。'] : []),
+    ...(session.morning_run
+      ? ['', '朝RUN（6:30〜）は、スタッフがつかないためHACOSの主催としてはお休みです。',
+         '集まって走っていただくのは大丈夫ですので、ご参加の方どうしでお声かけください。']
+      : []),
   ];
 
   for (const row of rows) {
     const lines = [...baseLines];
     if (row.bento) {
-      lines.push('', 'ご注文のお弁当はご用意しています。HACOSでお受け取りいただけます。');
+      lines.push('', 'ご注文のお弁当はご用意しています。HACOSでお受け取りいただけます。',
+        'お弁当代は通常どおりのお支払いです。');
     }
     lines.push('', '前日のご連絡になり、申し訳ありません。', 'またのご参加をお待ちしています🌅');
     await pushToUser(row.line_user_id, [{ type: 'text', text: lines.join('\n') }], env);
