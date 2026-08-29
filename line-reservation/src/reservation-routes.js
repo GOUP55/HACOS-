@@ -751,38 +751,76 @@ reservationRoutes.post('/api/liff/reservations/:id/cancel', async (c) => {
   return c.json({ ok: true });
 });
 
-// ── Cron: 前日リマインド ──
+// 最少催行人数（朝活クラス）。参加者が4名に満たない日は中止する。
+// 2026-08-16 オーナー決定（それ以前の正本は「3名に満たない場合は休講」＝1名ぶん緩かった）。
+// 「朝RUNのみ」（6:30〜・¥0）は7:30のクラスに出ないため、この人数には数えない。
+// ただし中止するときは朝RUNもあわせてお休みにするので、連絡はその日の予約者全員に送る。
+const MIN_ATTENDANCE = 4;
+
+// ── Cron: 前日18時のご連絡（リマインド／最少催行による中止）──
 // wrangler.toml: crons = ["0 9 * * *"]  (JST 18:00)
 // scheduled(event, env, ctx) { ctx.waitUntil(sendReminders(env)); }
+//
+// 判定も連絡も18時に一本化してある（2026-08-16 オーナー決定）。
+// 15時に判定して18時に送る形にすると、その3時間のあいだに4人目の予約が入って
+// 「中止と伝えたのに開催できる」状態が起きうるため、同じ時刻でまとめて処理する。
 export async function sendReminders(env) {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+  // 予約が0件の日も中止対象にしたいので、先にセッションを取ってから予約をぶら下げる。
+  // （予約とJOINして回すだけだと、0件の日はループに現れず受付が開いたまま残る）
+  const { results: sessionsTomorrow } = await env.DB.prepare(
+    `SELECT * FROM sessions WHERE date = ? AND is_open = 1`
+  ).bind(tomorrowStr).all();
 
   // s.* で取得することで、time_label列のmigration未適用DBでもSQLエラーにならない。
   // session_id/session_dateはs.*の後に明示エイリアスで付け直す
   // （素のs.id/s.dateのままだと、行オブジェクトのidが「セッションのid」であることが
   //   コード上読み取れず、将来の列追加で静かに壊れるため）
   const { results } = await env.DB.prepare(`
-    SELECT r.line_user_id, s.*, s.id AS session_id, s.date AS session_date
+    SELECT r.id AS reservation_id, r.line_user_id, r.display_name, r.category,
+           s.*, s.id AS session_id, s.date AS session_date
     FROM reservations r
     JOIN sessions s ON s.id = r.session_id
     WHERE s.date = ? AND r.status = 'confirmed'
   `).bind(tomorrowStr).all();
 
+  const bySession = new Map();
   for (const row of results) {
-    // 特別枠（例: TACOS Party）は朝クラスの定型文（AM7:30・朝RUN）を使わない
-    const isSpecial = row.session_id !== row.session_date;
-    const lines = isSpecial
-      ? [
-          `🌅 明日 ${row.display_date}「${row.title}」${row.time_label ? `（${row.time_label}）` : ''}、HMCでお待ちしています！`,
-          'お気をつけてお越しください。',
-        ]
-      : [
-          `🌅 明日 ${row.display_date} AM7:30、HMCでお待ちしています！`,
-          row.morning_run ? '朝RUNは6:30〜。お気をつけてお越しください。' : 'お気をつけてお越しください。',
-        ];
-    await pushToUser(row.line_user_id, [{ type: 'text', text: lines.join('\n') }], env);
+    if (!bySession.has(row.session_id)) bySession.set(row.session_id, []);
+    bySession.get(row.session_id).push(row);
+  }
+
+  for (const session of sessionsTomorrow || []) {
+    const rows = bySession.get(session.id) || [];
+
+    // 特別枠（TACOS Party・瞑想など）は朝活クラスとは催行の基準が違う。
+    // 最少催行の判定にはかけず、これまでどおりリマインドだけ送る
+    const isSpecial = session.id !== session.date;
+
+    if (!isSpecial) {
+      // 7:30のクラスに出る人数。「朝RUNのみ」は数えない
+      const classCount = rows.filter(r => r.category !== '朝RUNのみ').length;
+      if (classCount < MIN_ATTENDANCE) {
+        await cancelSessionForLowAttendance(session, rows, classCount, env);
+        continue; // 中止した日にリマインドを送ると矛盾するので、ここで打ち切る
+      }
+    }
+
+    for (const row of rows) {
+      const lines = isSpecial
+        ? [
+            `🌅 明日 ${row.display_date}「${row.title}」${row.time_label ? `（${row.time_label}）` : ''}、HMCでお待ちしています！`,
+            'お気をつけてお越しください。',
+          ]
+        : [
+            `🌅 明日 ${row.display_date} AM7:30、HMCでお待ちしています！`,
+            row.morning_run ? '朝RUNは6:30〜。お気をつけてお越しください。' : 'お気をつけてお越しください。',
+          ];
+      await pushToUser(row.line_user_id, [{ type: 'text', text: lines.join('\n') }], env);
+    }
   }
 
   // ── 月末：来月の開催日案内 ──
@@ -820,6 +858,60 @@ export async function sendReminders(env) {
         await pushToUser(u.line_user_id, [{ type: 'text', text }], env);
       }
     }
+  }
+}
+
+// 最少催行に届かなかった日を中止する。
+// DBを先に確定させてから通知する（通知が失敗しても中止そのものは成立させる）。
+async function cancelSessionForLowAttendance(session, rows, classCount, env) {
+  const runOnlyCount = rows.filter(r => r.category === '朝RUNのみ').length;
+
+  // その日の受付を閉じる。閉じないと、この連絡のあとに予約が入って
+  // 「中止と伝えた日に予約できてしまう」状態になる
+  await env.DB.prepare(`UPDATE sessions SET is_open = 0 WHERE id = ?`).bind(session.id).run();
+
+  // 予約をまとめてキャンセルにする。
+  // cancelled_at列のmigration未適用DBでも中止は成立させる（キャンセル導線と同じ2段構え）
+  const cancelledAt = new Date().toISOString();
+  try {
+    await env.DB.prepare(
+      `UPDATE reservations SET status = 'cancelled', cancelled_at = ?
+       WHERE session_id = ? AND status = 'confirmed'`
+    ).bind(cancelledAt, session.id).run();
+  } catch (e) {
+    if (!e.message?.includes('no such column')) throw e;
+    await env.DB.prepare(
+      `UPDATE reservations SET status = 'cancelled'
+       WHERE session_id = ? AND status = 'confirmed'`
+    ).bind(session.id).run();
+  }
+
+  // 予約者へのご連絡。「朝RUNのみ」の方にも同じ文面を送る（朝RUNもお休みになるため）
+  const userText = [
+    `😢 明日 ${session.display_date} の朝活クラスは、お休みとさせていただきます。`,
+    '',
+    `ご参加予定の方が${MIN_ATTENDANCE}名に満たなかったためです。`,
+    ...(session.morning_run ? ['朝RUN（6:30〜）も、あわせてお休みです。'] : []),
+    '',
+    '前日のご連絡になり、申し訳ありません。',
+    'またのご参加をお待ちしています🌅',
+  ].join('\n');
+
+  for (const row of rows) {
+    await pushToUser(row.line_user_id, [{ type: 'text', text: userText }], env);
+  }
+
+  const staffText = [
+    '⚠️ 中止【最少催行に未達】',
+    `${session.display_date} ${session.title}`,
+    `クラス ${classCount}名（最少催行${MIN_ATTENDANCE}名）${runOnlyCount ? ` ／ 朝RUNのみ ${runOnlyCount}名` : ''}`,
+    `予約${rows.length}件をキャンセルにし、受付を閉じました。`,
+    ...(rows.length ? ['', '▼ ご連絡した方', ...rows.map(r => `・${r.display_name || '(名前なし)'}（${r.category}）`)] : []),
+  ].join('\n');
+
+  const staffIds = (env.STAFF_USER_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
+  for (const staffId of staffIds) {
+    await pushToUser(staffId, [{ type: 'text', text: staffText }], env);
   }
 }
 

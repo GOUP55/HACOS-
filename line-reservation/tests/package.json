@@ -3,9 +3,10 @@
   "private": true,
   "description": "LINE予約フォーム（reserve.html）のモック環境自動テスト",
   "scripts": {
-    "test": "node admin-page.test.mjs && node cancel-fallback.test.mjs && node sessions-admin.test.mjs && node obosan-event.test.mjs && node morning-run.test.mjs && node morning-run-seats.test.mjs"
+    "test": "node admin-page.test.mjs && node cancel-fallback.test.mjs && node sessions-admin.test.mjs && node obosan-event.test.mjs && node morning-run.test.mjs && node morning-run-seats.test.mjs && node min-attendance.test.mjs"
   },
   "dependencies": {
+    "hono": "^4.13.5",
     "playwright-core": "^1.49.0"
   }
 }
