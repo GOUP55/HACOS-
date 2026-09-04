@@ -1,6 +1,6 @@
 // HACOS × HMC 予約ルート（Hono）
 // 既存ハーネスの src/index.js に追加する:
-//   import { reservationRoutes, sendReminders } from './reservation-routes.js';
+//   import { reservationRoutes, sendReminders, sendFinalCall } from './reservation-routes.js';
 //   app.route('/', reservationRoutes);
 // wrangler.toml に追加:
 //   [[d1_databases]]
@@ -8,7 +8,10 @@
 //   database_name = "<YOUR_D1_NAME>"
 //   database_id = "<YOUR_D1_ID>"
 //   [triggers]
-//   crons = ["0 9 * * *"]   // 毎日 18:00 JST (UTC+9)
+//   crons = ["0 9 * * *", "0 12 * * *"]   // 18:00 JST と 21:00 JST (UTC+9)
+//   scheduled() の分岐:
+//     "0 9 * * *"  -> sendReminders(env)  … 前日18時のご連絡
+//     "0 12 * * *" -> sendFinalCall(env)  … 前日21時の確定連絡
 
 import { Hono } from 'hono';
 import { verifyIdToken, pushToUser } from './line-utils.js';
@@ -801,38 +804,94 @@ reservationRoutes.post('/api/liff/reservations/:id/cancel', async (c) => {
   return c.json({ ok: true });
 });
 
-// ── Cron: 前日リマインド ──
+// 最少催行人数（朝活クラス）。参加者が3名に満たない日は中止する（＝2名以下で中止）。
+// 2026-08-16 オーナー確定。お弁当とトレーナー謝礼の兼ね合いで4名も検討したが3名に決めた。
+// 「朝RUNのみ」（6:30〜・¥0）は7:30のクラスに出ないため、この人数には数えない。
+// 中止のときは朝RUNもHACOSの主催としてはお休みになるため、連絡はその日の予約者全員に送る
+// （走ること自体は止めない。集まって走るのは自由・2026-08-16 オーナー決定）。
+// お弁当を注文している方がいても、人数が足りなければ中止する（お弁当は中止を止める理由にしない。
+// 2026-08-16 オーナー決定。中止時のお弁当はHACOSが買い取り、ご注文の方へお渡しする）。
+const MIN_ATTENDANCE = 3;
+
+// HACOSのオープンチャット「HMC」。参加者どうしが朝RUNのお誘い・試食会・ゆる募で
+// 自由に声をかけあう場所。オープンチャットなので、電話番号やLINEのアカウントは
+// お互いに見えない（初めての方でも入りやすい形にするため、通常のグループLINEではなくこちら）
+const OPENCHAT_URL = 'https://line.me/ti/g2/hBcvkajEaSHvsVoqGX3SZJZZBbL7ZJsJwePWug?utm_source=invitation&utm_medium=link_copy&utm_campaign=default';
+const OPENCHAT_LINES = [
+  '',
+  '💬 HACOSのみんなの部屋（オープンチャット「HMC」）',
+  '朝RUNのお誘いや試食会など、参加される方どうしで声をかけあう場所です。',
+  OPENCHAT_URL,
+];
+
+// ── Cron: 前日18時のご連絡（リマインド／人数が足りない日は「未定」のお知らせ）──
 // wrangler.toml: crons = ["0 9 * * *"]  (JST 18:00)
 // scheduled(event, env, ctx) { ctx.waitUntil(sendReminders(env)); }
+//
+// ご連絡は2段階（2026-08-16 オーナー決定）。
+//   18:00 … 4名に満たない日は「まだ未定・今夜中にご予約を」とお伝えする
+//   21:00 … sendFinalCall() でもう一度数え、開催か中止かを確定してご連絡する
+// 18時に中止を確定させてしまうと、その日の夜に4人目が予約したくても受付が閉じており、
+// 開催できたはずの日を落とすことになるため、確定を21時まで待つ。
 export async function sendReminders(env) {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+  // 予約が0件の日も中止対象にしたいので、先にセッションを取ってから予約をぶら下げる。
+  // （予約とJOINして回すだけだと、0件の日はループに現れず受付が開いたまま残る）
+  const { results: sessionsTomorrow } = await env.DB.prepare(
+    `SELECT * FROM sessions WHERE date = ? AND is_open = 1`
+  ).bind(tomorrowStr).all();
 
   // s.* で取得することで、time_label列のmigration未適用DBでもSQLエラーにならない。
   // session_id/session_dateはs.*の後に明示エイリアスで付け直す
   // （素のs.id/s.dateのままだと、行オブジェクトのidが「セッションのid」であることが
   //   コード上読み取れず、将来の列追加で静かに壊れるため）
   const { results } = await env.DB.prepare(`
-    SELECT r.line_user_id, s.*, s.id AS session_id, s.date AS session_date
+    SELECT r.id AS reservation_id, r.line_user_id, r.display_name, r.category, r.bento,
+           s.*, s.id AS session_id, s.date AS session_date
     FROM reservations r
     JOIN sessions s ON s.id = r.session_id
     WHERE s.date = ? AND r.status = 'confirmed'
   `).bind(tomorrowStr).all();
 
+  const bySession = new Map();
   for (const row of results) {
-    // 特別枠（例: TACOS Party）は朝クラスの定型文（AM7:30・朝RUN）を使わない
-    const isSpecial = row.session_id !== row.session_date;
-    const lines = isSpecial
-      ? [
-          `🌅 明日 ${row.display_date}「${row.title}」${row.time_label ? `（${row.time_label}）` : ''}、HMCでお待ちしています！`,
-          'お気をつけてお越しください。',
-        ]
-      : [
-          `🌅 明日 ${row.display_date} AM7:30、HMCでお待ちしています！`,
-          row.morning_run ? '朝RUNは6:30〜。お気をつけてお越しください。' : 'お気をつけてお越しください。',
-        ];
-    await pushToUser(row.line_user_id, [{ type: 'text', text: lines.join('\n') }], env);
+    if (!bySession.has(row.session_id)) bySession.set(row.session_id, []);
+    bySession.get(row.session_id).push(row);
+  }
+
+  for (const session of sessionsTomorrow || []) {
+    const rows = bySession.get(session.id) || [];
+
+    // 特別枠（TACOS Party・瞑想など）は朝活クラスとは催行の基準が違う。
+    // 最少催行の判定にはかけず、これまでどおりリマインドだけ送る
+    const isSpecial = session.id !== session.date;
+
+    if (!isSpecial) {
+      // 7:30のクラスに出る人数。「朝RUNのみ」は数えない
+      const classCount = rows.filter(r => r.category !== '朝RUNのみ').length;
+      if (classCount < MIN_ATTENDANCE) {
+        // ここでは中止を確定させない。まだ今夜のご予約で4名に届く可能性があるため、
+        // 「未定です・今夜中にご予約ください」とだけお伝えして、21時に確定する
+        await sendPendingNotice(session, rows, classCount, env);
+        continue; // 「未定」とお伝えした日に「お待ちしています」を送ると矛盾する
+      }
+    }
+
+    for (const row of rows) {
+      const lines = isSpecial
+        ? [
+            `🌅 明日 ${row.display_date}「${row.title}」${row.time_label ? `（${row.time_label}）` : ''}、HMCでお待ちしています！`,
+            'お気をつけてお越しください。',
+          ]
+        : [
+            `🌅 明日 ${row.display_date} AM7:30、HMCでお待ちしています！`,
+            row.morning_run ? '朝RUNは6:30〜。お気をつけてお越しください。' : 'お気をつけてお越しください。',
+          ];
+      await pushToUser(row.line_user_id, [{ type: 'text', text: lines.join('\n') }], env);
+    }
   }
 
   // ── 月末：来月の開催日案内 ──
@@ -873,6 +932,186 @@ export async function sendReminders(env) {
   }
 }
 
+// 前日18時：まだ4名に届いていない日のご連絡。
+// 中止は確定させず、今夜のご予約で届く可能性を残す。
+async function sendPendingNotice(session, rows, classCount, env) {
+  // 21時の「開催します」は、ここで未定とお伝えした日にだけ送る。
+  // 印がないと、18時の時点で4名以上あった日にも21時に二重で送ってしまう。
+  // pending_notified_at列は 2026-08-16-pending-notice.sql で追加する。
+  // 未適用でも中止の判定は動くよう、列が無いときは黙って先へ進める
+  try {
+    await env.DB.prepare(`UPDATE sessions SET pending_notified_at = ? WHERE id = ?`)
+      .bind(new Date().toISOString(), session.id).run();
+  } catch (e) {
+    if (!e.message?.includes('no such column')) throw e;
+  }
+
+  const userText = [
+    `⏳ 明日 ${session.display_date} の朝活クラスについてのご連絡です。`,
+    '',
+    `いまのところ、ご参加は${classCount}名です。`,
+    `${MIN_ATTENDANCE}名に満たない場合はお休みとさせていただきます。`,
+    '',
+    'ご参加を迷っている方は、今夜のうちにご予約ください。',
+    '開催するかどうかは、**今夜21時**にあらためてご連絡します。',
+  ].join('\n').replace(/\*\*/g, '');
+
+  for (const row of rows) {
+    await pushToUser(row.line_user_id, [{ type: 'text', text: userText }], env);
+  }
+
+  const staffText = [
+    '⏳ 最少催行に未達【21時に確定します】',
+    `${session.display_date} ${session.title}`,
+    `クラス ${classCount}名（最少催行${MIN_ATTENDANCE}名）`,
+    rows.length ? `予約${rows.length}件の方へ「未定」のご連絡を送りました。` : '予約はまだ0件です。',
+  ].join('\n');
+  const staffIds = (env.STAFF_USER_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
+  for (const staffId of staffIds) {
+    await pushToUser(staffId, [{ type: 'text', text: staffText }], env);
+  }
+}
+
+// ── Cron: 前日21時の確定連絡 ──
+// wrangler.toml: crons に "0 12 * * *" を追加（JST 21:00）
+// scheduled(event, env, ctx) の cron 分岐から ctx.waitUntil(sendFinalCall(env)) を呼ぶ
+//
+// 18時に「未定」とお伝えした日を、ここで開催か中止かに決める。
+// 18時に4名以上あってその後キャンセルで割った日も、ここで拾って中止にする。
+export async function sendFinalCall(env) {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+  const { results: sessionsTomorrow } = await env.DB.prepare(
+    `SELECT * FROM sessions WHERE date = ? AND is_open = 1`
+  ).bind(tomorrowStr).all();
+
+  const { results } = await env.DB.prepare(`
+    SELECT r.id AS reservation_id, r.line_user_id, r.display_name, r.category, r.bento,
+           s.*, s.id AS session_id, s.date AS session_date
+    FROM reservations r
+    JOIN sessions s ON s.id = r.session_id
+    WHERE s.date = ? AND r.status = 'confirmed'
+  `).bind(tomorrowStr).all();
+
+  const bySession = new Map();
+  for (const row of results) {
+    if (!bySession.has(row.session_id)) bySession.set(row.session_id, []);
+    bySession.get(row.session_id).push(row);
+  }
+
+  for (const session of sessionsTomorrow || []) {
+    // 特別枠（TACOS・瞑想など）は最少催行の対象外
+    if (session.id !== session.date) continue;
+
+    const rows = bySession.get(session.id) || [];
+    const classCount = rows.filter(r => r.category !== '朝RUNのみ').length;
+
+    if (classCount < MIN_ATTENDANCE) {
+      await cancelSessionForLowAttendance(session, rows, classCount, env);
+      continue;
+    }
+
+    // 18時に「未定」とお伝えした日だけ、開催のご連絡をする。
+    // 列が無い（migration未適用）ときは送らない。二重送信になるより、
+    // 送らないほうが害が小さいため
+    const notifiedAt = session.pending_notified_at;
+    if (!notifiedAt) continue;
+
+    await env.DB.prepare(`UPDATE sessions SET pending_notified_at = NULL WHERE id = ?`)
+      .bind(session.id).run();
+
+    const userText = [
+      `✅ 明日 ${session.display_date} の朝活クラスは、予定どおり開催します！`,
+      '',
+      `ご参加は${classCount}名です。AM7:30、HMCでお待ちしています。`,
+      ...(session.morning_run ? ['朝RUNは6:30〜です。'] : []),
+      '',
+      '動きやすい服装でお越しください🌅',
+      ...OPENCHAT_LINES,
+    ].join('\n');
+    for (const row of rows) {
+      await pushToUser(row.line_user_id, [{ type: 'text', text: userText }], env);
+    }
+
+    const staffIds = (env.STAFF_USER_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
+    const staffText = [
+      '✅ 開催確定【21時の判定】',
+      `${session.display_date} ${session.title}`,
+      `クラス ${classCount}名`,
+    ].join('\n');
+    for (const staffId of staffIds) {
+      await pushToUser(staffId, [{ type: 'text', text: staffText }], env);
+    }
+  }
+}
+
+// 最少催行に届かなかった日を中止する。
+// DBを先に確定させてから通知する（通知が失敗しても中止そのものは成立させる）。
+async function cancelSessionForLowAttendance(session, rows, classCount, env) {
+  const runOnlyCount = rows.filter(r => r.category === '朝RUNのみ').length;
+
+  // その日の受付を閉じる。閉じないと、この連絡のあとに予約が入って
+  // 「中止と伝えた日に予約できてしまう」状態になる
+  await env.DB.prepare(`UPDATE sessions SET is_open = 0 WHERE id = ?`).bind(session.id).run();
+
+  // 予約をまとめてキャンセルにする。
+  // cancelled_at列のmigration未適用DBでも中止は成立させる（キャンセル導線と同じ2段構え）
+  const cancelledAt = new Date().toISOString();
+  try {
+    await env.DB.prepare(
+      `UPDATE reservations SET status = 'cancelled', cancelled_at = ?
+       WHERE session_id = ? AND status = 'confirmed'`
+    ).bind(cancelledAt, session.id).run();
+  } catch (e) {
+    if (!e.message?.includes('no such column')) throw e;
+    await env.DB.prepare(
+      `UPDATE reservations SET status = 'cancelled'
+       WHERE session_id = ? AND status = 'confirmed'`
+    ).bind(session.id).run();
+  }
+
+  // 予約者へのご連絡。「朝RUNのみ」の方にも送る（朝RUNもあわせてお休みになるため）。
+  // お弁当をご注文の方には、お渡しできる旨を添える（中止でもHACOSが買い取ってお渡しする。
+  // 2026-08-16 オーナー決定）。注文の有無で文面が変わるので、お一人ずつ組み立てる
+  const baseLines = [
+    `😢 明日 ${session.display_date} の朝活クラスは、お休みとさせていただきます。`,
+    '',
+    `ご参加予定の方が${MIN_ATTENDANCE}名に満たなかったためです。`,
+    ...(session.morning_run
+      ? ['', '朝RUN（6:30〜）は、スタッフがつかないためHACOSの主催としてはお休みです。',
+         '集まって走っていただくのは大丈夫ですので、ご参加の方どうしでお声かけください。']
+      : []),
+  ];
+
+  for (const row of rows) {
+    const lines = [...baseLines];
+    if (row.bento) {
+      lines.push('', 'ご注文のお弁当はご用意しています。HACOSでお受け取りいただけます。',
+        'お弁当代は通常どおりのお支払いです。');
+    }
+    lines.push('', '前日のご連絡になり、申し訳ありません。', 'またのご参加をお待ちしています🌅');
+    await pushToUser(row.line_user_id, [{ type: 'text', text: lines.join('\n') }], env);
+  }
+
+  const staffText = [
+    '⚠️ 中止【最少催行に未達】',
+    `${session.display_date} ${session.title}`,
+    `クラス ${classCount}名（最少催行${MIN_ATTENDANCE}名）${runOnlyCount ? ` ／ 朝RUNのみ ${runOnlyCount}名` : ''}`,
+    `予約${rows.length}件をキャンセルにし、受付を閉じました。`,
+    ...(rows.filter(r => r.bento).length
+      ? [`🍱 お弁当 ${rows.filter(r => r.bento).length}件は買い取り。HACOSでお渡しします`]
+      : []),
+    ...(rows.length ? ['', '▼ ご連絡した方', ...rows.map(r => `・${r.display_name || '(名前なし)'}（${r.category}）`)] : []),
+  ].join('\n');
+
+  const staffIds = (env.STAFF_USER_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
+  for (const staffId of staffIds) {
+    await pushToUser(staffId, [{ type: 'text', text: staffText }], env);
+  }
+}
+
 async function sendNotifications(userId, displayName, session, reservation, remaining, isExtra, env) {
   // 開催時間はセッション個別のtime_labelを優先（未設定なら朝クラス既定）。
   // id !== date は特別枠（例: 2026-07-19-tacos）＝朝クラスではないので、
@@ -897,6 +1136,7 @@ async function sendNotifications(userId, displayName, session, reservation, rema
       ? ['当日のご来場をお待ちしています🌅']
       : ['動きやすい服装でお越しください。', '日曜の朝、お待ちしています🌅']),
     '変更・キャンセルは、予約フォームを開くと画面上部の「あなたの予約」からいつでも行えます。',
+    ...OPENCHAT_LINES,
   ].join('\n');
 
   await pushToUser(userId, [{ type: 'text', text: userText }], env);
