@@ -805,12 +805,12 @@ reservationRoutes.post('/api/liff/reservations/:id/cancel', async (c) => {
 });
 
 // 最少催行人数（朝活クラス）。参加者が3名に満たない日は中止する（＝2名以下で中止）。
-// 2026-08-16 オーナー確定。お弁当とトレーナー謝礼の兼ね合いで4名も検討したが3名に決めた。
+// 2026-09-04 オーナー確定。お弁当とトレーナー謝礼の兼ね合いで4名も検討したが3名に決めた。
 // 「朝RUNのみ」（6:30〜・¥0）は7:30のクラスに出ないため、この人数には数えない。
 // 中止のときは朝RUNもHACOSの主催としてはお休みになるため、連絡はその日の予約者全員に送る
-// （走ること自体は止めない。集まって走るのは自由・2026-08-16 オーナー決定）。
+// （走ること自体は止めない。集まって走るのは自由・2026-09-04 オーナー決定）。
 // お弁当を注文している方がいても、人数が足りなければ中止する（お弁当は中止を止める理由にしない。
-// 2026-08-16 オーナー決定。中止時のお弁当はHACOSが買い取り、ご注文の方へお渡しする）。
+// 2026-09-04 オーナー決定。中止時のお弁当はHACOSが買い取り、ご注文の方へお渡しする）。
 const MIN_ATTENDANCE = 3;
 
 // HACOSのオープンチャット「HMC」。参加者どうしが朝RUNのお誘い・試食会・ゆる募で
@@ -828,7 +828,7 @@ const OPENCHAT_LINES = [
 // wrangler.toml: crons = ["0 9 * * *"]  (JST 18:00)
 // scheduled(event, env, ctx) { ctx.waitUntil(sendReminders(env)); }
 //
-// ご連絡は2段階（2026-08-16 オーナー決定）。
+// ご連絡は2段階（2026-09-04 オーナー決定）。
 //   18:00 … 4名に満たない日は「まだ未定・今夜中にご予約を」とお伝えする
 //   21:00 … sendFinalCall() でもう一度数え、開催か中止かを確定してご連絡する
 // 18時に中止を確定させてしまうと、その日の夜に4人目が予約したくても受付が閉じており、
@@ -937,7 +937,7 @@ export async function sendReminders(env) {
 async function sendPendingNotice(session, rows, classCount, env) {
   // 21時の「開催します」は、ここで未定とお伝えした日にだけ送る。
   // 印がないと、18時の時点で4名以上あった日にも21時に二重で送ってしまう。
-  // pending_notified_at列は 2026-08-16-pending-notice.sql で追加する。
+  // pending_notified_at列は 2026-09-04-pending-notice.sql で追加する。
   // 未適用でも中止の判定は動くよう、列が無いときは黙って先へ進める
   try {
     await env.DB.prepare(`UPDATE sessions SET pending_notified_at = ? WHERE id = ?`)
@@ -1074,7 +1074,7 @@ async function cancelSessionForLowAttendance(session, rows, classCount, env) {
 
   // 予約者へのご連絡。「朝RUNのみ」の方にも送る（朝RUNもあわせてお休みになるため）。
   // お弁当をご注文の方には、お渡しできる旨を添える（中止でもHACOSが買い取ってお渡しする。
-  // 2026-08-16 オーナー決定）。注文の有無で文面が変わるので、お一人ずつ組み立てる
+  // 2026-09-04 オーナー決定）。注文の有無で文面が変わるので、お一人ずつ組み立てる
   const baseLines = [
     `😢 明日 ${session.display_date} の朝活クラスは、お休みとさせていただきます。`,
     '',

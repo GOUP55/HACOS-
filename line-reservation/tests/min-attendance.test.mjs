@@ -70,7 +70,7 @@ async function run({ classMembers, runOnly = 0, special = false, capacity = 10,
                     finalCall = false, lateJoiners = 0, bentoOrders = 0 }) {
   const db = new DatabaseSync(':memory:');
   db.exec(read('../schema.sql'));
-  db.exec(read('../migrations/2026-08-16-pending-notice.sql'));
+  db.exec(read('../migrations/2026-09-04-pending-notice.sql'));
   const sessionId = special ? `${TOMORROW}-obosan` : TOMORROW;
   db.prepare(`
     INSERT INTO sessions
