@@ -813,6 +813,17 @@ reservationRoutes.post('/api/liff/reservations/:id/cancel', async (c) => {
 // 2026-08-16 オーナー決定。中止時のお弁当はHACOSが買い取り、ご注文の方へお渡しする）。
 const MIN_ATTENDANCE = 3;
 
+// HACOSのオープンチャット「HMC」。参加者どうしが朝RUNのお誘い・試食会・ゆる募で
+// 自由に声をかけあう場所。オープンチャットなので、電話番号やLINEのアカウントは
+// お互いに見えない（初めての方でも入りやすい形にするため、通常のグループLINEではなくこちら）
+const OPENCHAT_URL = 'https://line.me/ti/g2/hBcvkajEaSHvsVoqGX3SZJZZBbL7ZJsJwePWug?utm_source=invitation&utm_medium=link_copy&utm_campaign=default';
+const OPENCHAT_LINES = [
+  '',
+  '💬 HACOSのみんなの部屋（オープンチャット「HMC」）',
+  '朝RUNのお誘いや試食会など、参加される方どうしで声をかけあう場所です。',
+  OPENCHAT_URL,
+];
+
 // ── Cron: 前日18時のご連絡（リマインド／人数が足りない日は「未定」のお知らせ）──
 // wrangler.toml: crons = ["0 9 * * *"]  (JST 18:00)
 // scheduled(event, env, ctx) { ctx.waitUntil(sendReminders(env)); }
@@ -1018,6 +1029,7 @@ export async function sendFinalCall(env) {
       ...(session.morning_run ? ['朝RUNは6:30〜です。'] : []),
       '',
       '動きやすい服装でお越しください🌅',
+      ...OPENCHAT_LINES,
     ].join('\n');
     for (const row of rows) {
       await pushToUser(row.line_user_id, [{ type: 'text', text: userText }], env);
@@ -1124,6 +1136,7 @@ async function sendNotifications(userId, displayName, session, reservation, rema
       ? ['当日のご来場をお待ちしています🌅']
       : ['動きやすい服装でお越しください。', '日曜の朝、お待ちしています🌅']),
     '変更・キャンセルは、予約フォームを開くと画面上部の「あなたの予約」からいつでも行えます。',
+    ...OPENCHAT_LINES,
   ].join('\n');
 
   await pushToUser(userId, [{ type: 'text', text: userText }], env);

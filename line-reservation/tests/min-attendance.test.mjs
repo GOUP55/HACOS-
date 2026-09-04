@@ -223,6 +223,23 @@ async function run({ classMembers, runOnly = 0, special = false, capacity = 10,
     r.staffMsgs.some(m => m.text.includes('21時に確定')));
 }
 
+// ── 7. オープンチャット「HMC」への導線 ──────────────────────────
+{
+  const r = await run({ classMembers: 2, lateJoiners: 1, finalCall: true });
+  check('開催確定のご連絡にオープンチャットの案内が入る',
+    r.confirmMsgs.every(m => m.text.includes('オープンチャット「HMC」')));
+  check('開催確定のご連絡にオープンチャットのURLが入る',
+    r.confirmMsgs.every(m => m.text.includes('https://line.me/ti/g2/')));
+}
+{
+  // 中止のご連絡には入れない（お詫びの文面に勧誘を混ぜない）
+  const r = await run({ classMembers: 2, finalCall: true });
+  check('中止のご連絡にはオープンチャットの案内を入れない',
+    r.cancelMsgs.every(m => !m.text.includes('オープンチャット')));
+}
+check('オープンチャットのURLは1箇所（定数）で管理している',
+  (src.match(/https:\/\/line\.me\/ti\/g2\//g) || []).length === 1);
+
 const ok = results.filter(Boolean).length;
 console.log(`\n合計: ${results.length}項目中 ${ok}件 合格`);
 if (ok !== results.length) process.exit(1);
