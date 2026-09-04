@@ -49,8 +49,8 @@
 
 INSERT OR IGNORE INTO sessions VALUES
   ('2026-09-06','2026-09-06','9/6（日）','はじめてのマシンワークアウト＆巻き肩・背中リセット',
-   'ターメリックライスと三豊ナスのキーマカレー','GO, ふみや（KITCHEN）',1,10,1,
-   '[{"name":"ターメリックライスと三豊ナスのキーマカレー","price":null}]',0,'朝RUN 6:30〜あり',NULL),
+   '秋刀魚の土鍋ごはん','GO, みどり（KITCHEN）',1,10,1,
+   '[{"name":"秋刀魚の土鍋ごはん","price":null}]',0,'朝RUN 6:30〜あり',NULL),
 
   ('2026-09-13','2026-09-13','9/13（日）','ヒップアップトレーニング',
    'わっぱ弁当2種（新米おむすび／さんまの炊き込み）※仕入れにより変更になる場合があります','GO, みどり（KITCHEN）',1,10,1,
@@ -68,9 +68,9 @@ INSERT OR IGNORE INTO sessions VALUES
 -- 未適用のDBでは上のINSERTで最初から確定版が入るので、ここは無害に空振りする。
 UPDATE sessions SET
   title = 'はじめてのマシンワークアウト＆巻き肩・背中リセット',
-  food = 'ターメリックライスと三豊ナスのキーマカレー',
-  trainers = 'GO, ふみや（KITCHEN）',
-  bento_json = '[{"name":"ターメリックライスと三豊ナスのキーマカレー","price":null}]'
+  food = '秋刀魚の土鍋ごはん',
+  trainers = 'GO, みどり（KITCHEN）',
+  bento_json = '[{"name":"秋刀魚の土鍋ごはん","price":null}]'
 WHERE id = '2026-09-06';
 
 UPDATE sessions SET
