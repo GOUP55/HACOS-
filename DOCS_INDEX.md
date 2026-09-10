@@ -20,6 +20,7 @@
 | `AI_HEAVY_TASK_PLAYBOOK.md` | 重量級タスクの投げ方・測り方・課金判断（実行は `/heavy-task`） |
 | `LINE_HARNESS_HANDOFF.md` | LINE予約システムの構成・デプロイ手順 |
 | `FABLE5_SYSTEM_PROMPT.md` | CLAUDE.md「思考の規律」の抽出元（参照用・編集しない） |
+| `gpt-share/` | **ChatGPTに前提を引き継ぐための共有パック**（使い方は `gpt-share/README.md`）。正本ではなく要約。料金を変えたら `2_BUSINESS_BRIEF.md`、月が変わったら `3_CURRENT_STATE.md` を更新する |
 
 ## ローンチ運用中（第1期・募集締切 2026-07-31 まで）
 | ファイル | 役割 |
