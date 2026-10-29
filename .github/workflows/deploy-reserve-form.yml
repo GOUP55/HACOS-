@@ -1,0 +1,105 @@
+# LINE予約フォーム（reserve.html）を本番に反映する
+#
+# PCなし・スマホだけで本番反映するための仕組み（2026-10-30）。
+# main に line-reservation/liff/reserve.html の変更が入ると自動で動き、
+# Cloudflare KV（STATIC_KV の "liff/reserve.html"）を書き換える。
+# GitHubアプリの「Actions」タブから手動でも実行できる。
+#
+# 事前準備（1回だけ）：リポジトリの Settings → Secrets and variables → Actions に
+#   CLOUDFLARE_API_TOKEN … 権限「Workers KV Storage: Edit」だけを付けたAPIトークン
+# を登録する。
+#
+# 反映前に本番の中身をバックアップとして保存する（Actionsの実行結果 → Artifacts）。
+# 戻したいときは、そのファイルの中身で reserve.html を上書きして main に入れれば同じ流れで戻る。
+
+name: LINE予約フォームを本番に反映
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - line-reservation/liff/reserve.html
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-reserve-form
+  cancel-in-progress: false
+
+env:
+  KV_NAMESPACE_ID: b86324891c924346b20e6639035bc13f
+  KV_KEY: liff%2Freserve.html
+  SRC: line-reservation/liff/reserve.html
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: トークンの確認
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "::error::CLOUDFLARE_API_TOKEN が未登録です。Settings → Secrets and variables → Actions に登録してください。"
+            exit 1
+          fi
+
+      - name: アカウントIDを取得
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ACCOUNT_ID_SECRET: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -n "$ACCOUNT_ID_SECRET" ]; then
+            echo "ACCOUNT_ID=$ACCOUNT_ID_SECRET" >> "$GITHUB_ENV"; exit 0
+          fi
+          ids=$(curl -fsS -H "Authorization: Bearer $TOKEN" "https://api.cloudflare.com/client/v4/accounts?per_page=50" | jq -r '.result[].id')
+          n=$(printf '%s\n' "$ids" | grep -c . || true)
+          if [ "$n" != "1" ]; then
+            echo "::error::アカウントが ${n} 件見つかりました。CLOUDFLARE_ACCOUNT_ID も Secrets に登録してください。"
+            exit 1
+          fi
+          echo "ACCOUNT_ID=$ids" >> "$GITHUB_ENV"
+
+      - name: 反映前の本番をバックアップ
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          mkdir -p backup
+          curl -fsS -H "Authorization: Bearer $TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/storage/kv/namespaces/$KV_NAMESPACE_ID/values/$KV_KEY" \
+            -o backup/reserve.before.html
+          wc -c backup/reserve.before.html
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reserve-form-backup-${{ github.run_number }}
+          path: backup/reserve.before.html
+          retention-days: 90
+
+      - name: 本番に書き込む
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          test -s "$SRC"
+          curl -fsS -X PUT -H "Authorization: Bearer $TOKEN" -H "Content-Type: text/html; charset=utf-8" \
+            --data-binary "@$SRC" \
+            "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/storage/kv/namespaces/$KV_NAMESPACE_ID/values/$KV_KEY" \
+            | jq -e '.success == true'
+
+      - name: 書き込めたか確認
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          curl -fsS -H "Authorization: Bearer $TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/storage/kv/namespaces/$KV_NAMESPACE_ID/values/$KV_KEY" \
+            -o after.html
+          if cmp -s after.html "$SRC"; then
+            echo "本番のフォームは main の reserve.html と一致しました。"
+          else
+            echo "::error::書き込み後の内容が一致しません。バックアップ（Artifacts）を確認してください。"
+            exit 1
+          fi
