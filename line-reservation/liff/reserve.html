@@ -204,15 +204,13 @@ textarea:focus { border-color: var(--green); }
       <div class="section-title">参加区分<span class="required">必須</span></div>
       <div class="options">
         <label class="opt"><input type="radio" name="category" value="朝RUNのみ">
-          <span class="opt-label">朝RUNのみ（6:30〜）<span class="opt-price">参加費 ¥0・7:30の朝活クラスには参加しない</span></span></label>
+          <span class="opt-label">朝RUNのみ（7:30〜）<span class="opt-price">参加費 ¥1,000・7:30の朝活クラスには参加しない</span></span></label>
         <label class="opt"><input type="radio" name="category" value="ご利用中の方">
           <span class="opt-label">ご利用中の方<span class="opt-price">¥2,000／回・パーソナルを受けている方／ジャーニーの参加者・卒業生</span></span></label>
         <label class="opt"><input type="radio" name="category" value="都度">
           <span class="opt-label">都度（はじめての方）<span class="opt-price">¥3,000／回</span></span></label>
         <label class="opt"><input type="radio" name="category" value="HMC会員">
           <span class="opt-label">HMC会員<span class="opt-price">月額¥6,000・朝活クラス受け放題（当日のお支払いなし）</span></span></label>
-        <label class="opt"><input type="radio" name="category" value="セミパ会員">
-          <span class="opt-label">セミパ会員<span class="opt-price">月額¥24,000・朝活クラス受け放題（当日のお支払いなし）</span></span></label>
         <label class="opt" id="cat-tacos" style="display:none;"><input type="radio" name="category" value="TACOS">
           <span class="opt-label">TACOS Party<span class="opt-price">¥3,000・タコス食べ放題／ドリンク・その他フード別</span></span></label>
         <label class="opt" id="cat-obosan" style="display:none;"><input type="radio" name="category" value="瞑想">
@@ -224,7 +222,7 @@ textarea:focus { border-color: var(--green); }
 
     <!-- 朝RUN（条件表示） -->
     <div class="section conditional" id="morning-run-section">
-      <div class="section-title">朝RUN（6:30〜）への参加</div>
+      <div class="section-title">朝RUN（7:30〜）への参加</div>
       <p class="section-note" id="morning-run-note"></p>
       <div class="options">
         <label class="opt"><input type="radio" name="morning_run" value="join">
@@ -368,7 +366,7 @@ async function loadSessions() {
       ${s.food ? `<div class="session-food">🍱 ${esc(s.food)}</div>` : ''}
       ${s.note ? `<div class="session-note">${esc(s.note)}</div>` : ''}
       <div class="session-tags">
-        ${s.morning_run ? '<span class="tag tag-run">🏃 朝RUN 6:30〜</span>' : ''}
+        ${s.morning_run ? '<span class="tag tag-run">🏃 朝RUN 7:30〜</span>' : ''}
         ${s.time_label ? `<span class="tag tag-time">🕔 ${esc(s.time_label)}</span>` : ''}
       </div>
       ${badge}
@@ -490,7 +488,7 @@ async function cancelTrial(t, btn) {
 }
 
 // 「朝RUNのみ」を選ぶと、7:30の朝活クラスには参加しない予約になる。
-// 朝RUNは参加費¥0なので、朝RUN参加の質問（morning-run-section）は聞くまでもなく
+// 朝RUNのみの方は朝RUNに出るのが前提なので、朝RUN参加の質問（morning-run-section）は聞くまでもなく
 // 「参加する」で確定させ、二重に選ばせない。
 function setupCategoryHandler() {
   const runSection = document.getElementById('morning-run-section');
@@ -690,12 +688,12 @@ async function handleSubmit(e) {
     return;
   }
 
-  // 「朝RUNのみ」は朝RUN（6:30〜）を開催する日にしか使えない。
+  // 「朝RUNのみ」は朝RUN（7:30〜）を開催する日にしか使えない。
   // 朝活クラスの定員を消費しない予約なので、対象日を取り違えると席の計算が狂う
   if (category === '朝RUNのみ') {
     const noRun = [...selectedIds].filter(id => !sessions.find(s => s.id === id)?.morning_run);
     if (noRun.length) {
-      showError('「朝RUNのみ」は朝RUN（6:30〜）を開催する日にのみお選びいただけます。7:30の朝活クラスにご参加の場合は、別の参加区分でご予約ください。');
+      showError('「朝RUNのみ」は朝RUN（7:30〜）を開催する日にのみお選びいただけます。7:30の朝活クラスにご参加の場合は、別の参加区分でご予約ください。');
       return;
     }
   }

@@ -380,7 +380,7 @@ reservationRoutes.get('/api/liff/sessions', async (c) => {
     cutoffDate = tomorrow.toISOString().split('T')[0];
   }
 
-  // 「朝RUNのみ」（6:30〜・参加費¥0）は7:30の朝活クラスに出ないため、定員10名を消費しない。
+  // 「朝RUNのみ」（7:30〜・参加費¥1,000）は7:30の朝活クラスに出ないため、定員10名を消費しない。
   // お客様に見える残席の計算からも必ず除外する（除外を外すと、朝RUNだけの申込みで
   // クラスの残席が減って見える）。
   const { results } = await c.env.DB.prepare(`
@@ -455,7 +455,7 @@ reservationRoutes.post('/api/liff/reservations', async (c) => {
   // API直叩きで同一IDが重複していても1回だけ処理する（UI経由ではSetなので起きない）
   for (const sessionId of [...new Set(session_ids)]) {
     // 2. 残枠チェック（定員＋追加枠を超えたら満席）
-    // 「朝RUNのみ」（6:30〜・参加費¥0）は7:30の朝活クラスに出ないため、
+    // 「朝RUNのみ」（7:30〜・参加費¥1,000）は7:30の朝活クラスに出ないため、
     // クラスの定員10名を消費しない。残枠の計算からも除外する
     const session = await c.env.DB.prepare(`
       SELECT s.*,
@@ -806,7 +806,7 @@ reservationRoutes.post('/api/liff/reservations/:id/cancel', async (c) => {
 
 // 最少催行人数（朝活クラス）。参加者が3名に満たない日は中止する（＝2名以下で中止）。
 // 2026-09-04 オーナー確定。お弁当とトレーナー謝礼の兼ね合いで4名も検討したが3名に決めた。
-// 「朝RUNのみ」（6:30〜・¥0）は7:30のクラスに出ないため、この人数には数えない。
+// 「朝RUNのみ」（7:30〜・¥1,000）は7:30のクラスに出ないため、この人数には数えない。
 // 中止のときは朝RUNもHACOSの主催としてはお休みになるため、連絡はその日の予約者全員に送る
 // （走ること自体は止めない。集まって走るのは自由・2026-09-04 オーナー決定）。
 // お弁当を注文している方がいても、人数が足りなければ中止する（お弁当は中止を止める理由にしない。
@@ -888,7 +888,7 @@ export async function sendReminders(env) {
           ]
         : [
             `🌅 明日 ${row.display_date} AM7:30、HMCでお待ちしています！`,
-            row.morning_run ? '朝RUNは6:30〜。お気をつけてお越しください。' : 'お気をつけてお越しください。',
+            row.morning_run ? '朝RUNは7:30〜。お気をつけてお越しください。' : 'お気をつけてお越しください。',
           ];
       await pushToUser(row.line_user_id, [{ type: 'text', text: lines.join('\n') }], env);
     }
@@ -1026,7 +1026,7 @@ export async function sendFinalCall(env) {
       `✅ 明日 ${session.display_date} の朝活クラスは、予定どおり開催します！`,
       '',
       `ご参加は${classCount}名です。AM7:30、HMCでお待ちしています。`,
-      ...(session.morning_run ? ['朝RUNは6:30〜です。'] : []),
+      ...(session.morning_run ? ['朝RUNは7:30〜です。'] : []),
       '',
       '動きやすい服装でお越しください🌅',
       ...OPENCHAT_LINES,
@@ -1080,7 +1080,7 @@ async function cancelSessionForLowAttendance(session, rows, classCount, env) {
     '',
     `ご参加予定の方が${MIN_ATTENDANCE}名に満たなかったためです。`,
     ...(session.morning_run
-      ? ['', '朝RUN（6:30〜）は、スタッフがつかないためHACOSの主催としてはお休みです。',
+      ? ['', '朝RUN（7:30〜）は、スタッフがつかないためHACOSの主催としてはお休みです。',
          '集まって走っていただくのは大丈夫ですので、ご参加の方どうしでお声かけください。']
       : []),
   ];
@@ -1127,7 +1127,7 @@ async function sendNotifications(userId, displayName, session, reservation, rema
     `${session.display_date} ${session.title}`,
     `${timeLabel} / 観音寺 HACOS`,
     `区分：${reservation.category}`,
-    ...(reservation.category === '朝RUNのみ' ? ['朝RUN（6:30〜）のみのご参加です。参加費はかかりません。'] : []),
+    ...(reservation.category === '朝RUNのみ' ? ['朝RUN（7:30〜）のみのご参加です。参加費は¥1,000です。'] : []),
     ...(['HMC会員', 'セミパ会員'].includes(reservation.category) ? ['月額プランにご加入中のため、当日のお支払いはありません。'] : []),
     ...(reservation.category === '瞑想' ? ['※写経用紙を人数分お取り寄せするため、開催前日以降のキャンセルは用紙代¥1,000をいただきます。'] : []),
     ...(reservation.trainer ? [`担当：${reservation.trainer}`] : []),
@@ -1144,7 +1144,7 @@ async function sendNotifications(userId, displayName, session, reservation, rema
   // スタッフ通知
   const staffText = [
     reservation.category === '朝RUNのみ'
-      ? '🏃 新規予約【朝RUNのみ・¥0】'
+      ? '🏃 新規予約【朝RUNのみ・¥1,000】'
       : (isExtra ? '🆕 新規予約（追加枠）' : '🆕 新規予約'),
     `${session.display_date} ／ ${reservation.category}`,
     ...(reservation.trainer ? [`担当：${reservation.trainer}`] : []),

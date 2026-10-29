@@ -1,0 +1,98 @@
+# 本番Worker（line-harness）の文言だけを差し替える
+#
+# PCが壊れていてWorkerを再ビルドできない間の応急処置（2026-10-30）。
+# main に line-reservation/ops/worker-text-patch.json の変更が入ると動く。
+# GitHubアプリの「Actions」タブから手動でも実行できる。
+#
+# 流れ：本番コードを取り出す → バックアップ保存 → 決めた文字列だけ置換 →
+#       /content で戻す（バインディング・設定は変わらない）→ 取り出し直して確認
+# 置換対象が本番に見つからないときは、何も書き換えずに止まる。
+#
+# 必要なSecret：CLOUDFLARE_API_TOKEN（権限「Workers Scripts: Edit」）
+
+name: 本番Workerの文言を差し替え
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - line-reservation/ops/worker-text-patch.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: patch-worker-text
+  cancel-in-progress: false
+
+env:
+  SCRIPT: line-harness
+  PATCH: line-reservation/ops/worker-text-patch.json
+  TOOL: line-reservation/ops/patch_worker_text.py
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: アカウントIDを取得
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ACCOUNT_ID_SECRET: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$TOKEN" ]; then echo "::error::CLOUDFLARE_API_TOKEN が未登録です"; exit 1; fi
+          if [ -n "$ACCOUNT_ID_SECRET" ]; then echo "ACCOUNT_ID=$ACCOUNT_ID_SECRET" >> "$GITHUB_ENV"; exit 0; fi
+          ids=$(curl -fsS -H "Authorization: Bearer $TOKEN" "https://api.cloudflare.com/client/v4/accounts?per_page=50" | jq -r '.result[].id')
+          n=$(printf '%s\n' "$ids" | grep -c . || true)
+          if [ "$n" != "1" ]; then echo "::error::アカウントが ${n} 件。CLOUDFLARE_ACCOUNT_ID を登録してください"; exit 1; fi
+          echo "ACCOUNT_ID=$ids" >> "$GITHUB_ENV"
+
+      - name: 本番コードを取り出す
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          mkdir -p work backup
+          curl -fsS -D work/headers.txt -H "Authorization: Bearer $TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/workers/scripts/$SCRIPT" -o backup/worker.before.bin
+          ctype=$(grep -i '^content-type:' work/headers.txt | tail -1 | cut -d' ' -f2- | tr -d '\r')
+          echo "$ctype" > backup/content-type.txt
+          python3 "$TOOL" split backup/worker.before.bin "$ctype" work
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: worker-backup-${{ github.run_number }}
+          path: backup/
+          retention-days: 90
+
+      - name: 文言を置き換える
+        run: python3 "$TOOL" patch work "$PATCH"
+
+      - name: 本番に戻す
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ "$(cat work/changed)" = "0" ]; then echo "すべて適用済みのため書き込みません"; exit 0; fi
+          main=$(curl -fsS -H "Authorization: Bearer $TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/workers/scripts/$SCRIPT/settings" | jq -r '.result.main_module // empty')
+          [ -n "$main" ] || main=index.js
+          echo "{\"main_module\":\"$main\"}" > work/metadata.json
+          args=(-F "metadata=<work/metadata.json;type=application/json")
+          while IFS=$'\t' read -r name type; do
+            args+=(-F "${name}=@work/modules/${name};filename=${name};type=${type}")
+          done < <(jq -r '.[] | [.name, .type] | @tsv' work/manifest.json)
+          curl -fsS -X PUT -H "Authorization: Bearer $TOKEN" "${args[@]}" \
+            "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/workers/scripts/$SCRIPT/content" \
+            | jq -e '.success == true'
+
+      - name: 反映を確認
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          mkdir -p check
+          curl -fsS -D check/headers.txt -H "Authorization: Bearer $TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/workers/scripts/$SCRIPT" -o check/worker.after.bin
+          ctype=$(grep -i '^content-type:' check/headers.txt | tail -1 | cut -d' ' -f2- | tr -d '\r')
+          python3 "$TOOL" split check/worker.after.bin "$ctype" check
+          python3 "$TOOL" verify check "$PATCH"

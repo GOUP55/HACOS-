@@ -1,4 +1,4 @@
-// 「朝RUNのみ」区分（参加費¥0・7:30のクラスには出ない）のテスト。
+// 「朝RUNのみ」区分（参加費¥1,000・7:30〜・クラスには出ない）のテスト。
 // あわせて、廃止した回数券がフォームから消えていることも確認する。
 // モックサーバー内蔵・Playwright。実行方法は README.md 参照
 import http from 'http';
@@ -13,7 +13,7 @@ const PORT = 8793;
 const CHROMIUM = process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium';
 const FIXED_NOW = new Date('2026-08-14T09:00:00+09:00');
 
-// 朝RUNあり（6:30〜）の日曜クラス
+// 朝RUNあり（7:30〜）の日曜クラス
 const runSession = {
   id: '2026-08-16', date: '2026-08-16', display_date: '8/16（日）', title: '朝ヨガ',
   food: '', note: '', morning_run: 1, remaining: 5, base_remaining: 5, trainers: null,
@@ -101,12 +101,12 @@ function check(name, ok, detail = '') {
     (await page.locator('input[name="category"][value="ご利用中の方"]').count()) === 1);
   check('「都度」区分がある（旧「ビジター」から改称）',
     (await page.locator('input[name="category"][value="都度"]').count()) === 1);
-  check('月額プラン2種（HMC会員・セミパ会員）の区分がある',
+  check('月額プランはHMC会員のみ（セミパ会員は2026-11に廃止）',
     (await page.locator('input[name="category"][value="HMC会員"]').count()) === 1 &&
-    (await page.locator('input[name="category"][value="セミパ会員"]').count()) === 1);
+    (await page.locator('input[name="category"][value="セミパ会員"]').count()) === 0);
   const runLabel = await page.locator('input[name="category"][value="朝RUNのみ"]')
     .locator('xpath=..').textContent();
-  check('「朝RUNのみ」に参加費¥0と明記がある', runLabel.includes('¥0'));
+  check('「朝RUNのみ」に参加費¥1,000と7:30開始の明記がある', runLabel.includes('¥1,000') && runLabel.includes('7:30〜'));
 
   // ── 朝RUNのみを選ぶと、朝RUN参加の質問は聞かずに「参加する」で確定する ──
   const runCard = page.locator(`#sessions-list [data-id="${runSession.id}"]`);
