@@ -305,11 +305,11 @@ details .card { padding: 12px 0 0; }
         <input type="text" id="sf-food" maxlength="200" placeholder="例: ビーフストロガノフ"></label>
       <label>お弁当の選択肢 <span class="hint">1行に1つ「メニュー名:価格」。価格未定は価格なしで（例: カオマンガイ:1300）</span>
         <textarea id="sf-bento" rows="2" placeholder="カオマンガイ:1300"></textarea></label>
-      <label><input type="checkbox" id="sf-run" style="width:auto;margin-right:6px;">朝RUNあり（6:30〜）</label>
+      <label><input type="checkbox" id="sf-run" style="width:auto;margin-right:6px;">朝RUNあり（7:30〜）</label>
       <label>定員 <span class="hint">1〜99。お休みにしたい日は定員ではなく「受付締切」を使う</span>
         <input type="number" id="sf-capacity" min="1" max="99" value="10"></label>
       <label>備考（日程カードに表示）
-        <input type="text" id="sf-note" maxlength="300" placeholder="例: 朝RUN 6:30〜あり"></label>
+        <input type="text" id="sf-note" maxlength="300" placeholder="例: 朝RUN 7:30〜あり"></label>
       <div class="form-actions">
         <button type="submit" class="btn-submit-session" id="sf-submit">この日程を追加する</button>
         <button type="button" class="btn-reset-session" id="sf-reset">クリア</button>
