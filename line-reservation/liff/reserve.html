@@ -203,7 +203,7 @@ textarea:focus { border-color: var(--green); }
       <div class="section-title">参加区分<span class="required">必須</span></div>
       <div class="options">
         <label class="opt"><input type="radio" name="category" value="朝RUNのみ">
-          <span class="opt-label">朝RUNのみ（7:30〜）<span class="opt-price">参加費 ¥1,000・7:30の朝活クラスには参加しない</span></span></label>
+          <span class="opt-label">朝のラン＆ウォークのみ（7:30〜）<span class="opt-price">参加費 ¥1,000・ラン／ジョグ＆ウォーキングから選べます・7:30の朝活クラスには参加しない</span></span></label>
         <label class="opt"><input type="radio" name="category" value="ご利用中の方">
           <span class="opt-label">ご利用中の方<span class="opt-price">¥2,000／回・パーソナルを受けている方／ジャーニーの参加者・卒業生</span></span></label>
         <label class="opt"><input type="radio" name="category" value="都度">
@@ -221,14 +221,19 @@ textarea:focus { border-color: var(--green); }
 
     <!-- 朝RUN（条件表示） -->
     <div class="section conditional" id="morning-run-section">
-      <div class="section-title">朝RUN（7:30〜）への参加</div>
+      <div class="section-title">朝のラン＆ウォーク（7:30〜）への参加</div>
       <p class="section-note" id="morning-run-note"></p>
+      <p class="section-note">二手に分かれます。歩くだけでも大丈夫です。</p>
+      <!-- 2コースとも morning_run は "join"（サーバー・管理画面の集計がこの値で数えるため）。
+           コースの違いは data-course で持ち、送信時に trainer（担当）として送る -->
       <div class="options">
-        <label class="opt"><input type="radio" name="morning_run" value="join">
-          <span class="opt-label">参加したい</span></label>
-        <label class="opt"><input type="radio" name="morning_run" value="skip">
+        <label class="opt"><input type="radio" name="morning_run" value="join" data-course="walk">
+          <span class="opt-label">ライトなジョグ＆ウォーキング<span class="opt-price">担当：みどり・歩いたり、ゆっくり走ったり</span></span></label>
+        <label class="opt"><input type="radio" name="morning_run" value="join" data-course="run">
+          <span class="opt-label">GOと一緒に走るラン<span class="opt-price">担当：GO</span></span></label>
+        <label class="opt run-optional"><input type="radio" name="morning_run" value="skip">
           <span class="opt-label">参加しない</span></label>
-        <label class="opt"><input type="radio" name="morning_run" value="decide">
+        <label class="opt run-optional"><input type="radio" name="morning_run" value="decide">
           <span class="opt-label">当日決める</span></label>
       </div>
     </div>
@@ -324,7 +329,7 @@ async function loadSessions() {
   const runDays = sessions.filter(s => s.morning_run).map(s => s.display_date);
   const runNote = document.getElementById('morning-run-note');
   runNote.textContent = runDays.length
-    ? `朝RUNの開催日は ${runDays.join('・')} です`
+    ? `ラン＆ウォークの開催日は ${runDays.join('・')} です`
     : '';
 
   // 特別イベントの参加区分は、該当セッションが受付中のときだけ表示する
@@ -365,7 +370,7 @@ async function loadSessions() {
       ${s.food ? `<div class="session-food">🍱 ${esc(s.food)}</div>` : ''}
       ${s.note ? `<div class="session-note">${esc(s.note)}</div>` : ''}
       <div class="session-tags">
-        ${s.morning_run ? '<span class="tag tag-run">🏃 朝RUN 7:30〜</span>' : ''}
+        ${s.morning_run ? '<span class="tag tag-run">🏃 ラン＆ウォーク 7:30〜</span>' : ''}
         ${s.time_label ? `<span class="tag tag-time">🕔 ${esc(s.time_label)}</span>` : ''}
       </div>
       ${badge}
@@ -487,23 +492,28 @@ async function cancelTrial(t, btn) {
 }
 
 // 「朝RUNのみ」を選ぶと、7:30の朝活クラスには参加しない予約になる。
-// 朝RUNのみの方は朝RUNに出るのが前提なので、朝RUN参加の質問（morning-run-section）は聞くまでもなく
-// 「参加する」で確定させ、二重に選ばせない。
+// 朝RUNのみの方は参加が前提なので「参加しない／当日決める」は隠し、コース（ラン／ジョグ＆ウォーキング）だけ選ばせる。
 function setupCategoryHandler() {
-  const runSection = document.getElementById('morning-run-section');
-
   document.querySelectorAll('input[name="category"]').forEach(input => {
     input.addEventListener('change', () => {
       if (!input.checked) return;
-      if (input.value === '朝RUNのみ') {
-        const join = document.querySelector('input[name="morning_run"][value="join"]');
-        if (join) join.checked = true;
-        runSection.style.display = 'none';
-      } else {
-        updateConditionals();
-      }
+      const runOnly = input.value === '朝RUNのみ';
+      document.querySelectorAll('#morning-run-section .run-optional').forEach(el => {
+        el.style.display = runOnly ? 'none' : '';
+        const r = el.querySelector('input');
+        if (runOnly && r.checked) r.checked = false;
+      });
+      updateConditionals();
     });
   });
+}
+
+// 選ばれた朝のコースを、予約の「担当」として送る文字列にする（通知・管理画面に「担当：…」で出る）
+function runCourseTrainer() {
+  const course = document.querySelector('input[name="morning_run"]:checked')?.dataset.course;
+  if (course === 'walk') return 'みどり（朝：ジョグ＆ウォーキング）';
+  if (course === 'run') return 'GO（朝：ラン）';
+  return undefined;
 }
 
 // ── 体験パーソナル（リクエスト型） ──
@@ -693,7 +703,11 @@ async function handleSubmit(e) {
   if (category === '朝RUNのみ') {
     const noRun = [...selectedIds].filter(id => !sessions.find(s => s.id === id)?.morning_run);
     if (noRun.length) {
-      showError('「朝RUNのみ」は朝RUN（7:30〜）を開催する日にのみお選びいただけます。7:30の朝活クラスにご参加の場合は、別の参加区分でご予約ください。');
+      showError('「朝のラン＆ウォークのみ」は開催する日にのみお選びいただけます。7:30の朝活クラスにご参加の場合は、別の参加区分でご予約ください。');
+      return;
+    }
+    if (!runCourseTrainer()) {
+      showError('朝のコース（ジョグ＆ウォーキング／ラン）を選んでください。');
       return;
     }
   }
@@ -718,6 +732,7 @@ async function handleSubmit(e) {
         session_ids: [...selectedIds],
         category,
         morning_run: formData.get('morning_run') || null,
+        trainer: runCourseTrainer(),
         bento,
         message: formData.get('message') || '',
         ref: sessionStorage.getItem('ref') || '',

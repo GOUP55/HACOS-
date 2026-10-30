@@ -235,6 +235,12 @@ section { padding:72px 24px; }
 }
 .runfree-step-title { font-size:15px; color:var(--cream); margin-bottom:4px; padding-top:8px; }
 .runfree-step-desc { font-size:12px; color:rgba(245,240,232,.65); line-height:1.7; }
+.runfree-pace-title { font-family:'Noto Serif JP',serif; font-size:15px; color:var(--cream); margin-top:28px; }
+.runfree-pace { display:flex; flex-direction:column; gap:10px; margin-top:12px; }
+.runfree-pace-card { background:rgba(245,240,232,.08); border:1px solid rgba(245,240,232,.2); border-radius:8px; padding:16px; }
+.runfree-pace-name { font-size:15px; color:var(--cream); line-height:1.5; }
+.runfree-pace-who { font-size:11px; color:var(--amber-light); letter-spacing:.08em; margin-top:2px; }
+.runfree-pace-desc { font-size:12px; color:rgba(245,240,232,.75); line-height:1.8; margin-top:8px; }
 .runfree-note { font-size:12px; color:rgba(245,240,232,.6); line-height:1.8; margin-top:8px; }
 .runfree-line-btn {
   display:inline-flex; align-items:center; gap:10px; margin-top:16px;
@@ -814,45 +820,59 @@ footer {
 <!-- ═══ RUNFREE ═══ -->
 <section class="runfree" id="runfree">
   <p class="section-label">Sunday Morning Run</p>
-  <h2 class="section-title">朝の<br><em>RUN</em></h2>
+  <h2 class="section-title">朝の<br><em>ラン＆ウォーク</em></h2>
   <div class="divider"></div>
   <p class="runfree-lead">
-    毎週日曜 AM7:30〜、観音寺のHACOSで走ります。<br>
-    朝RUNがあるのは、GO担当のクラスの日だけ。登山の日はありません。<br>
-    朝活クラスに参加する方は無料、朝RUNのみの参加は¥1,000です。<br>
-    走るのが得意じゃなくても、久しぶりでも大丈夫。
+    毎週日曜 AM7:30〜、観音寺のHACOSから出発します。<br>
+    走るのが苦手でも、歩くだけでも大丈夫。久しぶりの方も、自分のペースで。<br>
+    開催はGO担当のクラスの日だけ。登山の日はありません。<br>
+    朝活クラスに参加する方は無料、朝のラン＆ウォークのみの参加は¥1,000です。
   </p>
+
+  <p class="runfree-pace-title">選べる、ふたつのコース。</p>
+  <div class="runfree-pace">
+    <div class="runfree-pace-card">
+      <p class="runfree-pace-name">ライトなジョグ＆ウォーキング</p>
+      <p class="runfree-pace-who">担当：みどり</p>
+      <p class="runfree-pace-desc">おしゃべりしながら、歩いたり、ゆっくり走ったり。久しぶりの方・走るのが苦手な方はこちらから。</p>
+    </div>
+    <div class="runfree-pace-card">
+      <p class="runfree-pace-name">GOと一緒に走るラン</p>
+      <p class="runfree-pace-who">担当：GO</p>
+      <p class="runfree-pace-desc">GOと一緒に、いつもより少し長く走ってみたい方はこちら。</p>
+    </div>
+  </div>
 
   <div class="runfree-steps">
     <div class="runfree-step">
       <div class="runfree-num">1</div>
       <div class="step-content">
         <p class="runfree-step-title">LINEの予約フォームから申し込む</p>
-        <p class="runfree-step-desc">朝活クラスと同じ、LINEの予約フォームからお申し込みください。</p>
+        <p class="runfree-step-desc">朝活クラスと同じ、LINEの予約フォームからお申し込みください。予約フォームで、コース（ラン／ジョグ＆ウォーキング）を選べます。</p>
       </div>
     </div>
     <div class="runfree-step">
       <div class="runfree-num">2</div>
       <div class="step-content">
         <p class="runfree-step-title">日曜の朝7:30、HACOSへ</p>
-        <p class="runfree-step-desc">動きやすい服装で来てください。ひとりで走るより、ずっと続けやすい朝です。</p>
+        <p class="runfree-step-desc">動きやすい服装で来てください。ひとりより、ずっと続けやすい朝です。</p>
       </div>
     </div>
     <div class="runfree-step">
       <div class="runfree-num">3</div>
       <div class="step-content">
-        <p class="runfree-step-title">朝活クラスに参加する方は、朝RUNは無料</p>
-        <p class="runfree-step-desc">朝RUNのみの参加は¥1,000です。朝活クラスはご利用中の方¥2,000／都度¥3,000です。</p>
+        <p class="runfree-step-title">朝活クラスに参加する方は、無料</p>
+        <p class="runfree-step-desc">朝のラン＆ウォークのみの参加は¥1,000です。朝活クラスはご利用中の方¥2,000／都度¥3,000です。</p>
       </div>
     </div>
   </div>
 
-  <p class="runfree-note">朝RUNはGO担当のクラスの日だけの開催です。11月は22日（日）。開催日は下の「11月プログラム」でご確認ください。</p>
+  <p class="runfree-note">朝のラン＆ウォークはGO担当のクラスの日だけの開催です。11月は22日（日）。開催日は下の「11月プログラム」でご確認ください。</p>
   <a href="https://liff.line.me/2010528512-LJhoz7MP?ref=lp" target="_blank" rel="noopener noreferrer" class="runfree-line-btn" data-ga-event="cta_runfree_reserve" data-ga-loc="runfree">
     <div class="cta-line-icon" style="background:transparent;">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M19.365 9.863c.349 0 .63.285.63.63 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.281.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
     </div>
-    朝RUNを予約する →
+    朝のラン＆ウォークを予約する →
   </a>
 </section>
 
@@ -1033,7 +1053,7 @@ footer {
     <div class="time-step">
       <div class="time-dot active"><span>▶</span></div>
       <p class="time-label">7:30</p>
-      <p class="time-desc">スタート<br>（🏃朝RUNはGO担当の日）</p>
+      <p class="time-desc">スタート<br>（🏃ラン＆ウォークはGO担当の日）</p>
     </div>
     <div class="time-step">
       <div class="time-dot"><span></span></div>
@@ -1184,7 +1204,7 @@ footer {
         <div class="program-trainers">
           <span class="trainer-chip">GO</span>
         </div>
-        <p class="program-note">🏃 朝RUN 7:30〜あり ／ お弁当なし</p>
+        <p class="program-note">🏃 朝RUN 7:30〜あり（ラン／ジョグ＆ウォーキングから選べます） ／ お弁当なし</p>
         <div class="join-cta" style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(0,0,0,.08);">
           <a href="#reservation" style="display:inline-block;background:var(--forest);color:#fff;font-size:13px;padding:10px 22px;border-radius:4px;text-decoration:none;font-weight:600;">この日に参加する（予約する）→</a>
         </div>
@@ -1236,14 +1256,15 @@ footer {
   <div class="class-cards">
     <div class="class-card">
       <span class="class-card-badge">受付中</span>
-      <p class="class-card-title">朝RUN</p>
+      <p class="class-card-title">朝のラン＆ウォーク</p>
       <p class="class-card-meta">
         📅 毎週日曜のうちGO担当の日<br>
         ⏱ AM 7:30〜<br>
+        🚶 ラン（GO）／ジョグ＆ウォーキング（みどり）<br>
         👥 どなたでも
       </p>
       <div class="class-card-price">
-        クラス参加者は <strong>無料</strong> ／ 朝RUNのみ <strong>¥1,000</strong>
+        クラス参加者は <strong>無料</strong> ／ ラン＆ウォークのみ <strong>¥1,000</strong>
       </div>
     </div>
     <div class="class-card">
@@ -1463,7 +1484,7 @@ footer {
       <button class="faq-q">走るのが苦手・遅くても大丈夫ですか？</button>
       <div class="faq-a">
         <div class="faq-a-inner">
-          大丈夫です。朝RUNにタイムや順位はありません。それぞれのペースで走ってください。気になる方は、まず日曜の朝の様子を見にくるだけでも大丈夫です。
+          大丈夫です。朝のラン＆ウォークにタイムや順位はありません。走らず、歩くだけでもかまいません。ライトなジョグ＆ウォーキングのコース（担当：みどり）もあるので、それぞれのペースで参加してください。気になる方は、まず日曜の朝の様子を見にくるだけでも大丈夫です。
         </div>
       </div>
     </div>
