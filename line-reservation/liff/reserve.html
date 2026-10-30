@@ -153,15 +153,14 @@ textarea:focus { border-color: var(--green); }
         <div class="options">
           <label class="opt"><input type="radio" name="trial_kind" value="trial_personal" checked>
             <span class="opt-label">体験パーソナル（1対1）<span class="opt-price">¥3,500・初回限定の特別価格</span></span></label>
-          <label class="opt"><input type="radio" name="trial_kind" value="journey_trial7">
-            <span class="opt-label">フィットネスジャーニー 7日間お試し<span class="opt-price">¥9,000・セミパ1回＋グループパーソナル1回＋日曜朝活1回／2ヶ月へお進みの場合は参加費に充当します</span></span></label>
+          <!-- フィットネスジャーニー 7日間お試し（journey_trial7）は 2026-10-30 オーナー判断で募集停止。
+               再開するときはこの位置に選択肢を戻す（下の切り替え処理・サーバー側は残してある） -->
         </div>
 
         <div class="section-title" style="margin-top:14px;" id="trial-trainer-title">ご希望の担当トレーナー<span class="required" id="trial-trainer-req">必須</span></div>
         <div class="options">
           <label class="opt"><input type="radio" name="trial_trainer" value="GO"><span class="opt-label">GO</span></label>
           <label class="opt"><input type="radio" name="trial_trainer" value="片山めぐみ"><span class="opt-label">片山めぐみ</span></label>
-          <label class="opt"><input type="radio" name="trial_trainer" value="ちひろ"><span class="opt-label">ちひろ</span></label>
           <label class="opt"><input type="radio" name="trial_trainer" value="黒田陽子"><span class="opt-label">黒田陽子</span></label>
           <label class="opt"><input type="radio" name="trial_trainer" value="お任せ"><span class="opt-label">お任せ（運営にお任せします）</span></label>
         </div>
@@ -551,11 +550,12 @@ function setupTrialForm() {
   });
   applyKindCopy();
 
-  // LPから「7日間お試しを申し込む」で来た人は、フォームを開いて種別まで選んだ状態にする。
-  // 開いてもらう手間をかけると、ここで離脱する（?apply=trial7 / ?apply=personal）
+  // LPから申込ボタンで来た人は、フォームを開いて種別まで選んだ状態にする。
+  // 開いてもらう手間をかけると、ここで離脱する（?apply=personal）
+  // ?apply=trial7（7日間お試し）は 2026-10-30 に募集停止。古いリンクから来ても何も選ばない
   const apply = new URLSearchParams(location.search).get('apply');
-  if (apply === 'trial7' || apply === 'personal') {
-    const value = apply === 'trial7' ? 'journey_trial7' : 'trial_personal';
+  if (apply === 'personal') {
+    const value = 'trial_personal';
     const radio = document.querySelector(`input[name="trial_kind"][value="${value}"]`);
     if (radio) radio.checked = true;
     applyKindCopy();
