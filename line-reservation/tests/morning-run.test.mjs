@@ -114,11 +114,24 @@ function check(name, ok, detail = '') {
   check('朝RUN開催日を選ぶと朝RUNの質問が出る',
     await page.locator('#morning-run-section').isVisible());
 
+  check('コースは「ジョグ＆ウォーキング（みどり）」と「ラン（GO）」の2つ',
+    (await page.locator('input[name="morning_run"][data-course="walk"]').count()) === 1 &&
+    (await page.locator('input[name="morning_run"][data-course="run"]').count()) === 1);
+  check('ジョグ＆ウォーキングの担当はみどり',
+    (await page.locator('input[data-course="walk"]').locator('xpath=..').textContent()).includes('みどり'));
+
   await page.locator('input[name="category"][value="朝RUNのみ"]').check();
-  check('朝RUNのみを選ぶと朝RUNの質問が隠れる',
-    !(await page.locator('#morning-run-section').isVisible()));
-  check('朝RUNのみを選ぶと morning_run が自動で「参加する」になる',
-    await page.locator('input[name="morning_run"][value="join"]').isChecked());
+  check('朝RUNのみを選ぶとコースの質問は出たまま',
+    await page.locator('#morning-run-section').isVisible());
+  check('朝RUNのみでは「参加しない」「当日決める」が隠れる',
+    !(await page.locator('input[name="morning_run"][value="skip"]').isVisible()) &&
+    !(await page.locator('input[name="morning_run"][value="decide"]').isVisible()));
+
+  // ── ガード: コース未選択では送れない ──
+  await page.locator('#btn-submit').click();
+  check('ガード: 朝RUNのみでコース未選択だとエラーになり送信されない',
+    (await page.locator('#form-error').isVisible()) && lastPostBody === null);
+  await page.locator('input[name="morning_run"][data-course="walk"]').check();
 
   // ── ガード: 朝RUNの無い日に「朝RUNのみ」は使えない ──
   const noRunCard = page.locator(`#sessions-list [data-id="${noRunSession.id}"]`);
@@ -134,6 +147,8 @@ function check(name, ok, detail = '') {
 
   check('送信ボディ: category=朝RUNのみ・morning_run=join',
     lastPostBody?.category === '朝RUNのみ' && lastPostBody?.morning_run === 'join');
+  check('送信ボディ: 選んだコースが担当として送られる（ジョグ＆ウォーキング＝みどり）',
+    lastPostBody?.trainer === 'みどり（朝：ジョグ＆ウォーキング）');
   check('送信ボディ: 対象は朝RUN開催日だけ',
     JSON.stringify(lastPostBody?.session_ids) === JSON.stringify([runSession.id]));
 
