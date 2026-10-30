@@ -211,7 +211,7 @@ section { padding:72px 24px; }
 }
 .section-title em { font-style:italic; color:var(--forest); }
 /* 深緑・黒背景セクションでは em が背景に沈むため明色に */
-.weekly .section-title em, .method .section-title em, .cta-section .section-title em { color:var(--amber-light); }
+.weekly .section-title em, .cta-section .section-title em { color:var(--amber-light); }
 .section-body { font-size:14px; color:var(--mid); line-height:1.9; }
 .divider { width:40px; height:1px; background:var(--amber); margin:20px 0; }
 
@@ -455,46 +455,6 @@ section { padding:72px 24px; }
 }
 .pricing-coming { margin-top:12px; text-align:center; font-size:12px; color:rgba(245,240,232,.45); }
 
-/* ── 3ヶ月プレミアム（NEW SECTION） ── */
-.method { background:var(--dark); }
-.method .section-title { color:var(--cream); }
-.method .section-label { color:var(--amber-light); }
-.method .divider { background:rgba(245,240,232,.25); }
-.method-lead { font-size:14px; color:rgba(245,240,232,.75); line-height:1.9; margin-top:16px; }
-.method-card {
-  background:linear-gradient(135deg,rgba(61,90,62,.3),rgba(200,131,58,.1));
-  border:1px solid rgba(200,131,58,.3); border-radius:12px; padding:24px; margin-top:28px;
-}
-.method-tag {
-  display:inline-block; background:var(--amber); color:#fff; font-size:10px;
-  padding:4px 12px; border-radius:20px; font-family:'DM Sans',sans-serif;
-  letter-spacing:.08em; margin-bottom:16px;
-}
-.method-title { font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:300; color:var(--cream); margin-bottom:4px; }
-.method-sub { font-size:12px; color:rgba(245,240,232,.55); margin-bottom:20px; }
-.method-includes { list-style:none; display:flex; flex-direction:column; gap:8px; margin-bottom:20px; }
-.method-includes li {
-  font-size:13px; color:rgba(245,240,232,.8); padding-left:20px; position:relative; line-height:1.6;
-}
-.method-includes li::before { content:'✓'; position:absolute; left:0; color:var(--amber-light); }
-.method-price-box {
-  background:rgba(0,0,0,.25); border-radius:8px; padding:16px; text-align:center; margin-bottom:16px;
-}
-.method-price-old { font-size:13px; color:rgba(245,240,232,.4); text-decoration:line-through; margin-bottom:4px; }
-.method-price-new { font-family:'Cormorant Garamond',serif; font-size:40px; font-weight:300; color:var(--amber-light); }
-.method-price-period { font-size:13px; color:rgba(245,240,232,.5); }
-.method-capacity { font-size:11px; color:rgba(245,240,232,.5); text-align:center; margin-bottom:16px; }
-.method-cta {
-  display:block; background:var(--amber); color:#fff; text-decoration:none;
-  text-align:center; padding:16px; border-radius:6px; font-size:15px;
-  font-family:'DM Sans',sans-serif; letter-spacing:.04em;
-}
-.method-cta.secondary {
-  background:transparent; border:1px solid rgba(245,240,232,.4);
-  color:var(--cream); margin-top:10px;
-}
-.method-note { font-size:11px; color:rgba(245,240,232,.4); text-align:center; margin-top:10px; line-height:1.6; }
-
 /* ── VOICES（お客様の声 / 社会的証明） ── */
 .voices { background:var(--cream); }
 .voices-note { font-size:12px; color:var(--light-text); margin-top:6px; }
@@ -673,6 +633,9 @@ footer {
 .plan-price-num { font-size:40px; font-weight:500; }
 .plan-price-unit { font-family:'DM Sans',sans-serif; font-size:12px; margin-left:6px; opacity:.8; }
 .plan-price-sub { font-size:13px; margin-bottom:6px; }
+.plan-voices-link { margin:4px 0 14px; font-size:13px; line-height:1.6; }
+.plan-voices-link a { color:inherit; text-decoration:underline; text-underline-offset:3px; font-weight:600; }
+.plan-voices-link small { display:block; font-size:11px; opacity:.7; margin-top:2px; }
 .plan-fine { font-size:12px; line-height:1.7; opacity:.8; margin-bottom:18px; }
 .plan-keyword-row { font-size:13px; line-height:1.8; display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; margin-bottom:10px; }
 .plan-keyword { font-weight:700; user-select:all; -webkit-user-select:all; }
@@ -685,9 +648,6 @@ footer {
 .plan-meal img { display:block; width:100%; height:200px; object-fit:cover; border-radius:12px; }
 .plan-meal-title { font-family:'Noto Serif JP',serif; font-size:16px; margin:12px 0 4px; color:var(--dark); }
 .plan-meal-cap { font-size:12px; color:var(--light-text); line-height:1.7; }
-.plans-pricing-link { display:block; box-sizing:border-box; margin-top:20px; padding:16px 18px; border-radius:10px; background:var(--cream); color:var(--dark); text-decoration:none; border:2px solid var(--amber); }
-.plans-pricing-link-label { display:block; font-family:'DM Sans',sans-serif; font-size:11px; letter-spacing:.14em; color:var(--rust); font-weight:700; margin-bottom:4px; }
-.plans-pricing-link-main { display:block; font-size:14px; line-height:1.7; font-weight:600; }
 </style>
 </head>
 <body>
@@ -726,7 +686,7 @@ footer {
       <span class="hero-badge">観音寺 HACOS</span>
       <span class="hero-badge">定員10名</span>
     </div>
-    <!-- ★フィットネスジャーニー入口バナー（チーム制のため締切なし・カウントダウンは廃止） -->
+    <!-- ★3ヶ月プラン入口バナー（締切なし・カウントダウンは廃止） -->
     <a href="#plans" class="hero-premium-banner" id="heroPremiumBanner" data-ga-event="cta_hero_to_plans" data-ga-loc="hero">
       11月スタートの3ヶ月プラン｜GOと「集中」・仲間と「仲間」 →
     </a>
@@ -786,6 +746,7 @@ footer {
             <li>今度こそ、暮らしから変えたい</li>
           </ul>
         </details>
+        <p class="plan-voices-link"><a href="#voices" data-ga-event="cta_plan_to_voices" data-ga-loc="plans-focus">GOと取り組んだ方の変化を見る →</a><small>効果には個人差があります。</small></p>
         <p class="plan-price"><span class="plan-price-num">¥250,000</span><span class="plan-price-unit">（税込）／3ヶ月</span></p>
         <p class="plan-fine">目標未達時の延長については、ご相談時に詳しくご説明します。</p>
         <p class="plan-keyword-row">
@@ -1336,21 +1297,16 @@ footer {
 </section>
 
 <!-- ═══ PRICING ═══ -->
-<!-- ★2026-11 新体系: 朝活都度 → HMC会員 → ジャーニーの階段（セミパ会員は掲載しない） -->
+<!-- ★2026-11 新体系: 朝活都度 → HMC会員 → 3ヶ月プランの階段（セミパ会員は掲載しない） -->
 <section class="pricing" id="pricing">
   <p class="section-label">Pricing</p>
   <h2 class="section-title">1回から、<br><em>始まる階段。</em></h2>
   <div class="divider"></div>
   <p style="font-size:13px;color:rgba(245,240,232,.6);line-height:1.8;margin-top:4px;">
     毎週日曜の朝活クラスは、1回からご参加いただけます（¥2,000〜）。<br>
-    そこから月額プラン、2ヶ月のフィットネスジャーニーへ。<br>
+    そこから月額プラン、3ヶ月プランへ。<br>
     あなたのペースで、一段ずつ進めます。
   </p>
-
-  <a href="#plans" class="plans-pricing-link" data-ga-event="cta_pricing_to_plans" data-ga-loc="pricing">
-    <span class="plans-pricing-link-label">いま募集中</span>
-    <span class="plans-pricing-link-main">3ヶ月プラン（集中 ¥250,000／仲間 月額¥12,000）→</span>
-  </a>
 
   <div class="pricing-steps">
 
@@ -1388,19 +1344,16 @@ footer {
 
     <div class="pricing-step">
       <p class="step-label">Step 3</p>
-      <p class="step-title">フィットネスジャーニー（2ヶ月）</p>
-      <p class="step-price">¥78,000<span class="step-price-unit">（2ヶ月・税込）</span></p>
+      <p class="step-title">3ヶ月プラン</p>
       <p class="step-desc">
-        セミパーソナル週1回、グループパーソナル週1回、HMC朝活クラス。<br>
-        3〜5名のチームで、2ヶ月を一緒に走りきります。
+        <strong>集中</strong>（GOと整える・3ヶ月・週2回・食事16食付き）<br>
+        <span class="step-price" style="display:inline-block;font-size:26px;">¥250,000<span class="step-price-unit">（3ヶ月・税込）</span></span>
       </p>
-      <p class="step-note">
-        ● 1期生・3〜5名のチーム制（メンバーがそろい次第スタート）。<br>
-        ● まず1週間ためす「7日間お試し」¥9,000 もあります。<strong>2ヶ月へお進みの場合、¥9,000は参加費に充当します。</strong><br>
-        ● 食事のサポート（夕食 週5食 ¥8,000／週）は別でお選びいただけます。
+      <p class="step-desc" style="margin-top:10px;">
+        <strong>仲間</strong>（2〜5名・月2回・全6回・片山めぐみ）<br>
+        <span class="step-price" style="display:inline-block;font-size:26px;">¥12,000<span class="step-price-unit">／月（税込）</span></span>
       </p>
-      <a href="https://liff.line.me/2010528512-LJhoz7MP?ref=lp&apply=trial7" target="_blank" rel="noopener noreferrer" class="step-cta" data-ga-event="trial7_reserve" data-ga-loc="pricing">7日間お試しを申し込む（¥9,000）→</a>
-      <a href="retreat.html" class="step-link" data-ga-event="cta_lp_to_journey" data-ga-loc="pricing">2ヶ月の詳細を見る →</a>
+      <a href="#plans" class="step-cta" data-ga-event="cta_pricing_to_plans" data-ga-loc="pricing-step3">3ヶ月プランを見る →</a>
     </div>
 
   </div>
@@ -1418,60 +1371,6 @@ footer {
       ● おふたり以上で受けられる場合は、人数に応じて割引します。
     </p>
     <a href="#reservation" class="step-cta">今すぐ予約する →</a>
-  </div>
-</section>
-
-<!-- ═══ 2ヶ月クラス：フィットネスジャーニー ═══ -->
-<section class="method" id="method">
-  <p class="section-label">Two Month Program</p>
-  <h2 class="section-title">2ヶ月の、<br><em>旅に出る。</em></h2>
-  <div class="divider"></div>
-  <p class="method-lead">
-    2ヶ月かけて、自分で自分をコーチできるようになる旅です。<br>
-    運動と食事の整え方を、根拠のある形で身につけます。<br>
-    終わってからも続けられる場所を、HACOSに用意しています。
-  </p>
-
-  <div class="method-card">
-    <span class="method-tag">1期生・3〜5名のチーム制</span>
-    <h3 class="method-title">フィットネス<br>ジャーニー</h3>
-    <p class="method-sub">2ヶ月の集中クラス（観音寺）</p>
-
-    <ul class="method-includes">
-      <li>スタートカウンセリング＋あなた専用プラン</li>
-      <li>セミパーソナル 週1回（少人数・定員5名）</li>
-      <li>グループパーソナル 週1回（チーム全員で）</li>
-      <li>日曜朝のHMC朝活クラス（出られる週に）</li>
-      <li>専用LINEグループでのサポート</li>
-      <li>2ヶ月の振り返りレポート</li>
-    </ul>
-
-    <div class="method-price-box">
-      <p class="method-price-old">単品で揃えると ¥104,000（税込）</p>
-      <p class="method-price-new">¥78,000</p>
-      <p class="method-price-period">2ヶ月ぶん・税込 ／ 食事のサポートは別でお選びいただけます</p>
-      <p style="font-size:11px;color:rgba(245,240,232,.55);line-height:1.75;margin-top:10px;">
-        ※単品の内訳は HMC朝活 ¥3,000×8＋セミパーソナル ¥4,000×8＋グループパーソナル ¥6,000×8。<br>
-        グループパーソナルは3名でご参加の場合の価格です（4名 ¥5,500／5名 ¥5,000）。
-      </p>
-    </div>
-
-    <p class="method-capacity">📍 1期生・3〜5名のチーム制 ｜ メンバーがそろい次第スタート ｜ <strong>7日間お試し ¥9,000</strong>（2ヶ月へ進む場合は参加費に充当）</p>
-
-    <a href="https://liff.line.me/2010528512-LJhoz7MP?ref=lp&apply=trial7" target="_blank" rel="noopener noreferrer" class="method-cta" data-ga-event="trial7_reserve" data-ga-loc="method">
-      まず7日間ためす（¥9,000）→
-    </a>
-
-    <a href="retreat.html" class="method-cta" data-ga-event="cta_lp_to_journey" data-ga-loc="method">
-      ジャーニーの詳細を見る →
-    </a>
-    <a href="https://lin.ee/TsRy6I9" class="method-cta secondary" target="_blank" rel="noopener noreferrer" data-ga-event="cta_counseling_line" data-ga-loc="method">
-      LINEで相談する →
-    </a>
-    <p class="method-note">
-      ご自身でコーチングを行い、そのサポートをHACOSチームが行うクラスです。努力は必要で、結果には個人差があります。<br>
-      3〜5名のチームがそろい次第の開始です（3名に満たない場合も、お集まりの方にご確認のうえ2名から始めることがあります）。
-    </p>
   </div>
 </section>
 
@@ -1642,7 +1541,7 @@ footer {
 </section>
 
 <!-- ═══ VOICES / 実績（Before → After / 社会的証明） ═══ -->
-<section class="voices">
+<section class="voices" id="voices">
   <p class="section-label">Real Results</p>
   <h2 class="section-title">結果が、<br><em>物語る</em></h2>
   <div class="divider"></div>
@@ -1668,7 +1567,7 @@ footer {
 
   </div>
   <p class="voices-disclaimer">※ 効果には個人差があります。掲載はご本人の許可を得たものです。</p>
-  <a href="retreat.html" class="voices-cta" data-ga-event="cta_lp_to_journey" data-ga-loc="voices">🌅 2ヶ月の旅・フィットネスジャーニー →</a>
+  <a href="#plans" class="voices-cta" data-ga-event="cta_voices_to_plans" data-ga-loc="voices">GOと整える、3ヶ月プランを見る →</a>
 </section>
 
 <!-- ═══ RESERVATION FORM ═══ -->
@@ -1760,7 +1659,6 @@ footer {
     <a href="https://lin.ee/TsRy6I9" target="_blank" rel="noopener noreferrer">公式LINE</a>
     <a href="https://hacos.base.shop/items/146190213" target="_blank" rel="noopener noreferrer">物販</a>
     <a href="https://www.instagram.com/hmc.day/" target="_blank" rel="noopener noreferrer">Instagram</a>
-    <a href="retreat.html">リトリート</a>
     <a href="tokushoho.html">特定商取引法に基づく表記</a>
   </div>
   <p class="footer-copy">© 2025–2026 HACOS LIFESTYLES. All rights reserved.</p>
@@ -1768,7 +1666,7 @@ footer {
 
 <script>
 // ── 募集締切のカウントダウンは置かない ──
-// フィットネスジャーニーは3〜5名そろい次第スタートのチーム制で、締切日が存在しない。
+// 締切日のある募集は現在なし。
 // スティッキーCTAは「日曜の朝、7:30から」で固定（JSから上書きしないこと）。
 
 // ── Sticky CTA ──
