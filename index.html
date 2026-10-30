@@ -401,6 +401,7 @@ section { padding:72px 24px; }
 /* ── TRAINERS ── */
 .trainers { background:var(--cream); }
 .trainer-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:28px; }
+.trainer-grid > .trainer-card:nth-child(odd):has(+ .trainer-kitchen) { grid-column:1 / -1; justify-self:center; width:calc(50% - 6px); }
 .trainer-card { background:var(--warm-white); border-radius:8px; overflow:hidden; }
 .trainer-photo {
   width:100%; aspect-ratio:3/4; object-fit:cover;
@@ -833,15 +834,6 @@ footer {
     </div>
 
     <div class="trainer-card">
-      <img loading="lazy" src="images/chihiro.jpg" alt="ちひろ" class="trainer-photo" style="object-position:center 20%;">
-      <div class="trainer-body">
-        <p class="trainer-name">ちひろ</p>
-        <p class="trainer-role">Trainer / Pilates</p>
-        <p class="trainer-bio">ピラティスの専門家。愛されbodyを一緒に作ります。</p>
-      </div>
-    </div>
-
-    <div class="trainer-card">
       <img loading="lazy" src="images/kuroda.jpg" alt="黒田陽子KURO" class="trainer-photo" style="object-position:center 15%;">
       <div class="trainer-body">
         <p class="trainer-name">黒田陽子 KURO</p>
@@ -1169,7 +1161,7 @@ footer {
         📅 月〜金<br>
         ⏱ 11:00 ／ 19:00<br>
         👥 定員5名（最少催行2名）<br>
-        🧑‍🏫 GO ／ 片山めぐみ ／ ちひろ
+        🧑‍🏫 GO ／ 片山めぐみ
       </p>
       <div class="class-card-price">
         ドロップイン <strong>¥4,000</strong>
@@ -1182,7 +1174,7 @@ footer {
         📅 ご希望に合わせて<br>
         ⏱ 60分<br>
         👥 定員5名<br>
-        🧑‍🏫 GO ／ 片山めぐみ ／ ちひろ
+        🧑‍🏫 GO ／ 片山めぐみ
       </p>
       <div class="class-card-price">
         <strong>¥6,000</strong> ／ 人
