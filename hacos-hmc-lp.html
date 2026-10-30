@@ -644,6 +644,50 @@ footer {
 .footer-links a { font-size:12px; color:var(--light-text); text-decoration:none; display:inline-block; padding:14px 8px; }
 .footer-copy { font-size:11px; color:rgba(138,132,120,.5); font-family:'DM Sans',sans-serif; }
 .hpb-days { white-space:nowrap; }
+
+/* ── 3-MONTH PLANS ── */
+.plans { background:var(--warm-white); overflow-x:hidden; }
+.plans-lead { font-size:14px; color:var(--mid); line-height:1.9; margin-top:4px; }
+.plans-cards { display:flex; flex-direction:column; gap:24px; margin-top:28px; }
+.plan-card { border-radius:12px; overflow:hidden; box-sizing:border-box; }
+.plan-card img.plan-photo { display:block; width:100%; height:180px; object-fit:cover; }
+.plan-body { padding:24px 20px 28px; }
+.plan-card--focus { background:var(--forest); color:var(--cream); }
+.plan-card--together { background:var(--cream); color:var(--dark); border:1px solid var(--sand); }
+.plan-tag { font-family:'DM Sans',sans-serif; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--amber-light); margin-bottom:8px; }
+.plan-card--together .plan-tag { color:var(--amber); }
+.plan-name { font-family:'Noto Serif JP',serif; font-size:20px; font-weight:500; line-height:1.5; margin-bottom:6px; }
+.plan-catch { font-size:14px; line-height:1.8; margin-bottom:14px; opacity:.9; }
+.plan-spec { font-family:'DM Sans',sans-serif; font-size:12px; line-height:1.7; padding:10px 12px; border-radius:6px; background:rgba(245,240,232,.12); margin-bottom:16px; }
+.plan-card--together .plan-spec { background:var(--sand-light); }
+.plan-points { list-style:none; padding:0; margin:0 0 18px; }
+.plan-points li { font-size:14px; line-height:1.8; padding-left:1.6em; text-indent:-1.6em; margin-bottom:8px; }
+.plan-points li b { color:var(--amber-light); font-family:'DM Sans',sans-serif; margin-right:.4em; text-indent:0; }
+.plan-card--together .plan-points li b { color:var(--amber); }
+.plan-note { font-size:13px; line-height:1.8; opacity:.85; margin-bottom:16px; }
+.plan-details { border-top:1px solid rgba(138,132,120,.35); padding:4px 0; margin-bottom:18px; font-size:13px; line-height:1.8; }
+.plan-details summary { cursor:pointer; min-height:44px; display:flex; align-items:center; font-weight:600; }
+.plan-details ul, .plan-details ol { margin:0 0 10px; padding-left:1.4em; }
+.plan-details li { margin-bottom:4px; }
+.plan-price { font-family:'Cormorant Garamond',serif; line-height:1.2; margin-bottom:6px; }
+.plan-price-num { font-size:40px; font-weight:500; }
+.plan-price-unit { font-family:'DM Sans',sans-serif; font-size:12px; margin-left:6px; opacity:.8; }
+.plan-price-sub { font-size:13px; margin-bottom:6px; }
+.plan-fine { font-size:12px; line-height:1.7; opacity:.8; margin-bottom:18px; }
+.plan-keyword-row { font-size:13px; line-height:1.8; display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; margin-bottom:10px; }
+.plan-keyword { font-weight:700; user-select:all; -webkit-user-select:all; }
+.plan-copy { font-family:'DM Sans',sans-serif; font-size:12px; min-height:44px; padding:0 14px; border-radius:999px; border:1px solid currentColor; background:transparent; color:inherit; cursor:pointer; }
+.plan-copied { font-size:12px; color:var(--amber-light); min-width:6em; }
+.plan-card--together .plan-copied { color:var(--rust); }
+.plan-line-btn { display:block; box-sizing:border-box; width:100%; text-align:center; background:#06c755; color:#fff; font-family:'DM Sans','Noto Serif JP',sans-serif; font-size:14px; font-weight:600; padding:14px 12px; min-height:48px; border-radius:6px; text-decoration:none; line-height:1.5; }
+.plan-line-sub { font-size:11px; line-height:1.7; text-align:center; margin-top:8px; opacity:.8; }
+.plan-meal { margin-top:28px; }
+.plan-meal img { display:block; width:100%; height:200px; object-fit:cover; border-radius:12px; }
+.plan-meal-title { font-family:'Noto Serif JP',serif; font-size:16px; margin:12px 0 4px; color:var(--dark); }
+.plan-meal-cap { font-size:12px; color:var(--light-text); line-height:1.7; }
+.plans-pricing-link { display:block; box-sizing:border-box; margin-top:20px; padding:16px 18px; border-radius:10px; background:var(--cream); color:var(--dark); text-decoration:none; border:2px solid var(--amber); }
+.plans-pricing-link-label { display:block; font-family:'DM Sans',sans-serif; font-size:11px; letter-spacing:.14em; color:var(--rust); font-weight:700; margin-bottom:4px; }
+.plans-pricing-link-main { display:block; font-size:14px; line-height:1.7; font-weight:600; }
 </style>
 </head>
 <body>
@@ -683,8 +727,8 @@ footer {
       <span class="hero-badge">定員10名</span>
     </div>
     <!-- ★フィットネスジャーニー入口バナー（チーム制のため締切なし・カウントダウンは廃止） -->
-    <a href="retreat.html" class="hero-premium-banner" id="heroPremiumBanner" data-ga-event="cta_lp_to_journey" data-ga-loc="hero">
-      フィットネスジャーニー 1期生 募集中｜2ヶ月・3〜5名のチーム制 →
+    <a href="#plans" class="hero-premium-banner" id="heroPremiumBanner" data-ga-event="cta_hero_to_plans" data-ga-loc="hero">
+      11月スタートの3ヶ月プラン｜GOと「集中」・仲間と「仲間」 →
     </a>
     <a href="#schedule" class="hero-cta">
       11月の日程を見る →
@@ -706,6 +750,105 @@ footer {
     <span>HACOS = Healthy Authentic Community Organic Space</span>
   </div>
 </div>
+
+<!-- ═══ 3-MONTH PLANS（11月以降の申込内容） ═══ -->
+<section class="plans" id="plans">
+  <p class="section-label">3-Month Plans</p>
+  <h2 class="section-title">3ヶ月で、<br><em>暮らしから整える。</em></h2>
+  <div class="divider"></div>
+  <p class="plans-lead">
+    続かないのは、気合の問題じゃない。<br>
+    暮らしに合うやり方を、一緒に見つけていきます。
+  </p>
+
+  <div class="plans-cards">
+
+    <!-- A. 集中プラン -->
+    <article class="plan-card plan-card--focus">
+      <img class="plan-photo" src="images/studio-mats.jpg" alt="HACOSスタジオに並んだトレーニング用マット" loading="lazy" width="900" height="1200">
+      <div class="plan-body">
+        <p class="plan-tag">集中プラン｜ダイエットを繰り返してきた方へ</p>
+        <h3 class="plan-name">「またダイエットしなきゃ」から、卒業する。</h3>
+        <p class="plan-catch">GOと整える、3ヶ月。</p>
+        <p class="plan-spec">3ヶ月｜基本週2回｜担当：GO｜HACOSの食事16食付き</p>
+        <ul class="plan-points">
+          <li><b>1</b>目標と生活習慣を、一緒に整理する。</li>
+          <li><b>2</b>基本週2回の運動で、体を動かす。</li>
+          <li><b>3</b>HACOSの食事16食付き。</li>
+        </ul>
+        <p class="plan-note">続かないときは、原因から見直す。我慢比べにはしません。暮らしに合う形へ、直していきます。</p>
+        <details class="plan-details">
+          <summary>こんな方へ</summary>
+          <ul>
+            <li>ダイエットを何度も繰り返してきた</li>
+            <li>一人では続かなかった</li>
+            <li>食事も運動も、まとめて整えたい</li>
+            <li>今度こそ、暮らしから変えたい</li>
+          </ul>
+        </details>
+        <p class="plan-price"><span class="plan-price-num">¥250,000</span><span class="plan-price-unit">（税込）／3ヶ月</span></p>
+        <p class="plan-fine">目標未達時の延長については、ご相談時に詳しくご説明します。</p>
+        <p class="plan-keyword-row">
+          <span>LINEのトークで <strong>「<span class="plan-keyword">集中</span>」</strong> と送ってください</span>
+          <button type="button" class="plan-copy" data-copy="集中">コピー</button>
+          <span class="plan-copied" aria-live="polite"></span>
+        </p>
+        <a href="https://lin.ee/TsRy6I9" target="_blank" rel="noopener noreferrer" class="plan-line-btn" data-ga-event="cta_plan_line" data-ga-loc="plans-focus">LINEで「集中」と送って相談する →</a>
+        <p class="plan-line-sub">まずは相談だけでもOK｜返信だけで契約にはなりません</p>
+      </div>
+    </article>
+
+    <!-- B. 仲間プラン -->
+    <article class="plan-card plan-card--together">
+      <img class="plan-photo" src="images/hike-torii-steps.jpg" alt="朝の石段を一緒に歩いて登る仲間たち" loading="lazy" width="900" height="1200">
+      <div class="plan-body">
+        <p class="plan-tag">仲間プラン｜友達・家族と、始めよう</p>
+        <h3 class="plan-name">仲間と続ける、3ヶ月。</h3>
+        <p class="plan-catch">会いたい人がいる。それも、続ける理由。ひとりで続かなかったあなたへ。</p>
+        <p class="plan-spec">2〜5名｜月2回・全6回｜基本担当：片山めぐみトレーナー｜HACOSの食事を10%OFFで購入</p>
+        <ul class="plan-points">
+          <li><b>1</b>次に会う日を、決める。</li>
+          <li><b>2</b>お互いのペースを、尊重する。</li>
+          <li><b>3</b>来られたことを、喜び合う。</li>
+        </ul>
+        <p class="plan-note">誘うときは、この一言。<br>「次の日曜、まず1回だけ一緒に行こう」</p>
+        <p class="plan-price"><span class="plan-price-num">¥12,000</span><span class="plan-price-unit">（税込）お一人 月額</span></p>
+        <p class="plan-price-sub">3ヶ月で¥36,000（全6回）</p>
+        <p class="plan-fine">※登山・朝活は本プランに含まれません。日程・人数を確認して開催決定となります。</p>
+        <p class="plan-keyword-row">
+          <span>LINEのトークで <strong>「<span class="plan-keyword">仲間</span>」</strong> と送ってください</span>
+          <button type="button" class="plan-copy" data-copy="仲間">コピー</button>
+          <span class="plan-copied" aria-live="polite"></span>
+        </p>
+        <a href="https://lin.ee/TsRy6I9" target="_blank" rel="noopener noreferrer" class="plan-line-btn" data-ga-event="cta_plan_line" data-ga-loc="plans-together">LINEで「仲間」と送って相談する →</a>
+        <p class="plan-line-sub">まずは相談だけでもOK｜返信だけで契約にはなりません</p>
+      </div>
+    </article>
+
+  </div>
+
+  <figure class="plan-meal">
+    <img src="images/food-catering-table.jpg" alt="テーブルに並んだHACOSの食事" loading="lazy" width="900" height="1200">
+    <p class="plan-meal-title">HACOSの食事</p>
+    <figcaption class="plan-meal-cap">料理は提供例です。</figcaption>
+  </figure>
+
+  <script>
+  (function(){
+    document.querySelectorAll('#plans .plan-copy').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var msg = btn.parentNode.querySelector('.plan-copied');
+        try {
+          navigator.clipboard.writeText(btn.getAttribute('data-copy')).then(function(){
+            msg.textContent = 'コピーしました';
+            setTimeout(function(){ msg.textContent = ''; }, 1500);
+          }, function(){});
+        } catch (e) {}
+      });
+    });
+  })();
+  </script>
+</section>
 
 <!-- ═══ RUNFREE ═══ -->
 <section class="runfree" id="runfree">
@@ -1203,6 +1346,11 @@ footer {
     そこから月額プラン、2ヶ月のフィットネスジャーニーへ。<br>
     あなたのペースで、一段ずつ進めます。
   </p>
+
+  <a href="#plans" class="plans-pricing-link" data-ga-event="cta_pricing_to_plans" data-ga-loc="pricing">
+    <span class="plans-pricing-link-label">いま募集中</span>
+    <span class="plans-pricing-link-main">3ヶ月プラン（集中 ¥250,000／仲間 月額¥12,000）→</span>
+  </a>
 
   <div class="pricing-steps">
 
